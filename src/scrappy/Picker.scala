@@ -11,4 +11,12 @@ abstract class Picker {
   } ensuring(_.datatype == resultType)
   
   protected def doPick(source: Value): Value
+  
+  def pick(source: ValueWithOrigin): ValueWithOrigin = {
+    require(source.value.datatype == sourceType)
+    doPick(source)
+  } ensuring(_.value.datatype == resultType)
+  
+  // TODO
+  protected def doPick(souce: ValueWithOrigin): ValueWithOrigin = ???
 }

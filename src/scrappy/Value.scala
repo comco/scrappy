@@ -24,3 +24,5 @@ case class TupleValue(val datatype: TupleType, val coordinates: IndexedSeq[Value
 
 case class StructValue(val datatype: StructType, val features: Map[String, Value])
   extends Value
+
+case class ValueWithOrigin(val value: Value, val origin: Origin)
