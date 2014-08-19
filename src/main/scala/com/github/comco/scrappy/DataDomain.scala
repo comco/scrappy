@@ -79,12 +79,8 @@ object DataDomain extends Domain {
   }
   
   object SeqData {
-    case class Dummy(private[SeqData] val real: SeqData)
-    
-    def apply(datatype: SeqType)(elements: Data*): Dummy = {
-      Dummy(SeqData(datatype, elements))
+    def apply(datatype: SeqType)(elements: Data*)(implicit dummy: DummyImplicit): SeqData = {
+      SeqData(datatype, elements)
     }
-    
-    implicit def Dummy2SeqData(dummy: Dummy): SeqData = dummy.real
   }
 }
