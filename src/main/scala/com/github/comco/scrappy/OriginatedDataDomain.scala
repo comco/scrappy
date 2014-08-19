@@ -1,6 +1,9 @@
 package com.github.comco.scrappy
 
-object DataWithOriginDomain extends Domain {
+/**
+ * Domain for data values with origin.
+ */
+object OriginatedDataDomain extends Domain {
   sealed abstract class Data extends BaseData {
     def data: DataDomain.Data
     def origin: Origin

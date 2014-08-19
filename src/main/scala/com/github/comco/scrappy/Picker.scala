@@ -1,11 +1,15 @@
 package com.github.comco.scrappy
 
+/**
+ * Represents data transformations. A picker instance works both on bare data
+ * and on originated data.
+ */
 abstract class Picker {
   def sourceType: Type
   def targetType: Type
 
   def pick(source: DataDomain.Data): DataDomain.Data
-  def pickWithOrigin(source: DataWithOriginDomain.Data): DataWithOriginDomain.Data
+  def pickWithOrigin(source: OriginatedDataDomain.Data): OriginatedDataDomain.Data
 }
 
 abstract class BaseTuplePicker extends Picker {
@@ -18,12 +22,12 @@ abstract class BaseTuplePicker extends Picker {
 
   def doPick(source: DataDomain.TupleData): DataDomain.Data
 
-  def pickWithOrigin(source: DataWithOriginDomain.Data) = {
+  def pickWithOrigin(source: OriginatedDataDomain.Data) = {
     require(source.datatype == sourceType)
-    doPickWithOrigin(source.asInstanceOf[DataWithOriginDomain.TupleData])
+    doPickWithOrigin(source.asInstanceOf[OriginatedDataDomain.TupleData])
   } ensuring (_.datatype == targetType)
 
-  def doPickWithOrigin(source: DataWithOriginDomain.TupleData): DataWithOriginDomain.Data
+  def doPickWithOrigin(source: OriginatedDataDomain.TupleData): OriginatedDataDomain.Data
 }
 
 abstract class BaseStructPicker extends Picker {
@@ -36,12 +40,12 @@ abstract class BaseStructPicker extends Picker {
 
   def doPick(source: DataDomain.StructData): DataDomain.Data
 
-  def pickWithOrigin(source: DataWithOriginDomain.Data) = {
+  def pickWithOrigin(source: OriginatedDataDomain.Data) = {
     require(source.datatype == sourceType)
-    doPickWithOrigin(source.asInstanceOf[DataWithOriginDomain.StructData])
+    doPickWithOrigin(source.asInstanceOf[OriginatedDataDomain.StructData])
   } ensuring (_.datatype == targetType)
 
-  def doPickWithOrigin(source: DataWithOriginDomain.StructData): DataWithOriginDomain.Data
+  def doPickWithOrigin(source: OriginatedDataDomain.StructData): OriginatedDataDomain.Data
 }
 
 abstract class BaseSeqPicker extends Picker {
@@ -54,12 +58,12 @@ abstract class BaseSeqPicker extends Picker {
 
   def doPick(source: DataDomain.SeqData): DataDomain.Data
 
-  def pickWithOrigin(source: DataWithOriginDomain.Data) = {
+  def pickWithOrigin(source: OriginatedDataDomain.Data) = {
     require(source.datatype == sourceType)
-    doPickWithOrigin(source.asInstanceOf[DataWithOriginDomain.SeqData])
+    doPickWithOrigin(source.asInstanceOf[OriginatedDataDomain.SeqData])
   } ensuring (_.datatype == targetType)
 
-  def doPickWithOrigin(source: DataWithOriginDomain.SeqData): DataWithOriginDomain.Data
+  def doPickWithOrigin(source: OriginatedDataDomain.SeqData): OriginatedDataDomain.Data
 }
 
 case class SelfPicker(val sourceType: Type) extends Picker {
@@ -67,7 +71,7 @@ case class SelfPicker(val sourceType: Type) extends Picker {
 
   def pick(source: DataDomain.Data) = source
 
-  def pickWithOrigin(source: DataWithOriginDomain.Data) = source
+  def pickWithOrigin(source: OriginatedDataDomain.Data) = source
 }
 
 case class CoordinatePicker(val sourceType: TupleType, val position: Int)
@@ -77,7 +81,7 @@ case class CoordinatePicker(val sourceType: TupleType, val position: Int)
   def targetType = sourceType.coordinateType(position)
 
   def doPick(source: DataDomain.TupleData) = source.coordinates(position)
-  def doPickWithOrigin(source: DataWithOriginDomain.TupleData) = source.coordinates(position)
+  def doPickWithOrigin(source: OriginatedDataDomain.TupleData) = source.coordinates(position)
 }
 
 case class FeaturePicker(val sourceType: StructType, val name: String)
@@ -87,7 +91,7 @@ case class FeaturePicker(val sourceType: StructType, val name: String)
   def targetType = sourceType.featureType(name)
   
   def doPick(source: DataDomain.StructData) = source.features(name)
-  def doPickWithOrigin(source: DataWithOriginDomain.StructData) = source.features(name)
+  def doPickWithOrigin(source: OriginatedDataDomain.StructData) = source.features(name)
 }
 
 case class ElementPicker(val sourceType: SeqType, val index: Int)
@@ -97,5 +101,5 @@ case class ElementPicker(val sourceType: SeqType, val index: Int)
   def targetType = sourceType.elementType
   
   def doPick(source: DataDomain.SeqData) = source.elements(index)
-  def doPickWithOrigin(source: DataWithOriginDomain.SeqData) = source.elements(index)
+  def doPickWithOrigin(source: OriginatedDataDomain.SeqData) = source.elements(index)
 }

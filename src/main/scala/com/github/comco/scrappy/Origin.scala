@@ -1,5 +1,8 @@
 package com.github.comco.scrappy
 
+/**
+ * Representation of the origin of a value - either it is original or computed.
+ */
 sealed abstract class Origin {
   def append(step: Step): Origin
   

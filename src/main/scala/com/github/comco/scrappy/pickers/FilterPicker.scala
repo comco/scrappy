@@ -14,8 +14,8 @@ case class FilterPicker(val cond: Picker) extends BaseSeqPicker {
   def doPick(source: DataDomain.SeqData) =
     DataDomain.SeqData(sourceType, source.elements.filter(check))
 
-  def doPickWithOrigin(source: DataWithOriginDomain.SeqData) = {
-    DataWithOriginDomain.ComputedSeqData(
+  def doPickWithOrigin(source: OriginatedDataDomain.SeqData) = {
+    OriginatedDataDomain.ComputedSeqData(
       doPick(source.data),
       source.origin.computed,
       source.elements.filter {
