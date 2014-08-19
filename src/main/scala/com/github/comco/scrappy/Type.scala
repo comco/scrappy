@@ -1,9 +1,20 @@
 package com.github.comco.scrappy
 
+/**
+ * Base class for scrappy types.
+ */
 sealed abstract class Type
 
+/**
+ * Base class for the primitive scrappy types.
+ * These are predefined - user-defined types cannot be primitive.
+ */
 sealed abstract class PrimitiveType[T] extends Type
 
+/**
+ * Tuple type is for data having coordinates. The coordinates can be indexed by position.
+ * The position is zero-based.
+ */
 case class TupleType(val coordinateTypes: IndexedSeq[Type])
     extends Type {
   
@@ -13,7 +24,7 @@ case class TupleType(val coordinateTypes: IndexedSeq[Type])
     (0 <= position && position < coordinateTypes.length)
 
   def coordinateType(position: Int) = {
-    require(hasCoordinate(position), s"Invalid coordinate position: $position for a TupleType: $this")
+    require(hasCoordinate(position), s"Invalid coordinate position: $position for a TupleType: $this.")
     coordinateTypes(position)
   }
 }
@@ -22,6 +33,10 @@ object TupleType {
   def apply(coordinatesTypes: Type*): TupleType = TupleType(coordinatesTypes.toIndexedSeq)
 }
 
+/**
+ * A struct type has a name named features. The name of the feature is used as a key for identifying that
+ * feature in the struct.
+ */
 case class StructType(val name: String, val featureTypes: Map[String, Type])
     extends Type {
   
@@ -30,7 +45,7 @@ case class StructType(val name: String, val featureTypes: Map[String, Type])
   def hasFeature(name: String) = featureTypes.contains(name)
 
   def featureType(name: String) = {
-    require(hasFeature(name), s"Invalid feature name: $name for a StructType: $this")
+    require(hasFeature(name), s"Invalid feature name: $name for a StructType: $this.")
     featureTypes(name)
   }
 }
@@ -41,6 +56,9 @@ object StructType {
   }
 }
 
+/**
+ * A type for representing a sequence of elements of the same type.
+ */
 case class SeqType(val elementType: Type) extends Type
 
 object PrimitiveType {

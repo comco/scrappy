@@ -9,7 +9,7 @@ case class FilterPicker(val cond: Picker) extends BaseSeqPicker {
   def targetType = sourceType
 
   def check(data: DataDomain.Data): Boolean =
-    cond.pick(data).asInstanceOf[DataDomain.PrimitiveData[Boolean]].data
+    cond.pick(data).asInstanceOf[DataDomain.PrimitiveData[Boolean]].value
 
   def doPick(source: DataDomain.SeqData) =
     DataDomain.SeqData(sourceType, source.elements.filter(check))

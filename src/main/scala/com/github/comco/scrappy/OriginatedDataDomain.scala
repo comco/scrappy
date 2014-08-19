@@ -13,6 +13,7 @@ object OriginatedDataDomain extends Domain {
     val origin: Origin)
       extends Data with BasePrimitiveData[T] {
     def datatype: PrimitiveType[T] = data.datatype
+    def value = data.value
   }
 
   sealed abstract class TupleData extends Data with BaseTupleData {
@@ -25,7 +26,7 @@ object OriginatedDataDomain extends Domain {
       extends TupleData {
     lazy val coordinates: IndexedSeq[Data] =
       data.coordinates.zipWithIndex.map {
-        case (coord, pos) => coord.withOrigin(
+        case (coord, pos) => coord.originatedFrom(
           origin.append(CoordinateStep(datatype, pos)))
       }
   }
@@ -45,7 +46,7 @@ object OriginatedDataDomain extends Domain {
       extends StructData {
 
     lazy val features: Map[String, Data] = data.features.map {
-      case (name, feature) => (name, feature.withOrigin(
+      case (name, feature) => (name, feature.originatedFrom(
         origin.append(FeatureStep(datatype, name))))
     }
   }
@@ -64,7 +65,7 @@ object OriginatedDataDomain extends Domain {
       extends SeqData {
 
     lazy val elements: Seq[Data] = data.elements.zipWithIndex.map {
-      case (elem, index) => elem.withOrigin(
+      case (elem, index) => elem.originatedFrom(
         origin.append(ElementStep(datatype, index)))
     }
   }
