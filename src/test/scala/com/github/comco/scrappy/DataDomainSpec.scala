@@ -53,10 +53,6 @@ class DataDomainSpec extends FlatSpec {
     struct.features shouldEqual Map("a" -> PrimitiveData(3), "b" -> tuple)
   }
   
-  it should "validate against constructing with null features" in {
-    an[IllegalArgumentException] should be thrownBy struct.feature(null)
-  }
-  
   it should "validate against constructing with uncompatible features" in {
     an[IllegalArgumentException] should be thrownBy
       StructData(structType)("a" -> 3, "b" -> 4)

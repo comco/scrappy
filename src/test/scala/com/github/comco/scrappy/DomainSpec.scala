@@ -18,110 +18,145 @@ object TestDomain extends Domain {
 
   case class SeqData(val datatype: SeqType, val elements: Seq[Data])
     extends Data with BaseSeqData
+    
+  abstract class OptionData extends Data with BaseOptionData
+  
+  case class SomeData(val datatype: OptionType, val value: Data) extends OptionData with BaseSomeData
+  
+  case class NoneData(val datatype: OptionType) extends OptionData with BaseNoneData
 }
 
 class DomainSpec extends FlatSpec {
   import TestDomain._
 
-  val pi = PrimitiveData[Int](3)
-  val ps = PrimitiveData[String]("hi")
-  val pb = PrimitiveData[Boolean](true)
-
+  val optionBooleanType = OptionType(BooleanPrimitiveType)
+  
+  val intData = PrimitiveData[Int](3)
+  val stringData = PrimitiveData[String]("hi")
+  val booleanData = PrimitiveData[Boolean](true)
+  val someBooleanData = SomeData(optionBooleanType, booleanData)
+  val noneBooleanData = NoneData(optionBooleanType)
+  
   "A PrimitiveData" should "have the right datatype" in {
-    Seq(pi, ps, pb).map(_.datatype) shouldEqual
+    Seq(intData, stringData, booleanData).map(_.datatype) shouldEqual
       Seq(IntPrimitiveType, StringPrimitiveType, BooleanPrimitiveType)
   }
 
   it should "have have the right data" in {
-    Seq(pi, ps, pb).map(_.value) shouldEqual Seq(3, "hi", true)
+    Seq(intData, stringData, booleanData).map(_.value) shouldEqual Seq(3, "hi", true)
   }
-
-  val tt = TupleType(IntPrimitiveType, StringPrimitiveType)
-  val tp = TupleData(tt, IndexedSeq(pi, ps))
-  val nt = TupleData(tt, IndexedSeq(pi, null))
+  
+  "An OptionData" should "have false isSome when None" in {
+    NoneData(OptionType(IntPrimitiveType)).isSome shouldEqual false
+  }
+  
+  it should "have true isSome when Some" in {
+    SomeData(OptionType(IntPrimitiveType), intData).isSome shouldEqual true
+  }
+  
+  val tupleType = TupleType(IntPrimitiveType, StringPrimitiveType, OptionType(BooleanPrimitiveType))
+  val tupleData = TupleData(tupleType, IndexedSeq(intData, stringData, someBooleanData))
+  val tupleDataWithBlanks = TupleData(tupleType, IndexedSeq(intData, stringData, noneBooleanData))
   
   "A TupleData" should "have a TupleType datatype" in {
-    tp.datatype shouldEqual tt
+    tupleData.datatype shouldEqual tupleType
   }
 
   it should "have size" in {
-    tp.size shouldEqual 2
+    tupleData.size shouldEqual 3
+    tupleDataWithBlanks.size shouldEqual 3
   }
 
-  it should "support checking valid positions" in {
-    (0 to 2).map(tt.hasCoordinate(_)) shouldEqual Seq(true, true, false)
-    nt.hasCoordinate(1) shouldEqual false
+  it should "support checking valid positions with hasCoordinate" in {
+    (0 to 3) map (tupleData.hasCoordinate(_)) shouldEqual
+      Seq(true, true, true, false)
+    (0 to 3) map (tupleDataWithBlanks.hasCoordinate(_)) shouldEqual
+      Seq(true, true, false, false)
   }
 
   it should "support extracting coordinates one by one" in {
-    (0 until 2).map(tp.coordinate(_)) shouldEqual Seq(pi, ps)
+    (0 until 3).map(tupleData.coordinate(_)) shouldEqual Seq(intData, stringData, someBooleanData)
+    tupleDataWithBlanks.coordinate(2) shouldEqual noneBooleanData
   }
   
   it should "support extracting a sequence of the coordinates" in {
-    tp.coordinates shouldEqual Seq(pi, ps)
+    tupleData.coordinates shouldEqual Seq(intData, stringData, someBooleanData)
+    tupleDataWithBlanks.coordinates shouldEqual Seq(intData, stringData, noneBooleanData)
   }
   
   it should "throw an exception when an invalid position is given" in {
-    an[IllegalArgumentException] should be thrownBy tp.coordinate(-1)
-    an[IllegalArgumentException] should be thrownBy nt.coordinate(1)
+    an[IllegalArgumentException] should be thrownBy tupleData.coordinate(-1)
+    an[IllegalArgumentException] should be thrownBy tupleData.coordinate(4)
   }
   
-  val st = StructType("name", "a" -> IntPrimitiveType, "b" -> StringPrimitiveType)
-  val struct = StructData(st, Map("a" -> PrimitiveData(3), "b" -> PrimitiveData("ala")))
-  val nullStruct = StructData(st, Map("a" -> PrimitiveData(5), "b" -> null))
+  val structType = StructType("name", "a" -> IntPrimitiveType, "b" -> StringPrimitiveType, "cd" -> optionBooleanType)
+  val structData = StructData(structType,
+      Map("a" -> PrimitiveData(3), "b" -> PrimitiveData("ala"), "cd" -> someBooleanData))
+  val structDataWithBlanks = StructData(structType, 
+      Map("a" -> PrimitiveData(5), "b" -> PrimitiveData("hi"), "cd" -> noneBooleanData))
   
   
   "A StructData" should "have a StructType datatype" in {
-    struct.datatype shouldEqual st
+    structData.datatype shouldEqual structType
+    structDataWithBlanks.datatype shouldEqual structType
   }
   
   it should "support checking feature names" in {
-    Seq("a", "b", null, "none") map (struct.hasFeature(_)) shouldEqual
+    Seq("a", "b", "cd", "none") map (structData.hasFeature(_)) shouldEqual
+      Seq(true, true, true, false)
+    Seq("a", "b", "cd", "none") map (structDataWithBlanks.hasFeature(_)) shouldEqual
       Seq(true, true, false, false)
   }
   
   it should "support extracting features by a valid name" in {
-    Seq("a", "b") map (struct.feature(_)) shouldEqual
-      Seq(PrimitiveData(3), PrimitiveData("ala"))
+    Seq("a", "b", "cd") map (structData.feature(_)) shouldEqual
+      Seq(PrimitiveData(3), PrimitiveData("ala"), someBooleanData)
   }
   
   it should "throw exception when an invalid feature name is given" in {
-    an[IllegalArgumentException] should be thrownBy struct.feature(null)
-    an[IllegalArgumentException] should be thrownBy struct.feature("none")
-    an[IllegalArgumentException] should be thrownBy nullStruct.feature("b")
+    an[IllegalArgumentException] should be thrownBy structData.feature("none")
+    an[IllegalArgumentException] should be thrownBy structDataWithBlanks.feature("")
   }
   
   val seqType = SeqType(IntPrimitiveType)
-  val elems = Seq(PrimitiveData(3), PrimitiveData(4))
-  val seqValue = SeqData(seqType, elems)
-  val nullSeqValue = SeqData(seqType, Seq(PrimitiveData(5), null, PrimitiveData(6)))
+  val elements = Seq(PrimitiveData(3), PrimitiveData(4))
+  val seqValue = SeqData(seqType, elements)
+  val seqOptionType = SeqType(optionBooleanType)
+  val elementsWithBlanks = Seq(
+      SomeData(optionBooleanType, PrimitiveData(true)),
+      NoneData(optionBooleanType),
+      SomeData(optionBooleanType, PrimitiveData(false)))
+  val seqValueWithBlanks = SeqData(seqOptionType, elementsWithBlanks)
   
   "A SeqData" should "have a SeqType datatype" in {
     seqValue.datatype shouldEqual seqType
+    seqValueWithBlanks.datatype shouldEqual seqOptionType
   }
   
   it should "support extracting a sequence of all the elements" in {
-    seqValue.elements shouldEqual elems
+    seqValue.elements shouldEqual elements
+    seqValueWithBlanks.elements shouldEqual elementsWithBlanks
   }
   
   it should "have the right length" in {
     seqValue.length shouldEqual 2
+    seqValueWithBlanks.length shouldEqual 3
   }
   
   it should "allow checking for elements" in {
     Seq(0, 1, -1, 2) map(seqValue.hasElement(_)) shouldEqual
       Seq(true, true, false, false)
     
-    nullSeqValue.hasElement(1) shouldEqual false
+    seqValueWithBlanks.hasElement(1) shouldEqual false
   }
   
   it should "support extracting elements by a valid index" in {
     seqValue.element(0) shouldEqual PrimitiveData(3)
     seqValue.element(1) shouldEqual PrimitiveData(4)
+    seqValueWithBlanks.element(0) shouldEqual elementsWithBlanks(0)
   }
   
   it should "throw an exception when invalid index is given" in {
     an[IllegalArgumentException] should be thrownBy seqValue.element(-1)
-    an[IllegalArgumentException] should be thrownBy nullSeqValue.element(1)
   }
 }

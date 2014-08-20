@@ -6,12 +6,12 @@ case class MapPicker(val f: Picker) extends BaseSeqPicker {
   def sourceType = SeqType(f.sourceType)
   def targetType = SeqType(f.targetType)
 
-  def doPick(source: DataDomain.SeqData) =
-    DataDomain.SeqData(targetType, source.elements.map(f.pick(_)))
+  def doPickData(source: DataDomain.SeqData) =
+    DataDomain.SeqData(targetType, source.elements.map(f.pickData(_)))
 
-  def doPickWithOrigin(source: OriginatedDataDomain.SeqData) =
+  def doPickOriginatedData(source: OriginatedDataDomain.SeqData) =
     OriginatedDataDomain.ComputedSeqData(
-      doPick(source.data),
+      doPickData(source.data),
       source.origin.computed,
-      source.elements.map(f.pickWithOrigin(_)))
+      source.elements.map(f.pickOriginatedData(_)))
 }

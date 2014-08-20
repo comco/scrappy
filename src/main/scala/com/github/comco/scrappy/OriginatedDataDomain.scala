@@ -4,6 +4,8 @@ package com.github.comco.scrappy
  * Domain for data values with origin.
  */
 object OriginatedDataDomain extends Domain {
+  def mkDataOriginatedFrom(data: DataDomain.Data, origin: Origin): Data = ???
+  
   sealed abstract class Data extends BaseData {
     def data: DataDomain.Data
     def origin: Origin
@@ -26,7 +28,7 @@ object OriginatedDataDomain extends Domain {
       extends TupleData {
     lazy val coordinates: IndexedSeq[Data] =
       data.coordinates.zipWithIndex.map {
-        case (coord, pos) => coord.originatedFrom(
+        case (coord, pos) => mkDataOriginatedFrom(coord,
           origin.append(CoordinateStep(datatype, pos)))
       }
   }
@@ -46,7 +48,7 @@ object OriginatedDataDomain extends Domain {
       extends StructData {
 
     lazy val features: Map[String, Data] = data.features.map {
-      case (name, feature) => (name, feature.originatedFrom(
+      case (name, feature) => (name, mkDataOriginatedFrom(feature,
         origin.append(FeatureStep(datatype, name))))
     }
   }
@@ -65,7 +67,7 @@ object OriginatedDataDomain extends Domain {
       extends SeqData {
 
     lazy val elements: Seq[Data] = data.elements.zipWithIndex.map {
-      case (elem, index) => elem.originatedFrom(
+      case (elem, index) => mkDataOriginatedFrom(elem,
         origin.append(ElementStep(datatype, index)))
     }
   }

@@ -9,8 +9,8 @@ case class AndThenPicker(val first: Picker, val next: Picker)
   def sourceType = first.sourceType
   def targetType = next.targetType
   
-  def pick(source: DataDomain.Data) = next.pick(first.pick(source))
+  def pickData(source: DataDomain.Data) = next.pickData(first.pickData(source))
   
-  def pickWithOrigin(source: OriginatedDataDomain.Data) = 
-    next.pickWithOrigin(first.pickWithOrigin(source))
+  def pickOriginatedData(source: OriginatedDataDomain.Data) = 
+    next.pickOriginatedData(first.pickOriginatedData(source))
 }

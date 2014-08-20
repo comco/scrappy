@@ -6,16 +6,11 @@ import scala.language.implicitConversions
  * Domain for bare data values.
  */
 object DataDomain extends Domain {
-  sealed abstract class Data extends BaseData {
-    def originatedFrom(origin: Origin): OriginatedDataDomain.Data
-  }
+  sealed abstract class Data extends BaseData
 
   case class PrimitiveData[T](val value: T)(
     implicit val datatype: PrimitiveType[T])
       extends Data with BasePrimitiveData[T] {
-
-    def originatedFrom(origin: Origin): OriginatedDataDomain.PrimitiveData[T] =
-      OriginatedDataDomain.PrimitiveData(this, origin)
   }
 
   object PrimitiveData {
@@ -28,15 +23,11 @@ object DataDomain extends Domain {
   case class TupleData(val datatype: TupleType,
     val coordinates: IndexedSeq[Data])
       extends Data with BaseTupleData {
-    require(coordinates != null, "Can't construct TupleData with null coordinates.")
     require(datatype.size == coordinates.size,
       s"Invalid size of coordinates to construct a TupleData; expected: ${datatype.size}, actual: ${coordinates.size}.")
     require(datatype.coordinateTypes.zip(coordinates).forall {
       case (datatype, data) => data.datatype == datatype
     }, "Data coordinates types don't match tuple datatypes for TupleData construction.")
-
-    def originatedFrom(origin: Origin): OriginatedDataDomain.TupleData =
-      OriginatedDataDomain.OriginalTupleData(this, origin)
   }
 
   object TupleData {
@@ -46,17 +37,25 @@ object DataDomain extends Domain {
   }
 
   case class StructData(val datatype: StructType,
-    val features: Map[String, Data])
+    rawFeatures: Map[String, Data])
       extends Data with BaseStructData {
-    require(features != null, "StructData cannot be constructed with null features")
-    require(features.keys.forall(datatype.hasFeature(_)), "Invalid feature name")
-    require(features.forall {
-      case (name, data) if data != null => data.datatype == datatype.featureType(name)
-      case _ => true
+    require(rawFeatures.keys.forall(datatype.hasFeature(_)), "Invalid feature name")
+    require(rawFeatures.forall {
+      case (name, data) => data.datatype == datatype.featureType(name)
     }, "Invalid feature type")
+    require(datatype.featureTypes.forall {
+      case (name, datatype) => rawFeatures.contains(name) || datatype.isInstanceOf[OptionType]
+    }, "A non-optional feature is not given")
     
-    def originatedFrom(origin: Origin): OriginatedDataDomain.StructData =
-      OriginatedDataDomain.OriginalStructData(this, origin)
+    lazy val features: Map[String, Data] = {
+      val missingFeatures: Map[String, Type] = datatype.featureTypes.filter({
+        case (name, _) => !rawFeatures.contains(name)
+      })
+      // all missing features should have option types
+      rawFeatures ++ missingFeatures.map {
+        case (name, datatype) => (name, NoneData(datatype.asInstanceOf[OptionType]))
+      }
+    }
   }
   
   object StructData {
@@ -68,14 +67,7 @@ object DataDomain extends Domain {
   case class SeqData(val datatype: SeqType,
     val elements: Seq[Data])
       extends Data with BaseSeqData {
-    require(elements != null, "SeqData cannot be constructed with null elements")
-    require(elements.forall {
-      case element if element != null => element.datatype == datatype.elementType
-      case _ => true
-    }, "An element has invalid datatype")
-    
-    def originatedFrom(origin: Origin): OriginatedDataDomain.SeqData =
-      OriginatedDataDomain.OriginalSeqData(this, origin)
+    require(elements.forall(_.datatype == datatype.elementType), "An element has invalid datatype")
   }
   
   object SeqData {
@@ -83,4 +75,12 @@ object DataDomain extends Domain {
       SeqData(datatype, elements)
     }
   }
+  
+  sealed abstract class OptionData extends Data with BaseOptionData
+  
+  case class SomeData(val datatype: OptionType, val value: Data) extends OptionData with BaseSomeData {
+    require(value.datatype == datatype.someType, s"SomeData: $this cannot be created with value of type: ${value.datatype}")
+  }
+  
+  case class NoneData(val datatype: OptionType) extends OptionData with BaseNoneData
 }

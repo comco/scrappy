@@ -20,10 +20,10 @@ case class TupleType(val coordinateTypes: IndexedSeq[Type])
   
   def size: Int = coordinateTypes.size
   
-  def hasCoordinate(position: Int) =
+  def hasCoordinate(position: Int): Boolean =
     (0 <= position && position < coordinateTypes.length)
 
-  def coordinateType(position: Int) = {
+  def coordinateType(position: Int): Type = {
     require(hasCoordinate(position), s"Invalid coordinate position: $position for a TupleType: $this.")
     coordinateTypes(position)
   }
@@ -42,9 +42,9 @@ case class StructType(val name: String, val featureTypes: Map[String, Type])
   
   def size: Int = featureTypes.size
   
-  def hasFeature(name: String) = featureTypes.contains(name)
+  def hasFeature(name: String): Boolean = featureTypes.contains(name)
 
-  def featureType(name: String) = {
+  def featureType(name: String): Type = {
     require(hasFeature(name), s"Invalid feature name: $name for a StructType: $this.")
     featureTypes(name)
   }
@@ -60,6 +60,11 @@ object StructType {
  * A type for representing a sequence of elements of the same type.
  */
 case class SeqType(val elementType: Type) extends Type
+
+case class OptionType(val someType: Type) extends Type {
+  require(!someType.isInstanceOf[OptionType], 
+    s"OptionType is flat; it should have a concrete (non-optional) someType. Passed someType: $someType")
+}
 
 object PrimitiveType {
   implicit case object IntPrimitiveType extends PrimitiveType[Int]

@@ -7,31 +7,40 @@ import scala.language.higherKinds
  * object algebraic polymorphism.
  */
 trait Domain {
-  
+
   /**
    * Specific base class for data in the domain.
    */
   type Data <: BaseData
-  
+
   /**
    * Specific class for data of primitive type.
    */
   type PrimitiveData[T] <: BasePrimitiveData[T]
-  
+
   /**
    * Specific class for data of tuple type.
    */
   type TupleData <: BaseTupleData
-  
+
   /**
    * Specific class for data of struct type.
    */
   type StructData <: BaseStructData
-  
+
   /**
    * Specific class for data of seq type.
    */
   type SeqData <: BaseSeqData
+
+  /**
+   * Specific class for optional data.
+   */
+  type OptionData <: BaseOptionData
+
+  type SomeData <: OptionData
+
+  type NoneData <: OptionData
 
   /**
    * Base class with general properties of all data, independent of domain.
@@ -62,14 +71,12 @@ trait Domain {
     def size: Int = datatype.size
 
     def hasCoordinate(position: Int): Boolean = {
-      datatype.hasCoordinate(position) && coordinates(position) != null
+      datatype.hasCoordinate(position) && isFilled(coordinates(position))
     }
 
     def coordinate(position: Int): Data = {
       require(datatype.hasCoordinate(position),
         s"Coordinate position: $position is out of bounds for TupleType: $datatype")
-      require(coordinates(position) != null,
-        s"TupleData doesn't contain a coordinate at position: $position")
 
       coordinates(position)
     }
@@ -85,12 +92,12 @@ trait Domain {
     def features: Map[String, Data]
 
     def hasFeature(name: String): Boolean = {
-      features.contains(name) && features(name) != null
+      features.contains(name) && isFilled(features(name))
     }
-    
+
     def feature(name: String): Data = {
-      require(hasFeature(name), s"StructData doesn't contain a feature named: $name")
-      
+      require(datatype.hasFeature(name), s"StructData doesn't contain a feature named: $name")
+
       features(name)
     }
   }
@@ -105,18 +112,41 @@ trait Domain {
     def elements: Seq[Data]
 
     def hasElement(index: Int): Boolean = {
-      0 <= index && index < length && elements(index) != null
+      0 <= index && index < length && isFilled(elements(index))
     }
 
     def element(index: Int): Data = {
       require(0 <= index && index < length,
         s"Index: $index is out of bounds for SeqData with length: $length.")
-      require(elements(index) != null,
-        s"SeqData doesn't contain an element at index: $index")
 
       elements(index)
     }
 
     def length: Int = elements.length
+  }
+
+  trait BaseOptionData extends BaseData {
+    this: OptionData =>
+    
+    def datatype: OptionType
+    def isSome: Boolean
+  }
+
+  trait BaseNoneData extends BaseOptionData {
+    this: NoneData =>
+    
+      def isSome = false
+  }
+
+  trait BaseSomeData extends BaseOptionData {
+    this: SomeData =>
+    
+    def isSome = true
+    def value: Data
+  }
+  
+  def isFilled(data: Data): Boolean = data match {
+    case data: BaseOptionData => data.isSome
+    case _ => true
   }
 }

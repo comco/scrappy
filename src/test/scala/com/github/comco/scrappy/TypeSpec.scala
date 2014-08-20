@@ -11,11 +11,11 @@ class TupleTypeSpec extends FlatSpec {
   val c = IntPrimitiveType
   val tt = TupleType(a, b, c)
 
-  "A TupleType" should "have size" in {
+  "A TupleType" should "return its size by the size member" in {
     tt.size shouldEqual 3
   }
 
-  it should "return the right coordinate types" in {
+  it should "return each of its coordinate types by the coordinateType member" in {
     (0 until 3).map(tt.coordinateType(_)) shouldEqual Seq(a, b, c)
   }
 
@@ -68,5 +68,16 @@ class SeqTypeSpec extends FlatSpec {
   
   "A SeqType" should "have elementType" in {
     seq.elementType shouldEqual IntPrimitiveType
+  }
+}
+
+class OptionTypeSpec extends FlatSpec {
+  "An OptionType" should "provide a someType" in {
+    OptionType(IntPrimitiveType).someType shouldEqual IntPrimitiveType
+  }
+  
+  it should "be flat and don't allow creating nested option types" in {
+    val opt = OptionType(IntPrimitiveType)
+    an[IllegalArgumentException] should be thrownBy OptionType(opt)
   }
 }
