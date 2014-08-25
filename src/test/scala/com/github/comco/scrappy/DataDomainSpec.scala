@@ -63,6 +63,22 @@ class DataDomainSpec extends FlatSpec {
       StructData(structType)("a" -> 4, "none" -> "hi")
   }
   
+  val optionalBooleanType = OptionType(BooleanPrimitiveType)
+  val optionalStringType = OptionType(StringPrimitiveType)
+  val structTypeWithBlanks = StructType("name", "a" -> optionalBooleanType, "b" -> optionalStringType)
+  
+  it should "support assigning optional values directly" in {
+    val structWithBlanks = StructData(structTypeWithBlanks)("a" -> true, "b" -> "hi")
+    structWithBlanks.feature("a") shouldEqual SomeData(optionalBooleanType, true)
+    structWithBlanks.feature("b") shouldEqual SomeData(optionalStringType, "hi")
+  }
+  
+  it should "put none-s when the options are not provided" in {
+    val structWithBlanks = StructData(structTypeWithBlanks)("b" -> "has")
+    structWithBlanks.feature("a") shouldEqual NoneData(optionalBooleanType)
+    structWithBlanks.feature("b") shouldEqual SomeData(optionalStringType, "has")
+  }
+  
   val seqType = SeqType(IntPrimitiveType)
   val seq = SeqData(seqType)(1, 2, 3)
   
@@ -72,5 +88,11 @@ class DataDomainSpec extends FlatSpec {
   
   it should "validate for elements with wrong datatype" in {
     an[IllegalArgumentException] should be thrownBy SeqData(seqType)("hi")
+  }
+  
+  val optionSeqType = SeqType(OptionType(IntPrimitiveType))
+  it should "support assigning raw values from options" in {
+    val optionSeq = SeqData(optionSeqType)(3, 4, 5)
+    optionSeq.element(0) shouldEqual SomeData(OptionType(IntPrimitiveType), 3)
   }
 }

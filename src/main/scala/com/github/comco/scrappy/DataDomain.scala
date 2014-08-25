@@ -41,18 +41,23 @@ object DataDomain extends Domain {
       extends Data with BaseStructData {
     require(rawFeatures.keys.forall(datatype.hasFeature(_)), "Invalid feature name")
     require(rawFeatures.forall {
-      case (name, data) => data.datatype == datatype.featureType(name)
+      case (name, data) => {
+        canAssign(datatype.featureType(name), data)
+      }
     }, "Invalid feature type")
     require(datatype.featureTypes.forall {
       case (name, datatype) => rawFeatures.contains(name) || datatype.isInstanceOf[OptionType]
     }, "A non-optional feature is not given")
     
     lazy val features: Map[String, Data] = {
+      val convertedFeatures: Map[String, Data] = rawFeatures.transform ({
+        case (name, data) => convert(datatype.featureType(name), data)
+      })
       val missingFeatures: Map[String, Type] = datatype.featureTypes.filter({
         case (name, _) => !rawFeatures.contains(name)
       })
       // all missing features should have option types
-      rawFeatures ++ missingFeatures.map {
+      convertedFeatures ++ missingFeatures.map {
         case (name, datatype) => (name, NoneData(datatype.asInstanceOf[OptionType]))
       }
     }
@@ -65,9 +70,10 @@ object DataDomain extends Domain {
   }
 
   case class SeqData(val datatype: SeqType,
-    val elements: Seq[Data])
+    rawElements: Seq[Data])
       extends Data with BaseSeqData {
-    require(elements.forall(_.datatype == datatype.elementType), "An element has invalid datatype")
+	  require(rawElements.forall(canAssign(datatype.elementType, _)), "An element has invalid datatype")
+    lazy val elements = rawElements.map(convert(datatype.elementType, _))
   }
   
   object SeqData {
@@ -83,4 +89,18 @@ object DataDomain extends Domain {
   }
   
   case class NoneData(val datatype: OptionType) extends OptionData with BaseNoneData
+
+  private def canAssign(datatype: Type, data: Data): Boolean = {
+    data.datatype == datatype ||
+      (datatype.isInstanceOf[OptionType] && datatype.asInstanceOf[OptionType].someType == data.datatype)
+  }
+  
+  private def convert(datatype: Type, data: Data): Data = {
+    assert(canAssign(datatype, data))
+    if (data.datatype == datatype) {
+      data
+    } else {
+      SomeData(datatype.asInstanceOf[OptionType], data)
+    }
+  }
 }
