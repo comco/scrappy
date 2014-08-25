@@ -26,6 +26,11 @@ class StepSpec extends FlatSpec {
     an[IllegalArgumentException] should be thrownBy CoordinateStep(tupleType, 3)
   }
   
+  it should "have a CoordinatePicker" in {
+    coordinateStep0.picker shouldEqual CoordinatePicker(tupleType, 0)
+    coordinateStep1.picker shouldEqual CoordinatePicker(tupleType, 1)
+  }
+  
   val structType = StructType("name", "a" -> IntPrimitiveType, "b" -> BooleanPrimitiveType)
   val featureStepA = FeatureStep(structType, "a")
   val featureStepB = FeatureStep(structType, "b")
@@ -44,6 +49,11 @@ class StepSpec extends FlatSpec {
     an[IllegalArgumentException] should be thrownBy FeatureStep(structType, "c")
   }
   
+  it should "have a FeaturePicker" in {
+    featureStepA.picker shouldEqual FeaturePicker(structType, "a")
+    featureStepB.picker shouldEqual FeaturePicker(structType, "b")
+  }
+  
   val seqType = SeqType(IntPrimitiveType)
   val seqStep = ElementStep(seqType, 3)
   
@@ -57,5 +67,9 @@ class StepSpec extends FlatSpec {
   
   it should "validate for correct indices" in {
     an[IllegalArgumentException] should be thrownBy ElementStep(seqType, -3)
+  }
+  
+  it should "have an ElementPicker" in {
+    seqStep.picker shouldEqual ElementPicker(seqType, 3)
   }
 }
