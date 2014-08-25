@@ -88,6 +88,13 @@ object DataDomain extends Domain {
     require(value.datatype == datatype.someType, s"SomeData: $this cannot be created with value of type: ${value.datatype}")
   }
   
+  object SomeData {
+    def apply[T](value: T)(implicit datatype: PrimitiveType[T]): SomeData = {
+      import PrimitiveData.raw2PrimitiveData
+      SomeData(OptionType(datatype), value)
+    }
+  }
+  
   case class NoneData(val datatype: OptionType) extends OptionData with BaseNoneData
 
   private def canAssign(datatype: Type, data: Data): Boolean = {

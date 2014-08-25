@@ -6,7 +6,8 @@ import org.scalatest.Matchers._
 import DataDomain._
 import PrimitiveType._
 import PrimitiveData.raw2PrimitiveData
-    
+import SomeData._
+
 class DataDomainSpec extends FlatSpec {
   val a = PrimitiveData(3)
   val b = PrimitiveData("hi")
@@ -69,14 +70,14 @@ class DataDomainSpec extends FlatSpec {
   
   it should "support assigning optional values directly" in {
     val structWithBlanks = StructData(structTypeWithBlanks)("a" -> true, "b" -> "hi")
-    structWithBlanks.feature("a") shouldEqual SomeData(optionalBooleanType, true)
-    structWithBlanks.feature("b") shouldEqual SomeData(optionalStringType, "hi")
+    structWithBlanks.feature("a") shouldEqual SomeData(true)
+    structWithBlanks.feature("b") shouldEqual SomeData("hi")
   }
   
   it should "put none-s when the options are not provided" in {
     val structWithBlanks = StructData(structTypeWithBlanks)("b" -> "has")
     structWithBlanks.feature("a") shouldEqual NoneData(optionalBooleanType)
-    structWithBlanks.feature("b") shouldEqual SomeData(optionalStringType, "has")
+    structWithBlanks.feature("b") shouldEqual SomeData("has")
   }
   
   val seqType = SeqType(IntPrimitiveType)
@@ -93,6 +94,6 @@ class DataDomainSpec extends FlatSpec {
   val optionSeqType = SeqType(OptionType(IntPrimitiveType))
   it should "support assigning raw values from options" in {
     val optionSeq = SeqData(optionSeqType)(3, 4, 5)
-    optionSeq.element(0) shouldEqual SomeData(OptionType(IntPrimitiveType), 3)
+    optionSeq.element(0) shouldEqual SomeData(3)
   }
 }
