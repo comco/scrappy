@@ -44,7 +44,7 @@ object DataDomain extends Domain {
       case (name, data) => {
         canAssign(datatype.featureType(name), data)
       }
-    }, "Invalid feature type")
+    }, s"Invalid feature type for creating a StructData with datatype: $datatype from features: $rawFeatures")
     require(datatype.featureTypes.forall {
       case (name, datatype) => rawFeatures.contains(name) || datatype.isInstanceOf[OptionType]
     }, "A non-optional feature is not given")

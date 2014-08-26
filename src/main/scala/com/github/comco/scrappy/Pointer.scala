@@ -7,6 +7,8 @@ sealed abstract class Pointer {
   def targetType: Type
   
   def picker: Picker
+  
+  def append(step: Step): Pointer = StepPointer(this, step)
 }
 
 case class SelfPointer(val sourceType: Type) extends Pointer {
