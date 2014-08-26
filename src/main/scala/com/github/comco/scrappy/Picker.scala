@@ -75,6 +75,24 @@ abstract class BaseSeqPicker extends Picker {
   def doPickOriginatedData(source: OriginatedDataDomain.SeqData): OriginatedDataDomain.Data
 }
 
+abstract class BaseOptionPicker extends Picker {
+  def sourceType: OptionType
+  
+  def pickData(source: DataDomain.Data) = {
+    require(source.datatype == sourceType)
+    doPickData(source.asInstanceOf[DataDomain.OptionData])
+  } ensuring (_.datatype == targetType)
+  
+  def doPickData(source: DataDomain.OptionData): DataDomain.Data
+  
+  def pickOriginatedData(source: OriginatedDataDomain.Data) = {
+    require(source.datatype == sourceType)
+    doPickOriginatedData(source.asInstanceOf[OriginatedDataDomain.OptionData])
+  } ensuring (_.datatype == targetType)
+  
+  def doPickOriginatedData(source: OriginatedDataDomain.OptionData): OriginatedDataDomain.Data
+}
+
 /**
  * Identity picker - picks itself.
  */
@@ -127,4 +145,20 @@ case class ElementPicker(val sourceType: SeqType, val index: Int)
   
   def doPickData(source: DataDomain.SeqData) = source.elements(index)
   def doPickOriginatedData(source: OriginatedDataDomain.SeqData) = source.elements(index)
+}
+
+case class SomePicker(val sourceType: OptionType)
+  extends BaseOptionPicker {
+  
+  def targetType = sourceType.someType
+  
+  def doPickData(source: DataDomain.OptionData) = source match {
+    case source: DataDomain.SomeData => source.value
+    case _ => throw new IllegalArgumentException("SomePicker cannot pick NoneData")
+  }
+  
+  def doPickOriginatedData(source: OriginatedDataDomain.OptionData) = source match {
+    case source: OriginatedDataDomain.SomeData => source.value
+    case _ => throw new IllegalArgumentException("SomePicker cannot pick NoneData")
+  }
 }

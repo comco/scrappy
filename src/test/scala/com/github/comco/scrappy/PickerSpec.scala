@@ -8,10 +8,6 @@ import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
 class PickerSpec extends FlatSpec {
 	val data = DataDomain.PrimitiveData("hi")
 	
-	"A BaseTuplePicker" should "validate its source datatype" in {
-	  
-	}
-	
   "A SelfPicker" should "have the same targetType as its sourceType" in {
     SelfPicker(IntPrimitiveType).targetType shouldEqual IntPrimitiveType
   }

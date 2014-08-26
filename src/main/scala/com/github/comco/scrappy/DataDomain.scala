@@ -10,8 +10,7 @@ object DataDomain extends Domain {
 
   case class PrimitiveData[T](val value: T)(
     implicit val datatype: PrimitiveType[T])
-      extends Data with BasePrimitiveData[T] {
-  }
+      extends Data with BasePrimitiveData[T]
 
   object PrimitiveData {
     implicit def raw2PrimitiveData[T](value: T)(

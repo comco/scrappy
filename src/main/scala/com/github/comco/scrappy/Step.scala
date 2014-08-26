@@ -35,3 +35,10 @@ case class ElementStep(val sourceType: SeqType, val index: Int)
   
   def picker = ElementPicker(sourceType, index)
 }
+
+case class SomeStep(val sourceType: OptionType)
+  extends Step {
+  def targetType = sourceType.someType
+  
+  def picker = SomePicker(sourceType)
+}
