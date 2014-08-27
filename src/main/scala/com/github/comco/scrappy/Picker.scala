@@ -163,6 +163,9 @@ case class SomePicker(val sourceType: OptionType)
   }
 }
 
+/**
+ * Composes pickers of comparable types together.
+ */
 case class AndThenPicker(val first: Picker, val next: Picker)
     extends Picker {
   require(first.targetType == next.sourceType)

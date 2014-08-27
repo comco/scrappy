@@ -123,4 +123,26 @@ class PickerSpec extends FlatSpec {
   it should "verify that the appropriate data is given" in {
     an[IllegalArgumentException] should be thrownBy somePicker.pickData(seqData)
   }
+  
+  val andThenPicker = AndThenPicker(somePicker, elementPicker)
+  
+  "An AndThenPicker" should "have the right sourceType" in {
+    andThenPicker.sourceType shouldEqual optionType
+  }
+  
+  it should "have the right targetType" in {
+    andThenPicker.targetType shouldEqual structType
+  }
+  
+  it should "validate the parent and child pickers which create it" in {
+    an[IllegalArgumentException] should be thrownBy AndThenPicker(somePicker, somePicker)
+  }
+  
+  it should "pickData" in {
+    andThenPicker.pickData(optionData) shouldEqual structData
+  }
+  
+  it should "validate input datatype of pickData" in {
+    an[IllegalArgumentException] should be thrownBy andThenPicker.pickData(structData)
+  }
 }

@@ -22,7 +22,7 @@ class OriginSpec extends FlatSpec with Matchers {
     original.targetType shouldEqual IntPrimitiveType
   }
   
-  it should "transform ot computed" in {
+  it should "transform to computed" in {
     original.computed.pointers shouldEqual Set(pointer)
   }
   

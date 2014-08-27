@@ -15,7 +15,7 @@ object OriginatedDataDomain extends Domain {
       case data: DataDomain.NoneData => NoneData(data, origin)
     }
   }
-  
+
   sealed abstract class Data extends BaseData {
     def data: DataDomain.Data
     def origin: Origin
@@ -25,7 +25,7 @@ object OriginatedDataDomain extends Domain {
     val origin: Origin)
       extends Data with BasePrimitiveData[T] {
     require(data.datatype == origin.targetType,
-        s"Datatype of data: $data and targetType of origin: $origin does not match.")
+      s"Datatype of data: $data and targetType of origin: $origin does not match.")
     def datatype: PrimitiveType[T] = data.datatype
     def value = data.value
   }
@@ -38,6 +38,8 @@ object OriginatedDataDomain extends Domain {
   case class OriginalTupleData(val data: DataDomain.TupleData,
     val origin: Origin)
       extends TupleData {
+    require(data.datatype == origin.targetType,
+      s"Datatype of data: $data and targetType of origin: $origin does not match.")
     lazy val coordinates: IndexedSeq[Data] =
       data.coordinates.zipWithIndex.map {
         case (coord, pos) => mkDataOriginatedFrom(coord,
@@ -48,7 +50,10 @@ object OriginatedDataDomain extends Domain {
   case class ComputedTupleData(val data: DataDomain.TupleData,
     val origin: Origin,
     val coordinates: IndexedSeq[Data])
-      extends TupleData
+      extends TupleData {
+    require(data.datatype == origin.targetType,
+      s"Datatype of data: $data and targetType of origin: $origin does not match.")
+  }
 
   sealed abstract class StructData extends Data with BaseStructData {
     def data: DataDomain.StructData
@@ -58,6 +63,8 @@ object OriginatedDataDomain extends Domain {
   case class OriginalStructData(val data: DataDomain.StructData,
     val origin: Origin)
       extends StructData {
+    require(data.datatype == origin.targetType,
+      s"Datatype of data: $data and targetType of origin: $origin does not match.")
 
     lazy val features: Map[String, Data] = data.features.map {
       case (name, feature) => (name, mkDataOriginatedFrom(feature,
@@ -67,7 +74,10 @@ object OriginatedDataDomain extends Domain {
 
   case class ComputedStructData(val data: DataDomain.StructData,
     val origin: Origin, val features: Map[String, Data])
-      extends StructData
+      extends StructData {
+    require(data.datatype == origin.targetType,
+      s"Datatype of data: $data and targetType of origin: $origin does not match.")
+  }
 
   sealed abstract class SeqData extends Data with BaseSeqData {
     def data: DataDomain.SeqData
@@ -77,6 +87,8 @@ object OriginatedDataDomain extends Domain {
   case class OriginalSeqData(val data: DataDomain.SeqData,
     val origin: Origin)
       extends SeqData {
+    require(data.datatype == origin.targetType,
+      s"Datatype of data: $data and targetType of origin: $origin does not match.")
 
     lazy val elements: Seq[Data] = data.elements.zipWithIndex.map {
       case (elem, index) => mkDataOriginatedFrom(elem,
@@ -87,23 +99,35 @@ object OriginatedDataDomain extends Domain {
   case class ComputedSeqData(val data: DataDomain.SeqData,
     val origin: Origin,
     val elements: Seq[Data])
-      extends SeqData
-      
+      extends SeqData {
+    require(data.datatype == origin.targetType,
+      s"Datatype of data: $data and targetType of origin: $origin does not match.")
+  }
+
   sealed abstract class OptionData extends Data with BaseOptionData {
     def data: DataDomain.OptionData
     def datatype: OptionType = data.datatype
   }
-  
+
   case class NoneData(val data: DataDomain.NoneData, val origin: Origin)
-    extends OptionData with BaseNoneData
-    
+      extends OptionData with BaseNoneData {
+    require(data.datatype == origin.targetType,
+      s"Datatype of data: $data and targetType of origin: $origin does not match.")
+  }
+
   sealed abstract class SomeData extends OptionData with BaseSomeData
-    
+
   case class OriginalSomeData(val data: DataDomain.SomeData, val origin: Origin)
-    extends SomeData {
+      extends SomeData {
+    require(data.datatype == origin.targetType,
+      s"Datatype of data: $data and targetType of origin: $origin does not match.")
+
     lazy val value: Data = mkDataOriginatedFrom(data.value, origin.append(SomeStep(datatype)))
   }
-   
+
   case class ComputedSomeData(val data: DataDomain.SomeData, val origin: Origin, val value: Data)
-    extends SomeData
+      extends SomeData {
+    require(data.datatype == origin.targetType,
+      s"Datatype of data: $data and targetType of origin: $origin does not match.")
+  }
 }
