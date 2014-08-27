@@ -1,7 +1,5 @@
 package com.github.comco.scrappy
 
-import com.github.comco.scrappy.pickers.AndThenPicker
-
 sealed abstract class Pointer {
   def sourceType: Type
   def targetType: Type

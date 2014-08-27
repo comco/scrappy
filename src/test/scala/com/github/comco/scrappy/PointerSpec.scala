@@ -3,7 +3,6 @@ package com.github.comco.scrappy
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers._
 import com.github.comco.scrappy.PrimitiveType._
-import com.github.comco.scrappy.pickers.AndThenPicker
 
 class PointerSpec extends FlatSpec {
   "A SelfPointer" should "have the right targetType" in {

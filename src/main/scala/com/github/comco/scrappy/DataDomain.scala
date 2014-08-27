@@ -33,6 +33,11 @@ object DataDomain extends Domain {
     def apply(datatype: TupleType)(coordinates: Data*): TupleData = {
       TupleData(datatype, coordinates.toIndexedSeq)
     }
+    
+    def apply(coordinates: Data*): TupleData = {
+      val datatype = TupleType(coordinates.map(_.datatype).toIndexedSeq)
+      TupleData(datatype, coordinates.toIndexedSeq)
+    }
   }
 
   case class StructData(val datatype: StructType,
@@ -78,6 +83,10 @@ object DataDomain extends Domain {
   object SeqData {
     def apply(datatype: SeqType)(elements: Data*)(implicit dummy: DummyImplicit): SeqData = {
       SeqData(datatype, elements)
+    }
+    
+    def apply(firstElement: Data, nextElements: Data*): SeqData = {
+      SeqData(SeqType(firstElement.datatype), firstElement +: nextElements.toSeq)
     }
   }
   

@@ -162,3 +162,16 @@ case class SomePicker(val sourceType: OptionType)
     case _ => throw new IllegalArgumentException("SomePicker cannot pick NoneData")
   }
 }
+
+case class AndThenPicker(val first: Picker, val next: Picker)
+    extends Picker {
+  require(first.targetType == next.sourceType)
+  
+  def sourceType = first.sourceType
+  def targetType = next.targetType
+  
+  def pickData(source: DataDomain.Data) = next.pickData(first.pickData(source))
+  
+  def pickOriginatedData(source: OriginatedDataDomain.Data) = 
+    next.pickOriginatedData(first.pickOriginatedData(source))
+}

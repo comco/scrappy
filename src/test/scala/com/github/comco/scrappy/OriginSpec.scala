@@ -39,7 +39,7 @@ class OriginSpec extends FlatSpec with Matchers {
     computed.sourceType shouldEqual structType
   }
   
-  it should "have the righ targetType" in {
+  it should "have the right targetType" in {
     computed.targetType shouldEqual IntPrimitiveType
   }
   
