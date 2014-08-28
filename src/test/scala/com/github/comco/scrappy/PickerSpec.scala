@@ -5,10 +5,13 @@ import org.scalatest.Matchers._
 import com.github.comco.scrappy.PrimitiveType._
 import DataDomain.PrimitiveData._
 import DataDomain.PrimitiveData
+import OriginatedDataDomain.{mkDataOriginatedFrom, mkDataOriginatedFromSelf}
+import com.github.comco.scrappy.DataDomain.NoneData
 
 class PickerSpec extends FlatSpec {
 	val data = DataDomain.PrimitiveData("hi")
 	val selfPicker = SelfPicker(IntPrimitiveType)
+	
   "A SelfPicker" should "have the same targetType as its sourceType" in {
     selfPicker.targetType shouldEqual IntPrimitiveType
   }
@@ -42,6 +45,13 @@ class PickerSpec extends FlatSpec {
     coordinatePicker.pickData(tupleData) shouldEqual PrimitiveData(3)
   }
   
+  it should "pickOriginatedData" in {
+    val origin = Original(SelfPointer(tupleType))
+    val originated = mkDataOriginatedFromSelf(tupleData)
+    val expected = mkDataOriginatedFrom(PrimitiveData(3), origin.append(CoordinateStep(tupleType, 0)))
+    coordinatePicker.pickOriginatedData(originated) shouldEqual expected
+  }
+  
   it should "validate against wrong coordinates" in {
     an[IllegalArgumentException] should be thrownBy CoordinatePicker(tupleData.datatype, -1)
     an[IllegalArgumentException] should be thrownBy CoordinatePicker(tupleData.datatype, 3)
@@ -69,6 +79,13 @@ class PickerSpec extends FlatSpec {
   
   it should "validate datatype in pickData" in {
     an[IllegalArgumentException] should be thrownBy featurePicker.pickData(tupleData)
+  }
+  
+  it should "pickOriginatedData" in {
+    val origin = Original(SelfPointer(structType))
+    val originated = mkDataOriginatedFromSelf(structData)
+    val expected = mkDataOriginatedFrom(tupleData, origin.append(FeatureStep(structType, "a")))
+    featurePicker.pickOriginatedData(originated) shouldEqual expected
   }
   
   val seqType = SeqType(structType)
@@ -100,6 +117,13 @@ class PickerSpec extends FlatSpec {
     an[IllegalArgumentException] should be thrownBy elementPicker.pickData(tupleData)
   }
   
+  it should "pickOriginatedData" in {
+    val origin = Original(SelfPointer(seqType))
+    val originated = mkDataOriginatedFromSelf(seqData)
+    val expected = mkDataOriginatedFrom(structData, origin.append(ElementStep(seqType, 1)))
+    elementPicker.pickOriginatedData(originated) shouldEqual expected
+  }
+  
   val optionType = OptionType(seqType)
   val optionData = DataDomain.SomeData(optionType, seqData)
   val somePicker = SomePicker(optionType)
@@ -117,11 +141,25 @@ class PickerSpec extends FlatSpec {
   }
   
   it should "verify when none data is given" in {
-    an[IllegalArgumentException] should be thrownBy somePicker.pickData(DataDomain.NoneData(optionType))
+    an[IllegalArgumentException] should be thrownBy
+      somePicker.pickData(DataDomain.NoneData(optionType))
   }
   
   it should "verify that the appropriate data is given" in {
-    an[IllegalArgumentException] should be thrownBy somePicker.pickData(seqData)
+    an[IllegalArgumentException] should be thrownBy
+      somePicker.pickData(seqData)
+  }
+  
+  it should "pickOriginatedData" in {
+    val origin = Original(SelfPointer(optionType))
+    val originated = mkDataOriginatedFromSelf(optionData)
+    val expected = mkDataOriginatedFrom(seqData, origin.append(SomeStep(optionType)))
+    somePicker.pickOriginatedData(originated) shouldEqual expected
+  }
+  
+  it should "validate for non-empty data in pickOriginatedData" in {
+    an[IllegalArgumentException] should be thrownBy
+      somePicker.pickOriginatedData(mkDataOriginatedFromSelf(NoneData(optionType)))
   }
   
   val andThenPicker = AndThenPicker(somePicker, elementPicker)
@@ -144,5 +182,12 @@ class PickerSpec extends FlatSpec {
   
   it should "validate input datatype of pickData" in {
     an[IllegalArgumentException] should be thrownBy andThenPicker.pickData(structData)
+  }
+  
+  it should "pickOriginatedData" in {
+    val origin = Original(SelfPointer(optionType))
+    val originated = mkDataOriginatedFromSelf(optionData)
+    val expected = mkDataOriginatedFrom(structData, origin.append(SomeStep(optionType)).append(ElementStep(seqType, 1)))
+    andThenPicker.pickOriginatedData(originated) shouldEqual expected
   }
 }

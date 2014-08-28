@@ -15,6 +15,10 @@ object OriginatedDataDomain extends Domain {
       case data: DataDomain.NoneData => NoneData(data, origin)
     }
   }
+  
+  def mkDataOriginatedFromSelf(data: DataDomain.Data): OriginatedDataDomain.Data = {
+    mkDataOriginatedFrom(data, Original(SelfPointer(data.datatype)))
+  }
 
   sealed abstract class Data extends BaseData {
     def data: DataDomain.Data

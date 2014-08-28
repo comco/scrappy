@@ -33,6 +33,16 @@ class OriginSpec extends FlatSpec with Matchers {
     orig2.pointer shouldEqual ptr.append(FeatureStep(structType, "a"))
   }
   
+  it should "validate for incorrect steps" in {
+    an[IllegalArgumentException] should be thrownBy original.append(CoordinateStep(pointType, 1))
+  }
+  
+  it should "change its targetType when computedWithTargetType" in {
+    val result = original.computedWithTargetType(IntPrimitiveType)
+    result.sourceType shouldEqual original.sourceType
+    result.targetType shouldEqual IntPrimitiveType
+  }
+  
   val computed = original.computed
   
   "A Computed origin" should "have the right sourceType" in {
@@ -52,5 +62,13 @@ class OriginSpec extends FlatSpec with Matchers {
     val comp = orig.computed
     val comp2 = comp.append(FeatureStep(structType, "b"))
     comp2.pointers shouldEqual Set(SelfPointer(structType))
+  }
+  
+  it should "validate for incorrect steps" in {
+    an[IllegalArgumentException] should be thrownBy computed.append(CoordinateStep(pointType, 1))
+  }
+  
+  it should "change its targetType when computedWithTargetType" in {
+   computed.computedWithTargetType(IntPrimitiveType) .targetType shouldEqual IntPrimitiveType
   }
 }
