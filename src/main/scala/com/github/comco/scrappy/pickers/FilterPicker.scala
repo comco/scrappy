@@ -3,7 +3,8 @@ package com.github.comco.scrappy.pickers
 import com.github.comco.scrappy._
 
 case class FilterPicker(val cond: Picker) extends BaseSeqPicker {
-  require(cond.targetType == PrimitiveType.BooleanPrimitiveType)
+  require(cond.targetType == PrimitiveType.BooleanPrimitiveType,
+      s"FilterPicker argument: $cond should be a boolean picker.")
 
   def sourceType = SeqType(cond.sourceType)
   def targetType = sourceType
