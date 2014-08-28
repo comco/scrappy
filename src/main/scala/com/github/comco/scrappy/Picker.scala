@@ -13,6 +13,27 @@ abstract class Picker {
 }
 
 /**
+ * Base class for primitive types pickers.
+ */
+abstract class BasePrimitivePicker[T] extends Picker {
+  def sourceType: PrimitiveType[T]
+  
+  def pickData(source: DataDomain.Data) = {
+    require(source.datatype == sourceType)
+    doPickData(source.asInstanceOf[DataDomain.PrimitiveData[T]])
+  } ensuring (_.datatype == targetType)
+  
+  def doPickData(source: DataDomain.PrimitiveData[T]): DataDomain.Data
+  
+  def pickOriginatedData(source: OriginatedDataDomain.Data) = {
+    require(source.datatype == sourceType)
+    doPickOriginatedData(source.asInstanceOf[OriginatedDataDomain.PrimitiveData[T]])
+  } ensuring (_.datatype == targetType)
+  
+  def doPickOriginatedData(source: OriginatedDataDomain.PrimitiveData[T]): OriginatedDataDomain.Data
+}
+
+/**
  * Base class for pickers on tuples.
  */
 abstract class BaseTuplePicker extends Picker {
