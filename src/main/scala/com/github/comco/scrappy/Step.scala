@@ -1,5 +1,9 @@
 package com.github.comco.scrappy
 
+/**
+ * Steps represent single-level traversion of data.
+ * Steps are composed to form pointers.
+ */
 sealed abstract class Step {
   def sourceType: Type
   def targetType: Type

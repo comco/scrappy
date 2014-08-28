@@ -96,7 +96,8 @@ trait Domain {
     }
 
     def feature(name: String): Data = {
-      require(datatype.hasFeature(name), s"StructData doesn't contain a feature named: $name")
+      require(datatype.hasFeature(name),
+        s"StructData doesn't contain a feature named: $name")
 
       features(name)
     }
@@ -124,7 +125,10 @@ trait Domain {
 
     def length: Int = elements.length
   }
-
+  
+  /**
+   * Base mixin for OptionData.
+   */
   trait BaseOptionData extends BaseData {
     this: OptionData =>
     
