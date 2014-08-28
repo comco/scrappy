@@ -13,6 +13,25 @@ abstract class Picker {
 }
 
 /**
+ * Base class for general pickers.
+ */
+abstract class BasePicker extends Picker {
+  def pickData(source: DataDomain.Data) = {
+    require(source.datatype == sourceType)
+    doPickData(source)
+  } ensuring (_.datatype == targetType)
+  
+  def doPickData(source: DataDomain.Data): DataDomain.Data
+  
+  def pickOriginatedData(source: OriginatedDataDomain.Data) = {
+    require(source.datatype == sourceType)
+    doPickOriginatedData(source)
+  } ensuring (_.datatype == targetType)
+  
+  def doPickOriginatedData(source: OriginatedDataDomain.Data): OriginatedDataDomain.Data
+}
+
+/**
  * Base class for primitive types pickers.
  */
 abstract class BasePrimitivePicker[T] extends Picker {
