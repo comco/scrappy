@@ -6,6 +6,7 @@ import com.github.comco.scrappy._
 import PrimitiveType._
 import DataDomain._
 import PrimitiveData._
+import OriginatedDataDomain.mkDataOriginatedFrom
 
 class FilterPickerSpec extends FlatSpec {
   val structType = StructType("name", "a" -> IntPrimitiveType, "b" -> BooleanPrimitiveType)
@@ -23,6 +24,10 @@ class FilterPickerSpec extends FlatSpec {
     filterPicker.targetType shouldEqual SeqType(structType)
   }
   
+  it should "validate for the type of the condition picker" in {
+    an[IllegalArgumentException] should be thrownBy FilterPicker(FeaturePicker(structType, "a"))
+  }
+  
   val expectedData = SeqData(element0, element2)
   
   it should "pickData" in {
@@ -38,8 +43,8 @@ class FilterPickerSpec extends FlatSpec {
     result.origin shouldEqual origin.computed
     result.datatype shouldEqual SeqType(structType)
     val seqResult = result.asInstanceOf[OriginatedDataDomain.SeqData]
-    val expectedElement0 = OriginatedDataDomain.mkDataOriginatedFrom(element0, origin.append(ElementStep(SeqType(structType), 0)))
-    val expectedElement1 = OriginatedDataDomain.mkDataOriginatedFrom(element2, origin.append(ElementStep(SeqType(structType), 2)))
+    val expectedElement0 = mkDataOriginatedFrom(element0, origin.append(ElementStep(SeqType(structType), 0)))
+    val expectedElement1 = mkDataOriginatedFrom(element2, origin.append(ElementStep(SeqType(structType), 2)))
     seqResult.element(0) shouldEqual expectedElement0
   }
 }
