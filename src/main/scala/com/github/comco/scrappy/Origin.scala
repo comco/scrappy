@@ -10,6 +10,7 @@ sealed abstract class Origin {
   def append(step: Step): Origin
 
   def computed: Computed
+  def computedWithTargetType(targetType: Type): Computed
 }
 
 case class Original(val pointer: Pointer) extends Origin {
@@ -23,6 +24,7 @@ case class Original(val pointer: Pointer) extends Origin {
   }
 
   def computed = Computed(sourceType, targetType, Set(pointer))
+  def computedWithTargetType(targetType: Type) = Computed(sourceType, targetType, Set(pointer))
 }
 
 case class Computed(
@@ -38,4 +40,5 @@ case class Computed(
   }
 
   def computed = this
+  def computedWithTargetType(targetType: Type) = Computed(sourceType, targetType, pointers)
 }
