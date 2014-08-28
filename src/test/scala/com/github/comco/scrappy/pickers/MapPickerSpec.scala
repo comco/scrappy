@@ -28,8 +28,15 @@ class MapPickerSpec extends FlatSpec {
   }
   
   it should "pickOriginatedData" in {
-    val originated = OriginatedDataDomain.OriginalSeqData(points, Original(SelfPointer(SeqType(pointType))))
+    val sourcePointer = SelfPointer(SeqType(pointType))
+    val originated = OriginatedDataDomain.OriginalSeqData(points, Original(sourcePointer))
     val results = mapPicker.pickOriginatedData(originated)
-    //results.datatype shouldEqual SeqType(IntPrimitiveType)
+    results.datatype shouldEqual SeqType(IntPrimitiveType)
+    results.data shouldEqual SeqData(3, 5)
+    results.origin shouldEqual Computed(SeqType(pointType), SeqType(IntPrimitiveType), Set(sourcePointer))
+    val seqResults = results.asInstanceOf[OriginatedDataDomain.SeqData]
+    val expectedPointer0 = sourcePointer.append(ElementStep(SeqType(pointType), 0)).append(CoordinateStep(pointType, 0))
+    val expectedElement0 = OriginatedDataDomain.PrimitiveData(3, Original(expectedPointer0))
+    seqResults.element(0) shouldEqual expectedElement0
   }
 } 
