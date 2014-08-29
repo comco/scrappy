@@ -16,27 +16,27 @@ trait Domain {
   /**
    * Specific class for data of primitive type.
    */
-  type PrimitiveData[T] <: BasePrimitiveData[T]
+  type PrimitiveData[T] <: PrimitiveDataMixin[T]
 
   /**
    * Specific class for data of tuple type.
    */
-  type TupleData <: BaseTupleData
+  type TupleData <: TupleDataMixin
 
   /**
    * Specific class for data of struct type.
    */
-  type StructData <: BaseStructData
+  type StructData <: StructDataMixin
 
   /**
    * Specific class for data of seq type.
    */
-  type SeqData <: BaseSeqData
+  type SeqData <: SeqDataMixin
 
   /**
    * Specific class for optional data.
    */
-  type OptionData <: BaseOptionData
+  type OptionData <: OptionDataMixin
 
   type SomeData <: OptionData
 
@@ -52,7 +52,7 @@ trait Domain {
   /**
    * Base mixin for primitive data.
    */
-  trait BasePrimitiveData[T] extends BaseData {
+  trait PrimitiveDataMixin[T] extends BaseData {
     this: PrimitiveData[T] =>
 
     def datatype: PrimitiveType[T]
@@ -62,7 +62,7 @@ trait Domain {
   /**
    * Base mixin for tuple data.
    */
-  trait BaseTupleData extends BaseData {
+  trait TupleDataMixin extends BaseData {
     this: TupleData =>
 
     def datatype: TupleType
@@ -85,7 +85,7 @@ trait Domain {
   /**
    * Base mixin for struct data.
    */
-  trait BaseStructData extends BaseData {
+  trait StructDataMixin extends BaseData {
     this: StructData =>
 
     def datatype: StructType
@@ -106,7 +106,7 @@ trait Domain {
   /**
    * Base mixin for seq data.
    */
-  trait BaseSeqData extends BaseData {
+  trait SeqDataMixin extends BaseData {
     this: SeqData =>
 
     def datatype: SeqType
@@ -129,20 +129,20 @@ trait Domain {
   /**
    * Base mixin for OptionData.
    */
-  trait BaseOptionData extends BaseData {
+  trait OptionDataMixin extends BaseData {
     this: OptionData =>
     
     def datatype: OptionType
     def isSome: Boolean
   }
 
-  trait BaseNoneData extends BaseOptionData {
+  trait NoneDataMixin extends OptionDataMixin {
     this: NoneData =>
     
       def isSome = false
   }
 
-  trait BaseSomeData extends BaseOptionData {
+  trait SomeDataMixin extends OptionDataMixin {
     this: SomeData =>
     
     def isSome = true
@@ -150,7 +150,7 @@ trait Domain {
   }
   
   def isFilled(data: Data): Boolean = data match {
-    case data: BaseOptionData => data.isSome
+    case data: OptionDataMixin => data.isSome
     case _ => true
   }
 }

@@ -8,22 +8,22 @@ object TestDomain extends Domain {
   abstract class Data extends BaseData
 
   case class PrimitiveData[T](val value: T)(implicit val datatype: PrimitiveType[T])
-    extends Data with BasePrimitiveData[T]
+    extends Data with PrimitiveDataMixin[T]
 
   case class TupleData(val datatype: TupleType, val coordinates: IndexedSeq[Data])
-    extends Data with BaseTupleData
+    extends Data with TupleDataMixin
 
   case class StructData(val datatype: StructType, val features: Map[String, Data])
-    extends Data with BaseStructData
+    extends Data with StructDataMixin
 
   case class SeqData(val datatype: SeqType, val elements: Seq[Data])
-    extends Data with BaseSeqData
+    extends Data with SeqDataMixin
     
-  abstract class OptionData extends Data with BaseOptionData
+  abstract class OptionData extends Data with OptionDataMixin
   
-  case class SomeData(val datatype: OptionType, val value: Data) extends OptionData with BaseSomeData
+  case class SomeData(val datatype: OptionType, val value: Data) extends OptionData with SomeDataMixin
   
-  case class NoneData(val datatype: OptionType) extends OptionData with BaseNoneData
+  case class NoneData(val datatype: OptionType) extends OptionData with NoneDataMixin
 }
 
 class DomainSpec extends FlatSpec {

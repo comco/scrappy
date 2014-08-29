@@ -10,7 +10,7 @@ object DataDomain extends Domain {
 
   case class PrimitiveData[T](val value: T)(
     implicit val datatype: PrimitiveType[T])
-      extends Data with BasePrimitiveData[T]
+      extends Data with PrimitiveDataMixin[T]
 
   object PrimitiveData {
     implicit def raw2PrimitiveData[T](value: T)(
@@ -21,7 +21,7 @@ object DataDomain extends Domain {
 
   case class TupleData(val datatype: TupleType,
     val coordinates: IndexedSeq[Data])
-      extends Data with BaseTupleData {
+      extends Data with TupleDataMixin {
     require(datatype.size == coordinates.size,
       s"Invalid size of coordinates to construct a TupleData; expected: ${datatype.size}, actual: ${coordinates.size}.")
     require(datatype.coordinateTypes.zip(coordinates).forall {
@@ -42,7 +42,7 @@ object DataDomain extends Domain {
 
   case class StructData(val datatype: StructType,
     rawFeatures: Map[String, Data])
-      extends Data with BaseStructData {
+      extends Data with StructDataMixin {
     require(rawFeatures.keys.forall(datatype.hasFeature(_)), "Invalid feature name")
     require(rawFeatures.forall {
       case (name, data) => {
@@ -75,7 +75,7 @@ object DataDomain extends Domain {
 
   case class SeqData(val datatype: SeqType,
     rawElements: Seq[Data])
-      extends Data with BaseSeqData {
+      extends Data with SeqDataMixin {
 	  require(rawElements.forall(canAssign(datatype.elementType, _)), "An element has invalid datatype")
     lazy val elements = rawElements.map(convert(datatype.elementType, _))
   }
@@ -90,9 +90,9 @@ object DataDomain extends Domain {
     }
   }
   
-  sealed abstract class OptionData extends Data with BaseOptionData
+  sealed abstract class OptionData extends Data with OptionDataMixin
   
-  case class SomeData(val datatype: OptionType, val value: Data) extends OptionData with BaseSomeData {
+  case class SomeData(val datatype: OptionType, val value: Data) extends OptionData with SomeDataMixin {
     require(value.datatype == datatype.someType, s"SomeData: $this cannot be created with value of type: ${value.datatype}")
   }
   
@@ -103,7 +103,7 @@ object DataDomain extends Domain {
     }
   }
   
-  case class NoneData(val datatype: OptionType) extends OptionData with BaseNoneData
+  case class NoneData(val datatype: OptionType) extends OptionData with NoneDataMixin
 
   private def canAssign(datatype: Type, data: Data): Boolean = {
     data.datatype == datatype ||

@@ -29,12 +29,12 @@ object OriginatedDataDomain extends Domain {
 
   case class PrimitiveData[T](val data: DataDomain.PrimitiveData[T],
     val origin: Origin)
-      extends Data with BasePrimitiveData[T] {
+      extends Data with PrimitiveDataMixin[T] {
     def datatype: PrimitiveType[T] = data.datatype
     def value = data.value
   }
 
-  sealed abstract class TupleData extends Data with BaseTupleData {
+  sealed abstract class TupleData extends Data with TupleDataMixin {
     def data: DataDomain.TupleData
     def datatype: TupleType = data.datatype
   }
@@ -54,7 +54,7 @@ object OriginatedDataDomain extends Domain {
     val coordinates: IndexedSeq[Data])
       extends TupleData
 
-  sealed abstract class StructData extends Data with BaseStructData {
+  sealed abstract class StructData extends Data with StructDataMixin {
     def data: DataDomain.StructData
     def datatype: StructType = data.datatype
   }
@@ -72,7 +72,7 @@ object OriginatedDataDomain extends Domain {
     val origin: Origin, val features: Map[String, Data])
       extends StructData
 
-  sealed abstract class SeqData extends Data with BaseSeqData {
+  sealed abstract class SeqData extends Data with SeqDataMixin {
     def data: DataDomain.SeqData
     def datatype: SeqType = data.datatype
   }
@@ -92,15 +92,15 @@ object OriginatedDataDomain extends Domain {
     val elements: Seq[Data])
       extends SeqData
 
-  sealed abstract class OptionData extends Data with BaseOptionData {
+  sealed abstract class OptionData extends Data with OptionDataMixin {
     def data: DataDomain.OptionData
     def datatype: OptionType = data.datatype
   }
 
   case class NoneData(val data: DataDomain.NoneData, val origin: Origin)
-    extends OptionData with BaseNoneData
+    extends OptionData with NoneDataMixin
 
-  sealed abstract class SomeData extends OptionData with BaseSomeData
+  sealed abstract class SomeData extends OptionData with SomeDataMixin
 
   case class OriginalSomeData(val data: DataDomain.SomeData, val origin: Origin)
       extends SomeData {
