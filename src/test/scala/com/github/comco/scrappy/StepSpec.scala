@@ -72,4 +72,8 @@ class StepSpec extends FlatSpec {
   it should "have an ElementPicker" in {
     seqStep.picker shouldEqual ElementPicker(seqType, 3)
   }
+  
+  "A SomeStep" should "have the right picker" in {
+    SomeStep(OptionType(seqType)).picker shouldEqual SomePicker(OptionType(seqType))
+  }
 }

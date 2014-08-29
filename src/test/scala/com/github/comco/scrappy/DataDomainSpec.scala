@@ -80,10 +80,15 @@ class DataDomainSpec extends FlatSpec {
     structWithBlanks.feature("b") shouldEqual SomeData("has")
   }
   
+  it should "validate against missing non-optional feature" in {
+	  an[IllegalArgumentException] should be thrownBy
+	    StructData(structType)()
+  }
+  
   val seqType = SeqType(IntPrimitiveType)
   val seq = SeqData(seqType)(1, 2, 3)
   
-  "A DataDomain.SeqType" should "have the right elements" in {
+  "A DataDomain.SeqData" should "have the right elements" in {
     seq.elements shouldEqual Seq(PrimitiveData(1), PrimitiveData(2), PrimitiveData(3))
   }
   
@@ -95,5 +100,10 @@ class DataDomainSpec extends FlatSpec {
   it should "support assigning raw values from options" in {
     val optionSeq = SeqData(optionSeqType)(3, 4, 5)
     optionSeq.element(0) shouldEqual SomeData(3)
+  }
+  
+  "A DataDomain.SomeData" should "validate the datatype of the data passed to some" in {
+    an[IllegalArgumentException] should be thrownBy
+      SomeData(OptionType(IntPrimitiveType), DataDomain.PrimitiveData("hi"))
   }
 }
