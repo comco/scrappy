@@ -12,15 +12,15 @@ case class FoldPicker[A, R](f: Seq[A] => R)(
   
   def sourceType = SeqType(sourceElementType)
   
-  def doPickData(data: DataDomain.SeqData): DataDomain.PrimitiveData[R] = {
-    val rawArgs = data.elements.map(_.asInstanceOf[DataDomain.PrimitiveData[A]].value)
+  def doPickData(source: DataDomain.SeqData): DataDomain.PrimitiveData[R] = {
+    val rawArgs = source.elements.map(_.asInstanceOf[DataDomain.PrimitiveData[A]].value)
     val rawRes = f(rawArgs)
     DataDomain.PrimitiveData[R](rawRes)
   }
   
-  def doPickOriginatedData(data: OriginatedDataDomain.SeqData): OriginatedDataDomain.PrimitiveData[R] = {
-    val pickedData = doPickData(data.data)
+  def doPickOriginatedData(source: OriginatedDataDomain.SeqData): OriginatedDataDomain.PrimitiveData[R] = {
+    val pickedData = doPickData(source.data)
     OriginatedDataDomain.PrimitiveData[R](pickedData, 
-        data.origin.computedWithTargetType(pickedData.datatype))
+        source.origin.computedWithTargetType(pickedData.datatype))
   }
 }

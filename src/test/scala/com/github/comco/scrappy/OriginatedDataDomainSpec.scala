@@ -8,8 +8,8 @@ import DataDomain.PrimitiveData._
 import com.github.comco.scrappy.OriginatedDataDomain.OriginalSeqData
 
 class OriginatedDataDomainSpec extends FlatSpec {
-  val selfIntOrigin = Original(SelfPointer(IntPrimitiveType))
-  val selfStringOrigin = Original(SelfPointer(StringPrimitiveType))
+  val selfIntOrigin = OriginalOrigin(SelfPointer(IntPrimitiveType))
+  val selfStringOrigin = OriginalOrigin(SelfPointer(StringPrimitiveType))
   
   val intData: DataDomain.PrimitiveData[Int] = 3
   
@@ -27,7 +27,7 @@ class OriginatedDataDomainSpec extends FlatSpec {
   }
   
   val tupleType = TupleType(IntPrimitiveType, StringPrimitiveType)
-  val selfTupleOrigin = Original(SelfPointer(tupleType))
+  val selfTupleOrigin = OriginalOrigin(SelfPointer(tupleType))
   val tupleData = DataDomain.TupleData(tupleType)(3, "hi")
   val originalTupleData = OriginalTupleData(tupleData, selfTupleOrigin)
   
@@ -50,7 +50,7 @@ class OriginatedDataDomainSpec extends FlatSpec {
   }
   
   val structType = StructType("name", "a" -> IntPrimitiveType, "b" -> StringPrimitiveType)
-  val structOrigin = Original(SelfPointer(structType))
+  val structOrigin = OriginalOrigin(SelfPointer(structType))
   val structData = DataDomain.StructData(structType)("a" -> 3, "b" -> "hi")
   val originalStructData = OriginalStructData(structData, structOrigin)
   
@@ -72,7 +72,7 @@ class OriginatedDataDomainSpec extends FlatSpec {
   }
   
   val seqType = SeqType(structType)
-  val seqOrigin = Original(SelfPointer(seqType))
+  val seqOrigin = OriginalOrigin(SelfPointer(seqType))
   val seqData = DataDomain.SeqData(structData, structData)
   val originalSeqData = OriginalSeqData(seqData, seqOrigin)
   
@@ -95,7 +95,7 @@ class OriginatedDataDomainSpec extends FlatSpec {
   }
   
   val optionType = OptionType(structType)
-  val optionOrigin = Original(SelfPointer(optionType))
+  val optionOrigin = OriginalOrigin(SelfPointer(optionType))
   val someData = DataDomain.SomeData(optionType, structData)
   val originalSomeData = OriginalSomeData(someData, optionOrigin)
   

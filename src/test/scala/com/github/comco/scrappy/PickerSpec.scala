@@ -46,7 +46,7 @@ class PickerSpec extends FlatSpec {
   }
   
   it should "pickOriginatedData" in {
-    val origin = Original(SelfPointer(tupleType))
+    val origin = OriginalOrigin(SelfPointer(tupleType))
     val originated = mkDataOriginatedFromSelf(tupleData)
     val expected = mkDataOriginatedFrom(PrimitiveData(3), origin.append(CoordinateStep(tupleType, 0)))
     coordinatePicker.pickOriginatedData(originated) shouldEqual expected
@@ -82,7 +82,7 @@ class PickerSpec extends FlatSpec {
   }
   
   it should "pickOriginatedData" in {
-    val origin = Original(SelfPointer(structType))
+    val origin = OriginalOrigin(SelfPointer(structType))
     val originated = mkDataOriginatedFromSelf(structData)
     val expected = mkDataOriginatedFrom(tupleData, origin.append(FeatureStep(structType, "a")))
     featurePicker.pickOriginatedData(originated) shouldEqual expected
@@ -118,7 +118,7 @@ class PickerSpec extends FlatSpec {
   }
   
   it should "pickOriginatedData" in {
-    val origin = Original(SelfPointer(seqType))
+    val origin = OriginalOrigin(SelfPointer(seqType))
     val originated = mkDataOriginatedFromSelf(seqData)
     val expected = mkDataOriginatedFrom(structData, origin.append(ElementStep(seqType, 1)))
     elementPicker.pickOriginatedData(originated) shouldEqual expected
@@ -151,7 +151,7 @@ class PickerSpec extends FlatSpec {
   }
   
   it should "pickOriginatedData" in {
-    val origin = Original(SelfPointer(optionType))
+    val origin = OriginalOrigin(SelfPointer(optionType))
     val originated = mkDataOriginatedFromSelf(optionData)
     val expected = mkDataOriginatedFrom(seqData, origin.append(SomeStep(optionType)))
     somePicker.pickOriginatedData(originated) shouldEqual expected
@@ -185,9 +185,10 @@ class PickerSpec extends FlatSpec {
   }
   
   it should "pickOriginatedData" in {
-    val origin = Original(SelfPointer(optionType))
+    val origin = OriginalOrigin(SelfPointer(optionType))
     val originated = mkDataOriginatedFromSelf(optionData)
-    val expected = mkDataOriginatedFrom(structData, origin.append(SomeStep(optionType)).append(ElementStep(seqType, 1)))
+    val expected = mkDataOriginatedFrom(structData,
+      origin.append(SomeStep(optionType)).append(ElementStep(seqType, 1)))
     andThenPicker.pickOriginatedData(originated) shouldEqual expected
   }
 }

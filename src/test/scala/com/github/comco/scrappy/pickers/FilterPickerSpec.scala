@@ -36,7 +36,7 @@ class FilterPickerSpec extends FlatSpec {
   
   it should "pickOriginatedData by preserving the pointers to the underlying elements" in {
     val pointer = SelfPointer(SeqType(structType))
-    val origin = Original(pointer)
+    val origin = OriginalOrigin(pointer)
     val originatedElements = OriginatedDataDomain.mkDataOriginatedFrom(elements, origin)
     val result = filterPicker.pickOriginatedData(originatedElements)
     result.data shouldEqual expectedData

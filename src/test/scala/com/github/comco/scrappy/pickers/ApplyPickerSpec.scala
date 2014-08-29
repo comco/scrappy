@@ -24,8 +24,8 @@ class ApplyPickerSpec extends FlatSpec {
   }
   
   it should "pickOriginatedData" in {
-    val originated = OriginatedDataDomain.mkDataOriginatedFrom(data, Original(SelfPointer(IntPrimitiveType)))
+    val originated = OriginatedDataDomain.mkDataOriginatedFrom(data, OriginalOrigin(SelfPointer(IntPrimitiveType)))
     val result = incPicker.pickOriginatedData(originated)
-    result shouldEqual OriginatedDataDomain.mkDataOriginatedFrom(4, Computed(IntPrimitiveType, IntPrimitiveType, Set(SelfPointer(IntPrimitiveType))))
+    result shouldEqual OriginatedDataDomain.mkDataOriginatedFrom(4, ComputedOrigin(IntPrimitiveType, IntPrimitiveType, Set(SelfPointer(IntPrimitiveType))))
   }
 }

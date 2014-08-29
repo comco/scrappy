@@ -23,44 +23,41 @@ sealed abstract class Origin {
   /**
    * Constructs a computed origin from this origin.
    */
-  def computed: Computed
+  def computed: ComputedOrigin
   
   /**
    * Constructs a computed origin with a some target type from this origin.
    */
-  def computedWithTargetType(targetType: Type): Computed
+  def computedWithTargetType(targetType: Type): ComputedOrigin
 }
 
-case class Original(val pointer: Pointer) extends Origin {
+case class OriginalOrigin(val pointer: Pointer) extends Origin {
   
   def sourceType = pointer.sourceType
   def targetType = pointer.targetType
 
-  def append(step: Step): Original = {
+  def append(step: Step): OriginalOrigin = {
     require(step.sourceType == targetType,
       s"Cannot append step: $step to an origin: $this")
     
-    Original(pointer.append(step))
+    OriginalOrigin(pointer.append(step))
   }
 
-  def computed = Computed(sourceType, targetType, Set(pointer))
+  def computed = ComputedOrigin(sourceType, targetType, Set(pointer))
   
   def computedWithTargetType(targetType: Type) = 
-    Computed(sourceType, targetType, Set(pointer))
+    ComputedOrigin(sourceType, targetType, Set(pointer))
 }
 
-case class Computed(
-  val sourceType: Type,
-  val targetType: Type,
-  val pointers: Set[Pointer])
+case class ComputedOrigin(val sourceType: Type, val targetType: Type, val pointers: Set[Pointer])
     extends Origin {
-  
-  def append(step: Step): Computed = {
+
+  def append(step: Step): ComputedOrigin = {
     require(step.sourceType == targetType,
       s"Cannot append step: $step to an origin: $this")
-    Computed(sourceType, step.targetType, pointers)
+    ComputedOrigin(sourceType, step.targetType, pointers)
   }
 
   def computed = this
-  def computedWithTargetType(targetType: Type) = Computed(sourceType, targetType, pointers)
+  def computedWithTargetType(targetType: Type) = ComputedOrigin(sourceType, targetType, pointers)
 }
