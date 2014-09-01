@@ -13,6 +13,6 @@ case class ApplyPicker[A, R](f: A => R)(
   }
   
   def doPickOriginatedData(source: OriginatedDataDomain.PrimitiveData[A]): OriginatedDataDomain.PrimitiveData[R] = {
-    OriginatedDataDomain.PrimitiveData(doPickData(source.data), source.origin.computed)
+    OriginatedDataDomain.PrimitiveData(doPickData(source.data), source.origin.computedWithTargetType(targetType))
   }
 }

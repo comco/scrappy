@@ -30,6 +30,16 @@ class TuplePickerSpec extends FlatSpec with Matchers {
   }
   
   it should "pickOriginatedData" in {
-    // TODO
+    val originated = OriginatedDataDomain.mkDataOriginatedFromSelf(data)
+    val result = tuplePicker.pickOriginatedData(originated)
+    result.datatype shouldEqual TupleType(IntPrimitiveType, StringPrimitiveType)
+    result.data shouldEqual expectedData
+    val tuple = result.asInstanceOf[OriginatedDataDomain.TupleData]
+    tuple.coordinate(0) shouldEqual
+      OriginatedDataDomain.PrimitiveData(4, 
+          ComputedOrigin(IntPrimitiveType, IntPrimitiveType, Set(SelfPointer(IntPrimitiveType))))
+    tuple.coordinate(1) shouldEqual
+      OriginatedDataDomain.PrimitiveData("3",
+          ComputedOrigin(IntPrimitiveType, StringPrimitiveType, Set(SelfPointer(IntPrimitiveType))))
   }
 }

@@ -15,8 +15,10 @@ case class TuplePicker(coordinatePickers: IndexedSeq[Picker]) extends BasePicker
   }
   
   def doPickOriginatedData(source: OriginatedDataDomain.Data) = {
-    val pickedSource = doPickData(source.data)
-    OriginatedDataDomain.mkDataOriginatedFrom(pickedSource, source.origin.computedWithTargetType(targetType))
+    val data = doPickData(source.data)
+    val origin = source.origin.computedWithTargetType(targetType)
+    val coordinates = coordinatePickers.map(_.pickOriginatedData(source))
+    OriginatedDataDomain.ComputedTupleData(data, origin, coordinates)
   }
 }
 
