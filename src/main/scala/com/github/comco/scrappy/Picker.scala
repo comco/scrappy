@@ -153,7 +153,7 @@ case class SelfPicker(val sourceType: Type) extends Picker {
  */
 case class CoordinatePicker(val sourceType: TupleType, val position: Int)
     extends BaseTuplePicker {
-  require(sourceType.hasCoordinate(position))
+  require(sourceType.hasCoordinate(position), s"TupleType: $sourceType does not have a coordinate at position: $position")
 
   def targetType = sourceType.coordinateType(position)
 

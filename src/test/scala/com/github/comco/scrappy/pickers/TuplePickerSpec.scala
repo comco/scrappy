@@ -23,6 +23,15 @@ class TuplePickerSpec extends FlatSpec with Matchers {
       TupleType(IntPrimitiveType, StringPrimitiveType)
   }
   
+  it should "validate for no coordinates given" in {
+    an[IllegalArgumentException] should be thrownBy TuplePicker(IndexedSeq.empty)
+  }
+  
+  it should "check that all the coordinate pickers have the same sourceType" in {
+    val pickString = ApplyPicker[String, String](a => a)
+    an[IllegalArgumentException] should be thrownBy TuplePicker(pick0, pickString)
+  }
+  
   val expectedData = DataDomain.TupleData(4, "3")
   
   it should "pickData" in {
