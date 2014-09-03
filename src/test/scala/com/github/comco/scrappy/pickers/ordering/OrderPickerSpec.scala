@@ -5,14 +5,14 @@ import org.scalatest.Matchers
 import com.github.comco.scrappy._
 import DataDomain.PrimitiveData.raw2PrimitiveData
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
-import com.github.comco.scrappy.pickers.ordering.strategies.IntOrderingStrategy
 import com.github.comco.scrappy.OriginatedDataDomain._
+import com.github.comco.scrappy.pickers.ordering.strategies.IntOrderingStrategies
 
 class OrderPickerSpec extends FlatSpec with Matchers {
   val seqType = SeqType(IntPrimitiveType)
   val seqData = DataDomain.SeqData(3, 2, 4)
   val originatedSeqData = OriginatedDataDomain.mkDataOriginatedFromSelf(seqData)
-  val picker = OrderPicker(SelfPicker(IntPrimitiveType), IntOrderingStrategy.Ascending)
+  val picker = OrderPicker(SelfPicker(IntPrimitiveType), IntOrderingStrategies.Ascending)
   
   "An OrderPicker" should "pick by element" in {
     picker.pickData(seqData) shouldEqual

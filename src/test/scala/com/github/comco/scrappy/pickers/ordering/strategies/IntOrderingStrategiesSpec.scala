@@ -3,15 +3,14 @@ package com.github.comco.scrappy.pickers.ordering.strategies
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers
 import com.github.comco.scrappy._
-import com.github.comco.scrappy.pickers.ordering.OrderingStrategy
-import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
+import DataDomain.PrimitiveData.raw2PrimitiveData
 
-class StringOrderingStrategySpec extends FlatSpec with Matchers {
-  val x = DataDomain.PrimitiveData("ala")
-  val y = DataDomain.PrimitiveData("bala")
+class IntOrderingStrategySpec extends FlatSpec with Matchers {
+  val x = DataDomain.PrimitiveData[Int](3)
+  val y = DataDomain.PrimitiveData[Int](5)
 
-  "A StringOrderingStrategy.Ascending" should "compare Data.Strings-s" in {
-    val ordering = StringOrderingStrategy.Ascending.dataOrdering
+  "An IntOrderingStrategy.Ascending" should "compare Data.Int-s" in {
+    val ordering = IntOrderingStrategies.Ascending.dataOrdering
     ordering.compare(x, y) shouldEqual -1
     ordering.compare(y, x) shouldEqual 1
     ordering.compare(y, y) shouldEqual 0
@@ -20,8 +19,8 @@ class StringOrderingStrategySpec extends FlatSpec with Matchers {
   val originatedX = OriginatedDataDomain.mkDataOriginatedFromSelf(x)
   val originatedY = OriginatedDataDomain.mkDataOriginatedFromSelf(y)
 
-  it should "compare originatedStrings-s" in {
-    val ordering = StringOrderingStrategy.Ascending.originatedDataOrdering
+  it should "compare originatedInt-s" in {
+    val ordering = IntOrderingStrategies.Ascending.originatedDataOrdering
     ordering.compare(originatedX, originatedY) shouldEqual -1
     ordering.compare(originatedY, originatedX) shouldEqual 1
     ordering.compare(originatedY, originatedY) shouldEqual 0

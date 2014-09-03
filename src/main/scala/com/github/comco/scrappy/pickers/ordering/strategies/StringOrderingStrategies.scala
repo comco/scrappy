@@ -4,7 +4,7 @@ import com.github.comco.scrappy._
 import com.github.comco.scrappy.pickers.ordering.OrderingStrategy
 import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
 
-object StringOrderingStrategy {
+object StringOrderingStrategies extends BaseOrderingStrategies {
   case object Ascending
       extends OrderingStrategy
       with OrderingStrategy.SpecificDatatypeOrderingStrategy {
@@ -23,6 +23,4 @@ object StringOrderingStrategy {
       x.value compare(y.value)
     }
   }
-
-  final val Descending = DescendingOrderingStrategy(Ascending)
 }

@@ -11,21 +11,21 @@ class DescendingOrderingStrategySpec extends FlatSpec with Matchers {
   val y = DataDomain.PrimitiveData[Int](5)
 
   "An IntOrderingStrategy.Descending" should "compare Data.Int-s" in {
-    val ordering = IntOrderingStrategy.Descending.dataOrdering
+    val ordering = IntOrderingStrategies.Descending.dataOrdering
     ordering.compare(x, y) shouldEqual 1
     ordering.compare(y, x) shouldEqual -1
     ordering.compare(y, y) shouldEqual 0
   }
   
   it should "have the right type" in {
-    IntOrderingStrategy.Descending.datatype shouldEqual IntPrimitiveType
+    IntOrderingStrategies.Descending.datatype shouldEqual IntPrimitiveType
   }
 
   val originatedX = OriginatedDataDomain.mkDataOriginatedFromSelf(x)
   val originatedY = OriginatedDataDomain.mkDataOriginatedFromSelf(y)
 
   it should "compare originatedInt-s" in {
-    val ordering = IntOrderingStrategy.Descending.originatedDataOrdering
+    val ordering = IntOrderingStrategies.Descending.originatedDataOrdering
     ordering.compare(originatedX, originatedY) shouldEqual 1
     ordering.compare(originatedY, originatedX) shouldEqual -1
     ordering.compare(originatedY, originatedY) shouldEqual 0

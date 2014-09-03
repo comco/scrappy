@@ -5,10 +5,10 @@ import org.scalatest.Matchers
 import com.github.comco.scrappy._
 import DataDomain.PrimitiveData.raw2PrimitiveData
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
-import com.github.comco.scrappy.pickers.ordering.strategies.IntOrderingStrategy
 import com.github.comco.scrappy.OriginatedDataDomain._
 import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
-import com.github.comco.scrappy.pickers.ordering.strategies.StringOrderingStrategy
+import com.github.comco.scrappy.pickers.ordering.strategies.StringOrderingStrategies
+import com.github.comco.scrappy.pickers.ordering.strategies.IntOrderingStrategies
 
 class OrderPicker2Spec extends FlatSpec with Matchers {
   val structType = StructType("person",
@@ -34,8 +34,8 @@ class OrderPicker2Spec extends FlatSpec with Matchers {
   val lastNamePicker = FeaturePicker(structType, "lastName")
   
   val picker = OrderPicker2(
-      firstNamePicker, StringOrderingStrategy.Ascending)(
-      lastNamePicker, StringOrderingStrategy.Ascending)
+      firstNamePicker, StringOrderingStrategies.Ascending)(
+      lastNamePicker, StringOrderingStrategies.Ascending)
   
   val expectedData = DataDomain.SeqData(element1, element0, element2)
   
@@ -61,7 +61,7 @@ class OrderPicker2Spec extends FlatSpec with Matchers {
   
   it should "check the datatypes of its arguments" in {
     an[IllegalArgumentException] should be thrownBy
-      OrderPicker2(firstNamePicker, IntOrderingStrategy.Ascending)(
-          lastNamePicker, StringOrderingStrategy.Ascending)
+      OrderPicker2(firstNamePicker, IntOrderingStrategies.Ascending)(
+          lastNamePicker, StringOrderingStrategies.Ascending)
   }
 }
