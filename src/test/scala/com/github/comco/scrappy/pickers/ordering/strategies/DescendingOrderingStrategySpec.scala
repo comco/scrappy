@@ -4,6 +4,7 @@ import org.scalatest.FlatSpec
 import org.scalatest.Matchers
 import com.github.comco.scrappy._
 import DataDomain.PrimitiveData.raw2PrimitiveData
+import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 
 class DescendingOrderingStrategySpec extends FlatSpec with Matchers {
   val x = DataDomain.PrimitiveData[Int](3)
@@ -14,6 +15,10 @@ class DescendingOrderingStrategySpec extends FlatSpec with Matchers {
     ordering.compare(x, y) shouldEqual 1
     ordering.compare(y, x) shouldEqual -1
     ordering.compare(y, y) shouldEqual 0
+  }
+  
+  it should "have the right type" in {
+    IntOrderingStrategy.Descending.datatype shouldEqual IntPrimitiveType
   }
 
   val originatedX = OriginatedDataDomain.mkDataOriginatedFromSelf(x)

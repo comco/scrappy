@@ -15,12 +15,12 @@ object StringOrderingStrategy {
 
     def doCompareData(x: DataDomain.PrimitiveData[String],
       y: DataDomain.PrimitiveData[String]): Int = {
-      x.value.compare(y.value)
+      x.value compare(y.value)
     }
 
     def doCompareOriginatedData(x: OriginatedDataDomain.PrimitiveData[String],
       y: OriginatedDataDomain.PrimitiveData[String]): Int = {
-      x.value.compare(y.value)
+      x.value compare(y.value)
     }
   }
 

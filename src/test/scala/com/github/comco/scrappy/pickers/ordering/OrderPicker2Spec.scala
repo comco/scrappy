@@ -58,4 +58,10 @@ class OrderPicker2Spec extends FlatSpec with Matchers {
     seq.element(2) shouldEqual
       mkDataOriginatedFrom(element2, expectedOrigin.append(ElementStep(seqType, 2)))
   }
+  
+  it should "check the datatypes of its arguments" in {
+    an[IllegalArgumentException] should be thrownBy
+      OrderPicker2(firstNamePicker, IntOrderingStrategy.Ascending)(
+          lastNamePicker, StringOrderingStrategy.Ascending)
+  }
 }
