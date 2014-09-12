@@ -4,7 +4,7 @@ package com.github.comco.scrappy
  * Domain for data values with origin.
  */
 object OriginatedDataDomain extends Domain {
-  def mkDataOriginatedFrom(data: DataDomain.Data, origin: Origin): OriginatedDataDomain.Data = {
+  def mkOriginatedDataFrom(data: DataDomain.Data, origin: Origin): OriginatedDataDomain.Data = {
     data match {
       case data: DataDomain.PrimitiveData[t] => PrimitiveData[t](data, origin)
       case data: DataDomain.TupleData => OriginalTupleData(data, origin)
@@ -15,12 +15,12 @@ object OriginatedDataDomain extends Domain {
     }
   }
   
-  def mkDataComputedFrom(data: DataDomain.Data, source: OriginatedDataDomain.Data): OriginatedDataDomain.Data = {
-    mkDataOriginatedFrom(data, source.origin.computedWithTargetType(data.datatype))
+  def mkComputedDataFrom(data: DataDomain.Data, source: OriginatedDataDomain.Data): OriginatedDataDomain.Data = {
+    mkOriginatedDataFrom(data, source.origin.computedWithTargetType(data.datatype))
   }
 
   def mkDataOriginatedFromSelf(data: DataDomain.Data): OriginatedDataDomain.Data = {
-    mkDataOriginatedFrom(data, OriginalOrigin(SelfPointer(data.datatype)))
+    mkOriginatedDataFrom(data, OriginalOrigin(SelfPointer(data.datatype)))
   }
 
   sealed abstract class Data extends BaseData {
@@ -48,7 +48,7 @@ object OriginatedDataDomain extends Domain {
       extends TupleData {
     lazy val coordinates: IndexedSeq[Data] =
       data.coordinates.zipWithIndex.map {
-        case (coord, pos) => mkDataOriginatedFrom(coord,
+        case (coord, pos) => mkOriginatedDataFrom(coord,
           origin.append(CoordinateStep(datatype, pos)))
       }
   }
@@ -67,7 +67,7 @@ object OriginatedDataDomain extends Domain {
     val origin: Origin)
       extends StructData {
     lazy val features: Map[String, Data] = data.features.map {
-      case (name, feature) => (name, mkDataOriginatedFrom(feature,
+      case (name, feature) => (name, mkOriginatedDataFrom(feature,
         origin.append(FeatureStep(datatype, name))))
     }
   }
@@ -86,7 +86,7 @@ object OriginatedDataDomain extends Domain {
     val origin: Origin)
       extends SeqData {
     lazy val elements: Seq[Data] = data.elements.zipWithIndex.map {
-      case (elem, index) => mkDataOriginatedFrom(elem,
+      case (elem, index) => mkOriginatedDataFrom(elem,
         origin.append(ElementStep(datatype, index)))
     }
   }
@@ -108,7 +108,7 @@ object OriginatedDataDomain extends Domain {
 
   case class OriginalSomeData(val data: DataDomain.SomeData, val origin: Origin)
       extends SomeData {
-    lazy val value = mkDataOriginatedFrom(
+    lazy val value = mkOriginatedDataFrom(
       data.value,
       origin.append(SomeStep(datatype)))
   }

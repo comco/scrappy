@@ -28,10 +28,10 @@ class OrderPickerSpec extends FlatSpec with Matchers {
     
     val seq = result.asInstanceOf[OriginatedDataDomain.SeqData]
     seq.element(0) shouldEqual
-      mkDataOriginatedFrom(2, expectedOrigin.append(ElementStep(seqType, 1)))
+      mkOriginatedDataFrom(2, expectedOrigin.append(ElementStep(seqType, 1)))
     seq.element(1) shouldEqual
-      mkDataOriginatedFrom(3, expectedOrigin.append(ElementStep(seqType, 0)))
+      mkOriginatedDataFrom(3, expectedOrigin.append(ElementStep(seqType, 0)))
     seq.element(2) shouldEqual
-      mkDataOriginatedFrom(4, expectedOrigin.append(ElementStep(seqType, 2)))
+      mkOriginatedDataFrom(4, expectedOrigin.append(ElementStep(seqType, 2)))
   }
 }

@@ -27,7 +27,7 @@ class ConstPickerSpec extends FlatSpec with Matchers {
   it should "pickOriginatedData" in {
     val originated = OriginatedDataDomain.mkDataOriginatedFromSelf(data)
     const.pickOriginatedData(originated) shouldEqual
-      OriginatedDataDomain.mkDataOriginatedFrom(c, 
+      OriginatedDataDomain.mkOriginatedDataFrom(c, 
           originated.origin.computedWithTargetType(StringPrimitiveType))
   }
 }

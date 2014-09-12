@@ -6,7 +6,7 @@ import com.github.comco.scrappy._
 import PrimitiveType._
 import DataDomain._
 import PrimitiveData._
-import OriginatedDataDomain.mkDataOriginatedFrom
+import OriginatedDataDomain.mkOriginatedDataFrom
 
 class FilterPickerSpec extends FlatSpec {
   val structType = StructType("name", "a" -> IntPrimitiveType, "b" -> BooleanPrimitiveType)
@@ -37,14 +37,14 @@ class FilterPickerSpec extends FlatSpec {
   it should "pickOriginatedData by preserving the pointers to the underlying elements" in {
     val pointer = SelfPointer(SeqType(structType))
     val origin = OriginalOrigin(pointer)
-    val originatedElements = OriginatedDataDomain.mkDataOriginatedFrom(elements, origin)
+    val originatedElements = OriginatedDataDomain.mkOriginatedDataFrom(elements, origin)
     val result = filterPicker.pickOriginatedData(originatedElements)
     result.data shouldEqual expectedData
     result.origin shouldEqual origin.computed
     result.datatype shouldEqual SeqType(structType)
     val seqResult = result.asInstanceOf[OriginatedDataDomain.SeqData]
-    val expectedElement0 = mkDataOriginatedFrom(element0, origin.append(ElementStep(SeqType(structType), 0)))
-    val expectedElement1 = mkDataOriginatedFrom(element2, origin.append(ElementStep(SeqType(structType), 2)))
+    val expectedElement0 = mkOriginatedDataFrom(element0, origin.append(ElementStep(SeqType(structType), 0)))
+    val expectedElement1 = mkOriginatedDataFrom(element2, origin.append(ElementStep(SeqType(structType), 2)))
     seqResult.element(0) shouldEqual expectedElement0
   }
 }

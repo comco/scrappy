@@ -52,11 +52,11 @@ class OrderPicker2Spec extends FlatSpec with Matchers {
 
     val seq = result.asInstanceOf[OriginatedDataDomain.SeqData]
     seq.element(0) shouldEqual
-      mkDataOriginatedFrom(element1, expectedOrigin.append(ElementStep(seqType, 1)))
+      mkOriginatedDataFrom(element1, expectedOrigin.append(ElementStep(seqType, 1)))
     seq.element(1) shouldEqual
-      mkDataOriginatedFrom(element0, expectedOrigin.append(ElementStep(seqType, 0)))
+      mkOriginatedDataFrom(element0, expectedOrigin.append(ElementStep(seqType, 0)))
     seq.element(2) shouldEqual
-      mkDataOriginatedFrom(element2, expectedOrigin.append(ElementStep(seqType, 2)))
+      mkOriginatedDataFrom(element2, expectedOrigin.append(ElementStep(seqType, 2)))
   }
   
   it should "check the datatypes of its arguments" in {

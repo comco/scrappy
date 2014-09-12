@@ -6,7 +6,7 @@ import com.github.comco.scrappy._
 import com.github.comco.scrappy.PrimitiveType._
 import com.github.comco.scrappy.DataDomain.PrimitiveData.raw2PrimitiveData
 import com.github.comco.scrappy.OriginatedDataDomain.mkDataOriginatedFromSelf
-import com.github.comco.scrappy.OriginatedDataDomain.mkDataOriginatedFrom
+import com.github.comco.scrappy.OriginatedDataDomain.mkOriginatedDataFrom
 
 class FoldPickerSpec extends FlatSpec with Matchers {
   val seq = DataDomain.SeqData(3, 4, 5)
@@ -26,7 +26,7 @@ class FoldPickerSpec extends FlatSpec with Matchers {
   it should "pickOriginatedData" in {
     val originated = mkDataOriginatedFromSelf(seq)
     foldPicker.pickOriginatedData(originated) shouldEqual
-      mkDataOriginatedFrom(DataDomain.PrimitiveData(12),
+      mkOriginatedDataFrom(DataDomain.PrimitiveData(12),
           originated.origin.computedWithTargetType(IntPrimitiveType))
   }
 }

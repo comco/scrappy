@@ -24,7 +24,7 @@ case class GroupPicker(by: Picker) extends BaseSeqPicker {
     val rawResultMap = source.elements.groupBy(by.pickOriginatedData(_).data)
     val results = rawResultMap.toSeq.map {
       case (value, elements) =>
-        val computedValue = OriginatedDataDomain.mkDataComputedFrom(value, source)
+        val computedValue = OriginatedDataDomain.mkComputedDataFrom(value, source)
         val computedData = DataDomain.SeqData(sourceType, elements.map(_.data))
         val computedOrigin = source.origin.computedWithTargetType(sourceType)
         val computedElements = OriginatedDataDomain.ComputedSeqData(computedData, computedOrigin, elements)

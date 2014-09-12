@@ -5,7 +5,7 @@ import org.scalatest.Matchers._
 import com.github.comco.scrappy.PrimitiveType._
 import DataDomain.PrimitiveData._
 import DataDomain.PrimitiveData
-import OriginatedDataDomain.{mkDataOriginatedFrom, mkDataOriginatedFromSelf}
+import OriginatedDataDomain.{mkOriginatedDataFrom, mkDataOriginatedFromSelf}
 import com.github.comco.scrappy.DataDomain.NoneData
 
 class PickerSpec extends FlatSpec {
@@ -48,7 +48,7 @@ class PickerSpec extends FlatSpec {
   it should "pickOriginatedData" in {
     val origin = OriginalOrigin(SelfPointer(tupleType))
     val originated = mkDataOriginatedFromSelf(tupleData)
-    val expected = mkDataOriginatedFrom(PrimitiveData(3), origin.append(CoordinateStep(tupleType, 0)))
+    val expected = mkOriginatedDataFrom(PrimitiveData(3), origin.append(CoordinateStep(tupleType, 0)))
     coordinatePicker.pickOriginatedData(originated) shouldEqual expected
   }
   
@@ -84,7 +84,7 @@ class PickerSpec extends FlatSpec {
   it should "pickOriginatedData" in {
     val origin = OriginalOrigin(SelfPointer(structType))
     val originated = mkDataOriginatedFromSelf(structData)
-    val expected = mkDataOriginatedFrom(tupleData, origin.append(FeatureStep(structType, "a")))
+    val expected = mkOriginatedDataFrom(tupleData, origin.append(FeatureStep(structType, "a")))
     featurePicker.pickOriginatedData(originated) shouldEqual expected
   }
   
@@ -120,7 +120,7 @@ class PickerSpec extends FlatSpec {
   it should "pickOriginatedData" in {
     val origin = OriginalOrigin(SelfPointer(seqType))
     val originated = mkDataOriginatedFromSelf(seqData)
-    val expected = mkDataOriginatedFrom(structData, origin.append(ElementStep(seqType, 1)))
+    val expected = mkOriginatedDataFrom(structData, origin.append(ElementStep(seqType, 1)))
     elementPicker.pickOriginatedData(originated) shouldEqual expected
   }
   
@@ -153,7 +153,7 @@ class PickerSpec extends FlatSpec {
   it should "pickOriginatedData" in {
     val origin = OriginalOrigin(SelfPointer(optionType))
     val originated = mkDataOriginatedFromSelf(optionData)
-    val expected = mkDataOriginatedFrom(seqData, origin.append(SomeStep(optionType)))
+    val expected = mkOriginatedDataFrom(seqData, origin.append(SomeStep(optionType)))
     somePicker.pickOriginatedData(originated) shouldEqual expected
   }
   
@@ -187,7 +187,7 @@ class PickerSpec extends FlatSpec {
   it should "pickOriginatedData" in {
     val origin = OriginalOrigin(SelfPointer(optionType))
     val originated = mkDataOriginatedFromSelf(optionData)
-    val expected = mkDataOriginatedFrom(structData,
+    val expected = mkOriginatedDataFrom(structData,
       origin.append(SomeStep(optionType)).append(ElementStep(seqType, 1)))
     andThenPicker.pickOriginatedData(originated) shouldEqual expected
   }

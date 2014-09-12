@@ -12,6 +12,6 @@ case class ConstPicker(val sourceType: Type, val data: DataDomain.Data)
   def doPickData(source: DataDomain.Data) = data
   
   def doPickOriginatedData(source: OriginatedDataDomain.Data) =
-    OriginatedDataDomain.mkDataOriginatedFrom(data, 
+    OriginatedDataDomain.mkOriginatedDataFrom(data, 
         source.origin.computedWithTargetType(targetType))
 }
