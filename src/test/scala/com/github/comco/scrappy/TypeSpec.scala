@@ -12,7 +12,7 @@ class TupleTypeSpec extends FlatSpec {
   val tt = TupleType(a, b, c)
 
   "A TupleType" should "return its size by the size member" in {
-    tt.size shouldEqual 3
+    tt.length shouldEqual 3
   }
 
   it should "return each of its coordinate types by the coordinateType member" in {

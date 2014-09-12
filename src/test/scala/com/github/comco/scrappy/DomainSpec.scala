@@ -63,14 +63,14 @@ class DomainSpec extends FlatSpec {
   }
 
   it should "have size" in {
-    tupleData.size shouldEqual 3
-    tupleDataWithBlanks.size shouldEqual 3
+    tupleData.length shouldEqual 3
+    tupleDataWithBlanks.length shouldEqual 3
   }
 
   it should "support checking valid positions with hasCoordinate" in {
-    (0 to 3) map (tupleData.hasCoordinate(_)) shouldEqual
+    (0 to 3) map (tupleData.isOccupied(_)) shouldEqual
       Seq(true, true, true, false)
-    (0 to 3) map (tupleDataWithBlanks.hasCoordinate(_)) shouldEqual
+    (0 to 3) map (tupleDataWithBlanks.isOccupied(_)) shouldEqual
       Seq(true, true, false, false)
   }
 
@@ -102,9 +102,9 @@ class DomainSpec extends FlatSpec {
   }
   
   it should "support checking feature names" in {
-    Seq("a", "b", "cd", "none") map (structData.hasFeature(_)) shouldEqual
+    Seq("a", "b", "cd", "none") map (structData.isOccupied(_)) shouldEqual
       Seq(true, true, true, false)
-    Seq("a", "b", "cd", "none") map (structDataWithBlanks.hasFeature(_)) shouldEqual
+    Seq("a", "b", "cd", "none") map (structDataWithBlanks.isOccupied(_)) shouldEqual
       Seq(true, true, false, false)
   }
   
@@ -144,10 +144,10 @@ class DomainSpec extends FlatSpec {
   }
   
   it should "allow checking for elements" in {
-    Seq(0, 1, -1, 2) map(seqValue.hasElement(_)) shouldEqual
+    Seq(0, 1, -1, 2) map(seqValue.isOccupied(_)) shouldEqual
       Seq(true, true, false, false)
     
-    seqValueWithBlanks.hasElement(1) shouldEqual false
+    seqValueWithBlanks.isOccupied(1) shouldEqual false
   }
   
   it should "support extracting elements by a valid index" in {

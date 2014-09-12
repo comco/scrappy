@@ -6,7 +6,7 @@ package com.github.comco.scrappy
 sealed abstract class Type
 
 /**
- * Base class for the primitive scrappy types.
+ * Base (type)class for primitive scrappy types.
  * These are predefined - user-defined types cannot be primitive.
  */
 sealed abstract class PrimitiveType[T] extends Type
@@ -19,9 +19,9 @@ case class TupleType(val coordinateTypes: IndexedSeq[Type])
     extends Type {
   
   /**
-   * The size (number of coordinates) of this tuple type.
+   * The number of coordinates of this tuple type.
    */
-  def size: Int = coordinateTypes.size
+  def length: Int = coordinateTypes.length
   
   /**
    * Checks if this tuple type contains a coordinate at some position.

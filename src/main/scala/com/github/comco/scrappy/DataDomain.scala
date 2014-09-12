@@ -22,8 +22,8 @@ object DataDomain extends Domain {
   case class TupleData(val datatype: TupleType,
     val coordinates: IndexedSeq[Data])
       extends Data with TupleDataMixin {
-    require(datatype.size == coordinates.size,
-      s"Invalid size of coordinates to construct a TupleData; expected: ${datatype.size}, actual: ${coordinates.size}.")
+    require(datatype.length == coordinates.size,
+      s"Invalid size of coordinates to construct a TupleData; expected: ${datatype.length}, actual: ${coordinates.size}.")
     require(datatype.coordinateTypes.zip(coordinates).forall {
       case (datatype, data) => data.datatype == datatype
     }, "Data coordinates types don't match tuple datatypes for TupleData construction.")
