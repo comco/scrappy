@@ -14,6 +14,10 @@ object OriginatedDataDomain extends Domain {
       case data: DataDomain.NoneData => NoneData(data, origin)
     }
   }
+  
+  def mkDataComputedFrom(data: DataDomain.Data, source: OriginatedDataDomain.Data): OriginatedDataDomain.Data = {
+    mkDataOriginatedFrom(data, source.origin.computedWithTargetType(data.datatype))
+  }
 
   def mkDataOriginatedFromSelf(data: DataDomain.Data): OriginatedDataDomain.Data = {
     mkDataOriginatedFrom(data, OriginalOrigin(SelfPointer(data.datatype)))
