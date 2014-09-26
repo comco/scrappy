@@ -1,10 +1,10 @@
 package com.github.comco.scrappy.originated_data.simple
 
-import com.github.comco.scrappy.CoordinateStep
 import com.github.comco.scrappy.Origin
 import com.github.comco.scrappy.data.TupleData
 import com.github.comco.scrappy.originated_data.OriginatedData
 import com.github.comco.scrappy.originated_data.OriginatedTupleData
+import com.github.comco.scrappy.pointer.CoordinateStep
 
 case class SimpleOriginalTupleData(val data: TupleData, val origin: Origin)
     extends OriginatedTupleData {

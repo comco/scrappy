@@ -1,7 +1,7 @@
 package com.github.comco.scrappy.data
 
-import com.github.comco.scrappy.StructType
 import com.github.comco.scrappy.OptionType
+import com.github.comco.scrappy.StructType
 import com.github.comco.scrappy.Type
 import com.github.comco.scrappy.data.simple.SimpleStructData
 

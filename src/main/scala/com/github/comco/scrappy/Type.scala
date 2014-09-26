@@ -17,12 +17,12 @@ sealed abstract class PrimitiveType[T] extends Type
  */
 case class TupleType(val coordinateTypes: IndexedSeq[Type])
     extends Type {
-  
+
   /**
    * The number of coordinates of this tuple type.
    */
   def length: Int = coordinateTypes.length
-  
+
   /**
    * Checks if this tuple type contains a coordinate at some position.
    */
@@ -55,12 +55,12 @@ object TupleType {
  */
 case class StructType(val name: String, val featureTypes: Map[String, Type])
     extends Type {
-  
+
   /**
    * The size (number of features) of this struct type.
    */
   def size: Int = featureTypes.size
-  
+
   /**
    * Checks if this struct type has a feature with some name.
    */
@@ -73,7 +73,7 @@ case class StructType(val name: String, val featureTypes: Map[String, Type])
   def featureType(name: String): Type = {
     require(hasFeature(name),
       s"Invalid feature name: $name for a StructType: $this.")
-    
+
     featureTypes(name)
   }
 }
@@ -98,7 +98,7 @@ case class SeqType(val elementType: Type) extends Type
  * and the type of the value must be non-optional type.
  */
 case class OptionType(val someType: Type) extends Type {
-  require(!someType.isInstanceOf[OptionType], 
+  require(!someType.isInstanceOf[OptionType],
     s"OptionType should have a non-optional someType instead of: $someType")
 }
 

@@ -1,6 +1,7 @@
 package com.github.comco.scrappy.data
 
 import scala.language.implicitConversions
+
 import com.github.comco.scrappy.PrimitiveType
 import com.github.comco.scrappy.data.simple.SimplePrimitiveData
 

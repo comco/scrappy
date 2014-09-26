@@ -5,4 +5,4 @@ import com.github.comco.scrappy.data.PrimitiveData
 
 case class SimplePrimitiveData[T](val value: T)(
   implicit val datatype: PrimitiveType[T])
-  extends PrimitiveData[T]
+    extends PrimitiveData[T]

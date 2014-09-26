@@ -22,12 +22,19 @@ object Data {
     case _ => true
   }
 
+  /**
+   * Checks if data can be assigned to a field of type datatype.
+   * An option data field can be assigned by its corresponding value type.
+   */
   def canAssign(datatype: Type, data: Data): Boolean = {
     data.datatype == datatype ||
       (datatype.isInstanceOf[OptionType] &&
         datatype.asInstanceOf[OptionType].someType == data.datatype)
   }
 
+  /**
+   * Converts data to a directly assignable to datatype value.
+   */
   def convert(datatype: Type, data: Data): Data = {
     assert(canAssign(datatype, data))
     if (data.datatype == datatype) {
@@ -37,5 +44,3 @@ object Data {
     }
   }
 }
-
-

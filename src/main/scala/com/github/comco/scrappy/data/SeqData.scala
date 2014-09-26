@@ -50,8 +50,9 @@ abstract class BaseSeqDataCompanionObject {
 object SeqData extends BaseSeqDataCompanionObject {
   def doApply(datatype: SeqType, elements: Seq[Data]): SeqData =
     SimpleSeqData(datatype, elements)
-  
-  def apply(datatype: SeqType)(elements: Data*)(implicit dummy: DummyImplicit): SeqData = {
+
+  def apply(datatype: SeqType)(elements: Data*)(
+    implicit dummy: DummyImplicit): SeqData = {
     SeqData(datatype, elements)
   }
 
