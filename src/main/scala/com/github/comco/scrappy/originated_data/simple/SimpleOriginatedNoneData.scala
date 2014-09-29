@@ -5,7 +5,7 @@ import com.github.comco.scrappy.origin.Origin
 import com.github.comco.scrappy.data.NoneData
 import com.github.comco.scrappy.originated_data.OriginatedNoneData
 
-case class SimpleNoneData(val origin: Origin)
+case class SimpleOriginatedNoneData(val origin: Origin)
     extends OriginatedNoneData {
   require(origin.targetType.isInstanceOf[OptionType],
     s"Origin: $origin doesn't have an option targetType.")

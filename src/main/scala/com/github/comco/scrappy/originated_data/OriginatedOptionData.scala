@@ -6,6 +6,8 @@ import com.github.comco.scrappy.data.OptionData
 sealed abstract class OriginatedOptionData extends OriginatedData.Base {
   def datatype: OptionType
   def data: OptionData
+  
+  def isSome = data.isSome
 }
 
 object OriginatedOptionData {

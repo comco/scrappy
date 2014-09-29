@@ -12,6 +12,7 @@ abstract class OriginatedPrimitiveData[T] extends OriginatedData.Base {
 }
 
 object OriginatedPrimitiveData {
-  def apply[T](data: PrimitiveData[T], origin: Origin): OriginatedPrimitiveData[T] =
+  def apply[T](data: PrimitiveData[T], origin: Origin): OriginatedPrimitiveData[T] = {
     SimpleOriginatedPrimitiveData(data, origin)
+  }
 }
