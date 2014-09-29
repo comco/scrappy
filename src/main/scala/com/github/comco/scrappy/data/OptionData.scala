@@ -2,7 +2,7 @@ package com.github.comco.scrappy.data
 
 import com.github.comco.scrappy.OptionType
 
-sealed abstract class OptionData extends Data.Base {
+sealed abstract class OptionData extends Data.PackageSealed {
   def datatype: OptionType
 
   /**
@@ -12,5 +12,5 @@ sealed abstract class OptionData extends Data.Base {
 }
 
 object OptionData {
-  private[scrappy] abstract class Base extends OptionData
+  private[scrappy] abstract class PackageSealed extends OptionData
 }

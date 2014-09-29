@@ -3,7 +3,7 @@ package com.github.comco.scrappy.data
 import com.github.comco.scrappy.TupleType
 import com.github.comco.scrappy.data.simple.SimpleTupleData
 
-abstract class TupleData extends Data.Base {
+abstract class TupleData extends Data.PackageSealed {
   require(datatype.length == coordinates.size,
     s"Invalid size of coordinates to construct a TupleData; expected: ${datatype.length}, actual: ${coordinates.size}.")
   require(datatype.coordinateTypes.zip(coordinates).forall {

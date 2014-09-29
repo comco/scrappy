@@ -5,7 +5,7 @@ import scala.language.implicitConversions
 import com.github.comco.scrappy.PrimitiveType
 import com.github.comco.scrappy.data.simple.SimplePrimitiveData
 
-abstract class PrimitiveData[T] extends Data.Base {
+abstract class PrimitiveData[T] extends Data.PackageSealed {
   def datatype: PrimitiveType[T]
 
   /**

@@ -6,7 +6,7 @@ import com.github.comco.scrappy.OptionType
 import com.github.comco.scrappy.PrimitiveType
 import com.github.comco.scrappy.data.simple.SimpleSomeData
 
-abstract class SomeData extends OptionData.Base {
+abstract class SomeData extends OptionData.PackageSealed {
   def isSome = true
 
   /**

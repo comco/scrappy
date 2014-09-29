@@ -3,7 +3,7 @@ package com.github.comco.scrappy.data
 import com.github.comco.scrappy.SeqType
 import com.github.comco.scrappy.data.simple.SimpleSeqData
 
-abstract class SeqData extends Data.Base {
+abstract class SeqData extends Data.PackageSealed {
   def datatype: SeqType
 
   /**

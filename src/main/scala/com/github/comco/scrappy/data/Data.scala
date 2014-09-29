@@ -11,7 +11,7 @@ sealed abstract class Data {
 }
 
 object Data {
-  private[data] abstract class Base extends Data
+  private[data] abstract class PackageSealed extends Data
 
   /**
    * Checks if data contains a value.

@@ -5,7 +5,7 @@ import com.github.comco.scrappy.StructType
 import com.github.comco.scrappy.Type
 import com.github.comco.scrappy.data.simple.SimpleStructData
 
-abstract class StructData extends Data.Base {
+abstract class StructData extends Data.PackageSealed {
   def datatype: StructType
 
   /**

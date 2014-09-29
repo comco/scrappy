@@ -7,8 +7,6 @@ import com.github.comco.scrappy.PrimitiveType.BooleanPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
 
-import PrimitiveData.apply
-
 class PrimitiveDataSpec extends FlatSpec with CustomMatchers {
   val intData = PrimitiveData(3)
   val stringData = PrimitiveData("hi")
@@ -26,7 +24,7 @@ class PrimitiveDataSpec extends FlatSpec with CustomMatchers {
     booleanData.value shouldEqual false
   }
 
-  it should "provide implicit conversion from raw values" in {
+  it should "provide implicit conversion from raw values by apply" in {
     import PrimitiveData.apply
 
     3.datatype shouldEqual IntPrimitiveType
