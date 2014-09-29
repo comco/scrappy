@@ -1,7 +1,8 @@
-package com.github.comco.scrappy
+package com.github.comco.scrappy.origin
 
 import com.github.comco.scrappy.pointer.Pointer
 import com.github.comco.scrappy.pointer.Step
+import com.github.comco.scrappy.Type
 
 /**
  * Representation of the origin of a value - either it is original or computed.

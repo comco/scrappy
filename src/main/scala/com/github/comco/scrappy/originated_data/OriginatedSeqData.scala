@@ -3,7 +3,7 @@ package com.github.comco.scrappy.originated_data
 import com.github.comco.scrappy.SeqType
 import com.github.comco.scrappy.data.SeqData
 import com.github.comco.scrappy.originated_data.simple.SimpleOriginalSeqData
-import com.github.comco.scrappy.Origin
+import com.github.comco.scrappy.origin.Origin
 import com.github.comco.scrappy.originated_data.simple.SimpleComputedSeqData
 
 abstract class OriginatedSeqData extends OriginatedData.Base {

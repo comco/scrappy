@@ -20,6 +20,11 @@ class TupleDataSpec extends FlatSpec with CustomMatchers {
   "A TupleData" should "provide datatype" in {
     tupleData.datatype shouldEqual tupleType
   }
+  
+  it should "provide length" in {
+    tupleData.length shouldEqual 3
+    tupleDataWithBlanks.length shouldEqual 2
+  }
 
   it should "provide coordinates" in {
     tupleData.coordinates shouldEqual

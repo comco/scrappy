@@ -1,8 +1,8 @@
 package com.github.comco.scrappy.originated_data
 
-import com.github.comco.scrappy.Origin
 import com.github.comco.scrappy.TupleType
 import com.github.comco.scrappy.data.TupleData
+import com.github.comco.scrappy.origin.Origin
 import com.github.comco.scrappy.originated_data.simple.SimpleComputedTupleData
 import com.github.comco.scrappy.originated_data.simple.SimpleOriginalTupleData
 

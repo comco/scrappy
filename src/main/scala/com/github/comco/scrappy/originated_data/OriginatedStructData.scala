@@ -2,9 +2,9 @@ package com.github.comco.scrappy.originated_data
 
 import com.github.comco.scrappy.StructType
 import com.github.comco.scrappy.data.StructData
-import com.github.comco.scrappy.Origin
-import com.github.comco.scrappy.originated_data.simple.SimpleOriginalStructData
+import com.github.comco.scrappy.origin.Origin
 import com.github.comco.scrappy.originated_data.simple.SimpleComputedStructData
+import com.github.comco.scrappy.originated_data.simple.SimpleOriginalStructData
 
 abstract class OriginatedStructData extends OriginatedData.Base {
   def datatype: StructType = data.datatype

@@ -1,7 +1,7 @@
 package com.github.comco.scrappy.originated_data
 
 import com.github.comco.scrappy.Type
-import com.github.comco.scrappy.Origin
+import com.github.comco.scrappy.origin.Origin
 import com.github.comco.scrappy.data.Data
 
 sealed abstract class OriginatedData {
