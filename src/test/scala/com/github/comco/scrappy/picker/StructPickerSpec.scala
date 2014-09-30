@@ -25,34 +25,14 @@ class StructPickerSpec extends FlatSpec with CustomMatchers {
     "a" -> CoordinatePicker(tupleType, 1),
     "b" -> CoordinatePicker(tupleType, 0))
 
-  "A StructPicker" should "have the right sourceType" in {
+  "A StructPicker" should "provide sourceType" in {
     structPicker.sourceType shouldEqual tupleType
   }
 
-  it should "have the right targetType" in {
+  it should "provide targetType" in {
     structPicker.targetType shouldEqual structType
   }
 
-  it should "check that all the features have the same sourceType" in {
-    an[IllegalArgumentException] should be thrownBy
-      StructPicker(structType)(
-        "a" -> CoordinatePicker(tupleType, 1),
-        "b" -> SelfPicker(StringPrimitiveType))
-  }
-
-  it should "check that all the features are given" in {
-    an[IllegalArgumentException] should be thrownBy
-      StructPicker(structType)(
-        "a" -> CoordinatePicker(tupleType, 1))
-  }
-
-  it should "check that all the features have the right names" in {
-    an[IllegalArgumentException] should be thrownBy
-      StructPicker(structType)(
-        "a" -> CoordinatePicker(tupleType, 1),
-        "b" -> CoordinatePicker(tupleType, 0),
-        "c" -> CoordinatePicker(tupleType, 0))
-  }
 
   val expected = StructData(structType)("a" -> "hi", "b" -> 4)
 
@@ -76,5 +56,26 @@ class StructPickerSpec extends FlatSpec with CustomMatchers {
     struct.feature("b") shouldEqual
       OriginatedPrimitiveData(4,
         OriginalOrigin(SelfPointer(tupleType).append(CoordinateStep(tupleType, 0))))   
+  }
+  
+  "A StructPicker during construction" should "check that all the features have the same sourceType" in {
+    itShouldBeDisallowed calling
+      StructPicker(structType)(
+        "a" -> CoordinatePicker(tupleType, 1),
+        "b" -> SelfPicker(StringPrimitiveType))
+  }
+
+  it should "check that all the features are given" in {
+    itShouldBeDisallowed calling
+      StructPicker(structType)(
+        "a" -> CoordinatePicker(tupleType, 1))
+  }
+
+  it should "check that all the features have the right names" in {
+    itShouldBeDisallowed calling
+      StructPicker(structType)(
+        "a" -> CoordinatePicker(tupleType, 1),
+        "b" -> CoordinatePicker(tupleType, 0),
+        "c" -> CoordinatePicker(tupleType, 0))
   }
 }
