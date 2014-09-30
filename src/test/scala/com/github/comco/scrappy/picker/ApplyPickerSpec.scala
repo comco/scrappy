@@ -16,8 +16,11 @@ class ApplyPickerSpec extends FlatSpec with CustomMatchers {
 
   val data = PrimitiveData(3)
 
-  "An ApplyPicker" should "have the right types" in {
+  "An ApplyPicker" should "provide sourceType" in {
     incPicker.sourceType shouldEqual IntPrimitiveType
+  }
+  
+  it should "provide targetType" in {
     incPicker.targetType shouldEqual IntPrimitiveType
   }
 
@@ -27,8 +30,9 @@ class ApplyPickerSpec extends FlatSpec with CustomMatchers {
 
   it should "pickOriginatedData" in {
     val originated = OriginatedData.from(data, OriginalOrigin(SelfPointer(IntPrimitiveType)))
+    val origin = OriginatedData.from(4, 
+        ComputedOrigin(IntPrimitiveType, IntPrimitiveType, Set(SelfPointer(IntPrimitiveType))))
     val result = incPicker.pickOriginatedData(originated)
-    result shouldEqual
-      OriginatedData.from(4, ComputedOrigin(IntPrimitiveType, IntPrimitiveType, Set(SelfPointer(IntPrimitiveType))))
+    result shouldEqual origin
   }
 }

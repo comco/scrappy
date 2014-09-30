@@ -21,11 +21,11 @@ class MapPickerSpec extends FlatSpec with CustomMatchers {
   val secondPicker = CoordinatePicker(pointType, 1)
   val mapPicker = MapPicker(firstPicker)
   
-  "A MapPicker" should "have the right sourceType" in {
+  "A MapPicker" should "provide sourceType" in {
     mapPicker.sourceType shouldEqual SeqType(pointType)
   }
   
-  it should "have the right targetType" in {
+  it should "provide targetType" in {
     mapPicker.targetType shouldEqual SeqType(IntPrimitiveType)
   }
   

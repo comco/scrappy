@@ -16,8 +16,11 @@ class ConstPickerSpec extends FlatSpec with Matchers {
   val c = PrimitiveData("hi")
   val const = ConstPicker(data.datatype, c)
   
-  "A ConstPicker" should "have the right types" in {
+  "A ConstPicker" should "provide sourceType" in {
     const.sourceType shouldEqual SeqType(IntPrimitiveType)
+  }
+  
+  it should "provide targetType" in {
     const.targetType shouldEqual StringPrimitiveType
   }
   

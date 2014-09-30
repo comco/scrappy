@@ -16,5 +16,9 @@ case class SelfPicker(val sourceType: Type) extends Picker {
     source
   }
 
-  def pickOriginatedData(source: OriginatedData) = source
+  def pickOriginatedData(source: OriginatedData) = {
+    require(source.datatype == sourceType,
+        s"SelfPicker: $this doesn't support picking originated data of type: ${source.datatype}")
+    source
+  }
 }

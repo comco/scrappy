@@ -22,22 +22,13 @@ class TuplePickerSpec extends FlatSpec with CustomMatchers {
 
   val tuplePicker = TuplePicker(pick0, pick1)
 
-  "A TuplePicker" should "have the right sourceType" in {
+  "A TuplePicker" should "provide sourceType" in {
     tuplePicker.sourceType shouldEqual IntPrimitiveType
   }
 
-  it should "have the right targetType" in {
+  it should "provide targetType" in {
     tuplePicker.targetType shouldEqual
       TupleType(IntPrimitiveType, StringPrimitiveType)
-  }
-
-  it should "validate for no coordinates given" in {
-    an[IllegalArgumentException] should be thrownBy TuplePicker(IndexedSeq.empty)
-  }
-
-  it should "check that all the coordinate pickers have the same sourceType" in {
-    val pickString = ApplyPicker[String, String](a => a)
-    an[IllegalArgumentException] should be thrownBy TuplePicker(pick0, pickString)
   }
 
   val expectedData = TupleData(4, "3")
@@ -59,4 +50,12 @@ class TuplePickerSpec extends FlatSpec with CustomMatchers {
       OriginatedPrimitiveData("3",
         ComputedOrigin(IntPrimitiveType, StringPrimitiveType, Set(SelfPointer(IntPrimitiveType))))
   }
-}
+  
+  "A TuplePicker during construction" should "check against no coordinates given" in {
+    itShouldBeDisallowed calling TuplePicker(IndexedSeq.empty)
+  }
+
+  it should "check that all the coordinate pickers have the same sourceType" in {
+    val pickString = ApplyPicker[String, String](a => a)
+    an[IllegalArgumentException] should be thrownBy TuplePicker(pick0, pickString)
+  }}

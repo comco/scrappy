@@ -20,11 +20,11 @@ class GroupPickerSpec extends FlatSpec with Matchers {
   val by = CoordinatePicker(pointType, 0)
   val picker = GroupPicker(by)
   
-  "A GroupPicker" should "have the right sourceType" in {
+  "A GroupPicker" should "provide sourceType" in {
     picker.sourceType shouldEqual pointsType  
   }
   
-  it should "have the right targetType" in {
+  it should "provide targetType" in {
     picker.targetType shouldEqual resultType
   }
   

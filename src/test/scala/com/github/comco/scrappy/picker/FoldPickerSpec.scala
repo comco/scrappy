@@ -16,8 +16,11 @@ class FoldPickerSpec extends FlatSpec with Matchers {
   
   val foldPicker = FoldPicker(sum)
   
-  "A FoldPicker" should "have the right sourceType" in {
+  "A FoldPicker" should "provide sourceType" in {
     foldPicker.sourceType shouldEqual SeqType(IntPrimitiveType)
+  }
+
+  "A FoldPicker" should "provide targetType" in {
     foldPicker.targetType shouldEqual IntPrimitiveType
   }
   
