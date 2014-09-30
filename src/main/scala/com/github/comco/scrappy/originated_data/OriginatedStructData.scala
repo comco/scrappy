@@ -6,7 +6,7 @@ import com.github.comco.scrappy.origin.Origin
 import com.github.comco.scrappy.originated_data.simple.SimpleComputedStructData
 import com.github.comco.scrappy.originated_data.simple.SimpleOriginalStructData
 
-abstract class OriginatedStructData extends OriginatedData.Base {
+abstract class OriginatedStructData extends OriginatedData.PackageSealed {
   def datatype: StructType = data.datatype
   def data: StructData
 

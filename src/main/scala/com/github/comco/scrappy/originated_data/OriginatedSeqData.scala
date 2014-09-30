@@ -6,7 +6,7 @@ import com.github.comco.scrappy.originated_data.simple.SimpleOriginalSeqData
 import com.github.comco.scrappy.origin.Origin
 import com.github.comco.scrappy.originated_data.simple.SimpleComputedSeqData
 
-abstract class OriginatedSeqData extends OriginatedData.Base {
+abstract class OriginatedSeqData extends OriginatedData.PackageSealed {
   def datatype: SeqType = data.datatype
   def data: SeqData
   def elements: Seq[OriginatedData]

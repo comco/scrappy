@@ -6,7 +6,7 @@ import com.github.comco.scrappy.origin.Origin
 import com.github.comco.scrappy.originated_data.simple.SimpleComputedTupleData
 import com.github.comco.scrappy.originated_data.simple.SimpleOriginalTupleData
 
-abstract class OriginatedTupleData extends OriginatedData.Base {
+abstract class OriginatedTupleData extends OriginatedData.PackageSealed {
   def data: TupleData
   def datatype: TupleType = data.datatype
 
