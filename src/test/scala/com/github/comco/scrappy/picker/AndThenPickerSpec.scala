@@ -21,7 +21,7 @@ class AndThenPickerSpec extends FlatSpec with CustomMatchers {
   val nextPicker = CoordinatePicker(tupleType, 1)
   val andThenPicker = AndThenPicker(firstPicker, nextPicker)
   val tupleData = TupleData(tupleType)(3, "hi")
-  
+
   "An AndThenPicker" should "provide sourceType" in {
     andThenPicker.sourceType shouldEqual tupleType
   }
@@ -33,7 +33,7 @@ class AndThenPickerSpec extends FlatSpec with CustomMatchers {
   it should "pickData" in {
     andThenPicker.pickData(tupleData) shouldEqual PrimitiveData("hi")
   }
-  
+
   it should "pickOriginatedData" in {
     val originated = OriginatedData.fromSelf(tupleData)
     val origin = OriginalOrigin(SelfPointer(tupleType).append(CoordinateStep(tupleType, 1)))
@@ -41,8 +41,7 @@ class AndThenPickerSpec extends FlatSpec with CustomMatchers {
       OriginatedPrimitiveData(PrimitiveData("hi"), origin)
   }
 
-  "An AndThenPicker during construction" should "check that the targetType of " +
-    "the first picker is the same as the sourceType of the next picker" in {
-      itShouldBeDisallowed calling AndThenPicker(nextPicker, nextPicker)
-    }
+  "An AndThenPicker during construction" should "check that first.targetType == next.sourceType" in {
+    itShouldBeDisallowed calling AndThenPicker(nextPicker, nextPicker)
+  }
 }
