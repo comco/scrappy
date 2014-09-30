@@ -84,4 +84,8 @@ class StepSpec extends FlatSpec with CustomMatchers {
   "A SomeStep" should "have the right picker" in {
     SomeStep(OptionType(seqType)).picker shouldEqual SomePicker(OptionType(seqType))
   }
+  
+  it should "provide targetType" in {
+    SomeStep(OptionType(seqType)).targetType shouldEqual seqType
+  }
 }
