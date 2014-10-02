@@ -15,14 +15,23 @@ class OriginatedPrimitiveDataSpec extends FlatSpec with CustomMatchers {
   val intData: PrimitiveData[Int] = 3
   val originatedIntData = OriginatedPrimitiveData(intData, selfIntOrigin)
   
-  "An OriginatedPrimitiveData" should "provide members" in {
+  "An OriginatedPrimitiveData" should "provide data" in {
     originatedIntData.data shouldEqual intData
+  }
+  
+  it should "provide origin" in {
     originatedIntData.origin shouldEqual selfIntOrigin
+  }
+  
+  it should "provide value" in {
     originatedIntData.value shouldEqual 3
+  }
+  
+  it should "provide datatype" in {
     originatedIntData.datatype shouldEqual IntPrimitiveType
   }
   
-  it should "check its origin datatype during construction" in {
+  "An OriginatedPrimitiveData during construction" should "check its origin datatype" in {
     itShouldBeDisallowed calling OriginatedPrimitiveData(intData, selfStringOrigin)
   }
 }
