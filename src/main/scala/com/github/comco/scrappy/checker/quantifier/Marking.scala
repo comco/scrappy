@@ -1,6 +1,6 @@
 package com.github.comco.scrappy.checker.quantifier
 
-abstract class Marking {
+trait Marking {
   /**
    * Marks the current result as interesting.
    */

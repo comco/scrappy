@@ -12,6 +12,10 @@ abstract class Quantifier {
   def successful: Boolean
 }
 
+abstract class QuantifierFactory {
+  def create(marking: Marking = Marking.Empty): Quantifier
+}
+
 object Quantifier extends Enumeration {
   type State = Value
   val Running = Value
