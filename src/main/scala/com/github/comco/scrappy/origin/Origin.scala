@@ -33,6 +33,17 @@ sealed abstract class Origin {
    * Constructs a computed origin with a some target type from this origin.
    */
   def computedWithTargetType(targetType: Type): ComputedOrigin
+  
+  /**
+   * Merges two compatible origins.
+   */
+  def merge(that: Origin): Origin = {
+    require(sourceType == that.sourceType && targetType == that.targetType,
+        s"Origins $this and $that have incompatible types.")
+    ComputedOrigin(sourceType, targetType, pointers ++ that.pointers)
+  }
+  
+  def pointers: Set[Pointer]
 }
 
 case class OriginalOrigin(val pointer: Pointer) extends Origin {
@@ -51,6 +62,8 @@ case class OriginalOrigin(val pointer: Pointer) extends Origin {
 
   def computedWithTargetType(targetType: Type) =
     ComputedOrigin(sourceType, targetType, Set(pointer))
+    
+  lazy val pointers = Set(pointer)
 }
 
 case class ComputedOrigin(
