@@ -8,31 +8,42 @@ import com.github.comco.scrappy.checker.CheckResult
 import com.github.comco.scrappy.checker.CheckResult
 import com.github.comco.scrappy.checker.OriginatedCheckResult
 import com.github.comco.scrappy.originated_data.OriginatedSeqData
+import com.github.comco.scrappy.checker.OriginatedCheckResult
+import com.github.comco.scrappy.origin.ComputedOrigin
+import com.github.comco.scrappy.origin.Origin
+import com.github.comco.scrappy.checker.CheckReason
 
-/**
- * Not thread-safe!
- */
 case class QuantifierChecker(val quantifierFactory: QuantifierFactory, val elementChecker: Checker) 
-  extends BaseSeqChecker with Marking {
+  extends BaseSeqChecker {
   def sourceType = SeqType(elementChecker.sourceType)
   
   def doCheckData(source: SeqData): CheckResult = {
-    val quantifier = quantifierFactory.create()
+    val quantifier = quantifierFactory.createEmpty()
     for (element <- source.elements) {
       val result = elementChecker.checkData(element)
-      quantifier.addResult(result.successful)
+      quantifier.put(result.successful)
       if (quantifier.state == Quantifier.Done) {
-        return CheckResult(quantifier.successful)
+        return CheckResult(quantifier.valid)
       }
     }
     quantifier.finish()
-    return CheckResult(quantifier.successful)
+    return CheckResult(quantifier.valid)
   }
   
   def doCheckOriginatedData(source: OriginatedSeqData): OriginatedCheckResult = {
-    ??? // TODO
-    // Need ThreadLocal store for the origins
+    val quantifier = quantifierFactory.createEmpty()
+    var witnesses = Set.empty[CheckReason]
+    for (element <- source.elements) {
+      val result = elementChecker.checkOriginatedData(element)
+      quantifier.put(result.successful)
+      if (quantifier.unusual) {
+        witnesses += result
+      }
+      if (quantifier.state == Quantifier.Done) {
+        return OriginatedCheckResult(quantifier.valid, source.origin, witnesses, this)
+      }
+    }
+    quantifier.finish()
+    return OriginatedCheckResult(quantifier.valid, source.origin, witnesses, this)
   }
-  
-  def markCurrentResult(): Unit = ???
 }

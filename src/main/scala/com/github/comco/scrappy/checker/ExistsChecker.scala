@@ -16,9 +16,9 @@ case class ExistsChecker(val elementChecker: Checker) extends BaseSeqChecker {
     for (element <- data.elements) {
       val result = elementChecker.checkOriginatedData(element)
       if (result.successful) {
-        return result
+        return OriginatedCheckResult(true, data.origin, Set(result), this)
       }
     }
-    return OriginatedCheckResult(false, data.origin)
+    return OriginatedCheckResult(false, data.origin, Set(WitnessReason(data.origin)), this)
   }
 }
