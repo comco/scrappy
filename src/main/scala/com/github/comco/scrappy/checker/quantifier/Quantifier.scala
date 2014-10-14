@@ -45,8 +45,8 @@ object Quantifier extends Enumeration {
       require(state != Empty,
           "Only Quantifiers in non-Emply state can be queried by unusual.")
       super.unusual
-    } ensuring(state == Current,
-        "After queriying for unusual, the state must not change.")
+    } ensuring(state != Empty,
+        "After queriying for unusual, the state must not change.") // TODO: the state should not change, this is not quite the same.
     
     abstract override def finish(): Unit = {
       require(state != Done, "Quantifier state is already Done.")
