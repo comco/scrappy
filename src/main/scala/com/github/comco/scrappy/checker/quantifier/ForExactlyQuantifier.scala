@@ -1,13 +1,12 @@
 package com.github.comco.scrappy.checker.quantifier
 
-class ForExactlyQuantifier private(val count: Int) extends Quantifier {
+class ForExactlyQuantifier private(val count: Int) extends BaseQuantifier {
   require(count >= 0, s"Positive count is expected instead of: $count")
   
-  var state = Quantifier.Empty
   var hits = 0
   var currentResult = false
   
-  def put(result: Boolean) {
+  def doPut(result: Boolean) {
     currentResult = result
     if (result) hits += 1
     if (hits > count) {
@@ -17,18 +16,14 @@ class ForExactlyQuantifier private(val count: Int) extends Quantifier {
     }
   }
   
-  def unusual = currentResult
+  def isUnusual() = currentResult
   
-  def finish() {
-    state = Quantifier.Done
-  }
-  
-  def valid = (hits == count)
+  def isValid() = (hits == count)
   
 }
 
 object ForExactlyQuantifier {
   def from(count: Int) = new QuantifierFactory {
-    def createEmpty() = new ForExactlyQuantifier(count) with Quantifier.ContractChecking
+    def createEmpty() = new ForExactlyQuantifier(count)
   }
 }

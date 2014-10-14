@@ -2,11 +2,10 @@ package com.github.comco.scrappy.checker.quantifier
 
 import com.github.comco.scrappy.checker.quantifier.Quantifier.ContractChecking
 
-class ForAllQuantifier private() extends Quantifier {
-  var state = Quantifier.Empty
+class ForAllQuantifier private() extends BaseQuantifier {
   var ok = true
   
-  def put(result: Boolean): Unit = {
+  def doPut(result: Boolean): Unit = {
     if (!result) {
       state = Quantifier.Done
       ok = false
@@ -15,15 +14,11 @@ class ForAllQuantifier private() extends Quantifier {
     }
   }
   
-  def unusual = !ok
+  def isUnusual() = !ok
   
-  def finish() {
-    state = Quantifier.Done
-  }
-  
-  def valid = ok
+  def isValid() = ok
 }
 
 object ForAllQuantifier extends QuantifierFactory {
-  def createEmpty() = new ForAllQuantifier() with ContractChecking
+  def createEmpty() = new ForAllQuantifier()
 }
