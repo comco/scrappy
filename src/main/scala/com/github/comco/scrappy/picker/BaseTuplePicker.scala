@@ -9,20 +9,18 @@ import com.github.comco.scrappy.originated_data.OriginatedTupleData
 /**
  * Base class for pickers on tuples.
  */
-abstract class BaseTuplePicker extends Picker {
+abstract class BaseTuplePicker extends BasePicker {
   def sourceType: TupleType
 
-  def pickData(source: Data) = {
-    require(source.datatype == sourceType)
+  def doPickData(source: Data) = {
     doPickData(source.asInstanceOf[TupleData])
-  } ensuring (_.datatype == targetType)
+  }
 
   def doPickData(source: TupleData): Data
 
-  def pickOriginatedData(source: OriginatedData) = {
-    require(source.datatype == sourceType)
+  def doPickOriginatedData(source: OriginatedData) = {
     doPickOriginatedData(source.asInstanceOf[OriginatedTupleData])
-  } ensuring (_.datatype == targetType)
+  }
 
   def doPickOriginatedData(source: OriginatedTupleData): OriginatedData
 }

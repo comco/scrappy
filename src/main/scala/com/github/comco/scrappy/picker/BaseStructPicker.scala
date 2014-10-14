@@ -9,20 +9,18 @@ import com.github.comco.scrappy.originated_data.OriginatedStructData
 /**
  * Base class for pickers on structs.
  */
-abstract class BaseStructPicker extends Picker {
+abstract class BaseStructPicker extends BasePicker {
   def sourceType: StructType
 
-  def pickData(source: Data) = {
-    require(source.datatype == sourceType)
+  def doPickData(source: Data) = {
     doPickData(source.asInstanceOf[StructData])
-  } ensuring (_.datatype == targetType)
+  }
 
   def doPickData(source: StructData): Data
 
-  def pickOriginatedData(source: OriginatedData) = {
-    require(source.datatype == sourceType)
+  def doPickOriginatedData(source: OriginatedData) = {
     doPickOriginatedData(source.asInstanceOf[OriginatedStructData])
-  } ensuring (_.datatype == targetType)
+  }
 
   def doPickOriginatedData(source: OriginatedStructData): OriginatedData
 }

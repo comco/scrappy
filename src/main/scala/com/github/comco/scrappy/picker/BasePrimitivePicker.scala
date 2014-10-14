@@ -9,20 +9,18 @@ import com.github.comco.scrappy.originated_data.OriginatedPrimitiveData
 /**
  * Base class for primitive types pickers.
  */
-abstract class BasePrimitivePicker[T] extends Picker {
+abstract class BasePrimitivePicker[T] extends BasePicker {
   def sourceType: PrimitiveType[T]
   
-  def pickData(source: Data) = {
-    require(source.datatype == sourceType)
+  def doPickData(source: Data) = {
     doPickData(source.asInstanceOf[PrimitiveData[T]])
-  } ensuring (_.datatype == targetType)
+  }
   
   def doPickData(source: PrimitiveData[T]): Data
   
-  def pickOriginatedData(source: OriginatedData) = {
-    require(source.datatype == sourceType)
+  def doPickOriginatedData(source: OriginatedData) = {
     doPickOriginatedData(source.asInstanceOf[OriginatedPrimitiveData[T]])
-  } ensuring (_.datatype == targetType)
+  }
   
   def doPickOriginatedData(source: OriginatedPrimitiveData[T]): OriginatedData
 }

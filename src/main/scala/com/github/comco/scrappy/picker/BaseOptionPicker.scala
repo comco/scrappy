@@ -6,20 +6,18 @@ import com.github.comco.scrappy.data.OptionData
 import com.github.comco.scrappy.originated_data.OriginatedData
 import com.github.comco.scrappy.originated_data.OriginatedOptionData
 
-abstract class BaseOptionPicker extends Picker {
+abstract class BaseOptionPicker extends BasePicker {
   def sourceType: OptionType
   
-  def pickData(source: Data) = {
-    require(source.datatype == sourceType)
+  def doPickData(source: Data) = {
     doPickData(source.asInstanceOf[OptionData])
-  } ensuring (_.datatype == targetType)
+  }
   
   def doPickData(source: OptionData): Data
   
-  def pickOriginatedData(source: OriginatedData) = {
-    require(source.datatype == sourceType)
+  def doPickOriginatedData(source: OriginatedData) = {
     doPickOriginatedData(source.asInstanceOf[OriginatedOptionData])
-  } ensuring (_.datatype == targetType)
+  }
   
   def doPickOriginatedData(source: OriginatedOptionData): OriginatedData
 }

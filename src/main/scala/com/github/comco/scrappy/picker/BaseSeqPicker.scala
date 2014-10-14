@@ -9,20 +9,18 @@ import com.github.comco.scrappy.originated_data.OriginatedData
 /**
  * Base class for pickers on seq-s.
  */
-abstract class BaseSeqPicker extends Picker {
+abstract class BaseSeqPicker extends BasePicker {
   def sourceType: SeqType
 
-  def pickData(source: Data) = {
-    require(source.datatype == sourceType)
+  def doPickData(source: Data) = {
     doPickData(source.asInstanceOf[SeqData])
-  } ensuring (_.datatype == targetType)
+  }
 
   def doPickData(source: SeqData): Data
 
-  def pickOriginatedData(source: OriginatedData) = {
-    require(source.datatype == sourceType)
+  def doPickOriginatedData(source: OriginatedData) = {
     doPickOriginatedData(source.asInstanceOf[OriginatedSeqData])
-  } ensuring (_.datatype == targetType)
+  }
 
   def doPickOriginatedData(source: OriginatedSeqData): OriginatedData
 }
