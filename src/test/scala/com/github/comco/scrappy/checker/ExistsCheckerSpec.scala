@@ -7,6 +7,9 @@ import com.github.comco.scrappy.data.PrimitiveData.apply
 import com.github.comco.scrappy.picker.ConstPicker
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import com.github.comco.scrappy.picker.SelfPicker
+import com.github.comco.scrappy.originated_data.OriginatedData
+import com.github.comco.scrappy.originated_data.OriginatedTupleData
+import com.github.comco.scrappy.originated_data.OriginatedSeqData
 
 class ExistsCheckerSpec extends FlatSpec with CustomMatchers {
   val data = SeqData(1, 2, 3)
@@ -31,6 +34,11 @@ class ExistsCheckerSpec extends FlatSpec with CustomMatchers {
   }
   
   it should "checkOriginatedData" in {
-    
+    val originated = OriginatedData.fromSelf(data).asInstanceOf[OriginatedSeqData]
+    val result = checker3.checkOriginatedData(originated)
+    result.successful shouldEqual true
+    result.scope shouldEqual originated.origin
+    result.checker shouldEqual checker3
+    result.witnesses shouldEqual Set(elementChecker3.checkOriginatedData(originated.element(2)))
   }
 }
