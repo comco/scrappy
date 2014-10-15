@@ -22,9 +22,14 @@ case class OrElseChecker(val firstChecker: Checker, val secondChecker: Checker)
   def doCheckOriginatedData(source: OriginatedData): OriginatedCheckResult = {
     val firstResult = firstChecker.checkOriginatedData(source)
     if (firstResult.successful) {
-      return firstResult
+      return OriginatedCheckResult(true, source.origin, Set(firstResult), this)
     } else {
-      return secondChecker.checkOriginatedData(source)
+      val secondResult = secondChecker.checkOriginatedData(source)
+      if (secondResult.successful) {
+        return OriginatedCheckResult(true, source.origin, Set(secondResult), this)
+      } else {
+        return OriginatedCheckResult(false, source.origin, Set(firstResult, secondResult), this)
+      }
     }
   }
 }
