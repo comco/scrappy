@@ -1,15 +1,15 @@
 package com.github.comco.scrappy.checker
 
 import org.scalatest.FlatSpec
+
 import com.github.comco.scrappy.CustomMatchers
-import com.github.comco.scrappy.data.SeqData
-import com.github.comco.scrappy.data.PrimitiveData.apply
-import com.github.comco.scrappy.picker.ConstPicker
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
-import com.github.comco.scrappy.picker.SelfPicker
+import com.github.comco.scrappy.data.PrimitiveData.apply
+import com.github.comco.scrappy.data.SeqData
 import com.github.comco.scrappy.originated_data.OriginatedData
-import com.github.comco.scrappy.originated_data.OriginatedTupleData
 import com.github.comco.scrappy.originated_data.OriginatedSeqData
+import com.github.comco.scrappy.picker.ConstPicker
+import com.github.comco.scrappy.picker.SelfPicker
 
 class ExistsCheckerSpec extends FlatSpec with CustomMatchers {
   val data = SeqData(1, 2, 3)

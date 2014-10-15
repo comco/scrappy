@@ -1,7 +1,6 @@
 package com.github.comco.scrappy.checker
 
 import com.github.comco.scrappy.data.Data
-import com.github.comco.scrappy.SeqType
 import com.github.comco.scrappy.data.SeqData
 import com.github.comco.scrappy.originated_data.OriginatedData
 import com.github.comco.scrappy.originated_data.OriginatedSeqData
