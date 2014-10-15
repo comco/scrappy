@@ -20,7 +20,7 @@ class ForAllQuantifierSpec extends FlatSpec with CustomMatchers {
     q.valid shouldEqual true
   }
   
-  it should "stop at first false" in {
+  it should "stop invalidly at first false" in {
     var q = ForAllQuantifier.createEmpty()
     q.put(true)
     q.unusual shouldEqual false

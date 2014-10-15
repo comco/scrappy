@@ -33,7 +33,7 @@ abstract class BaseQuantifier extends Quantifier {
   def doFinish(): Unit = {}
 
   def valid: Boolean = {
-    require(state == Done, "Quantifier state is already Done.")
+    require(state == Done, "Quantifier state should be Done.")
     isValid() ensuring(state == Done,
         "After valid, the state should stay Done.")
   }

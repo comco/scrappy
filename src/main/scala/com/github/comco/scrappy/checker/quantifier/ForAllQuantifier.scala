@@ -1,7 +1,5 @@
 package com.github.comco.scrappy.checker.quantifier
 
-import com.github.comco.scrappy.checker.quantifier.Quantifier.ContractChecking
-
 class ForAllQuantifier private() extends BaseQuantifier {
   var ok = true
   

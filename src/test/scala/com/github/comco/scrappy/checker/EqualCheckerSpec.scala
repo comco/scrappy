@@ -9,6 +9,7 @@ import com.github.comco.scrappy.data.TupleData
 import com.github.comco.scrappy.data.PrimitiveData._
 import com.github.comco.scrappy.originated_data.OriginatedData
 import com.github.comco.scrappy.originated_data.OriginatedTupleData
+import com.github.comco.scrappy.picker.SelfPicker
 
 class EqualCheckerSpec extends FlatSpec with CustomMatchers {
   val pointType = TupleType(IntPrimitiveType, IntPrimitiveType)
@@ -29,7 +30,8 @@ class EqualCheckerSpec extends FlatSpec with CustomMatchers {
   }
   
   it should "checkOriginatedData" in {
-    val originatedGoodData = OriginatedData.fromSelf(dataGood).asInstanceOf[OriginatedTupleData]
+    val originatedGoodData = 
+      OriginatedData.fromSelf(dataGood).asInstanceOf[OriginatedTupleData]
     val result = equalChecker.checkOriginatedData(originatedGoodData)
     result.successful shouldEqual true
     result.scope shouldEqual originatedGoodData.origin
@@ -37,5 +39,9 @@ class EqualCheckerSpec extends FlatSpec with CustomMatchers {
     result.witnesses shouldEqual
       Set(WitnessReason(originatedGoodData.coordinate(0).origin), 
           WitnessReason(originatedGoodData.coordinate(1).origin))
+  }
+  
+  "An EqualChecker during construction" should "check the two pickers" in {
+    itShouldBeDisallowed calling EqualChecker(firstPicker, SelfPicker(pointType))
   }
 }

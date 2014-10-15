@@ -33,30 +33,4 @@ object Quantifier extends Enumeration {
   val Empty = Value
   val Current = Value
   val Done = Value
-  
-  trait ContractChecking extends Quantifier {
-    abstract override def put(next: Boolean): Unit = {
-      require(state != Done,
-          "The state of a Quantifier should not be Done for putting.")
-      super.put(next)
-    } ensuring(state != Empty, "After putting, the Quantifier should not be Empty.")
-    
-    abstract override def unusual: Boolean = {
-      require(state != Empty,
-          "Only Quantifiers in non-Emply state can be queried by unusual.")
-      super.unusual
-    } ensuring(state != Empty,
-        "After queriying for unusual, the state must not change.") // TODO: the state should not change, this is not quite the same.
-    
-    abstract override def finish(): Unit = {
-      require(state != Done, "Quantifier state is already Done.")
-      super.finish()
-    } ensuring(state == Done,
-        "After finishing, the state of a Quantifier should be Done.")
-        
-    abstract override def valid: Boolean = {
-      require(state == Done, "Quantifier state should be Done.")
-      super.valid
-    } ensuring(state == Done, "After valid, the state should stay Done.")
-  }
 }
