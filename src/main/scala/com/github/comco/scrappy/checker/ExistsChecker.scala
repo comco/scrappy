@@ -8,7 +8,7 @@ case class ExistsChecker(val elementChecker: Checker) extends BaseSeqChecker {
   def sourceType = SeqType(elementChecker.sourceType)
 
   def doCheckData(data: SeqData): CheckResult = {
-    val result = data.elements.forall(elementChecker.checkData(_).successful)
+    val result = data.elements.exists(elementChecker.checkData(_).successful)
     return CheckResult(result)
   }
   
@@ -19,6 +19,6 @@ case class ExistsChecker(val elementChecker: Checker) extends BaseSeqChecker {
         return OriginatedCheckResult(true, data.origin, Set(result), this)
       }
     }
-    return OriginatedCheckResult(false, data.origin, Set(WitnessReason(data.origin)), this)
+    return OriginatedCheckResult(false, data.origin, Set.empty, this)
   }
 }
