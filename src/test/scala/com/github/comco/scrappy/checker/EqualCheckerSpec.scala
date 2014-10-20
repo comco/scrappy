@@ -31,7 +31,7 @@ class EqualCheckerSpec extends FlatSpec with CustomMatchers {
   
   it should "checkOriginatedData" in {
     val originatedGoodData = 
-      OriginatedData.fromSelf(dataGood).asInstanceOf[OriginatedTupleData]
+      OriginatedData.fromSelf(dataGood)
     val result = equalChecker.checkOriginatedData(originatedGoodData)
     result.successful shouldEqual true
     result.scope shouldEqual originatedGoodData.origin

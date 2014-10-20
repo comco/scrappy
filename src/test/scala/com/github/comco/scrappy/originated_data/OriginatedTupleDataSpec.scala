@@ -1,11 +1,14 @@
 package com.github.comco.scrappy.originated_data
 
+import scala.IndexedSeq
+
 import org.scalatest.FlatSpec
 
 import com.github.comco.scrappy.CustomMatchers
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
 import com.github.comco.scrappy.TupleType
+import com.github.comco.scrappy.data.PrimitiveData
 import com.github.comco.scrappy.data.PrimitiveData.apply
 import com.github.comco.scrappy.data.TupleData
 import com.github.comco.scrappy.origin.OriginalOrigin
@@ -49,8 +52,8 @@ class OriginatedTupleDataSpec extends FlatSpec with CustomMatchers {
       OriginatedPrimitiveData("hi", selfTupleOrigin.append(CoordinateStep(tupleType, 1)))
   }
   
-  val coord1 = OriginatedData.fromSelf(3)
-  val coord2 = OriginatedData.fromSelf("hi")
+  val coord1 = OriginatedData.fromSelf(PrimitiveData(3))
+  val coord2 = OriginatedData.fromSelf(PrimitiveData("hi"))
   val computedTupleData = OriginatedTupleData.computed(tupleData, 
       selfTupleOrigin, 
       IndexedSeq(coord1, coord2))

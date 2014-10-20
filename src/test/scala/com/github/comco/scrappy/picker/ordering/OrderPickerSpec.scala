@@ -5,6 +5,7 @@ import org.scalatest.FlatSpec
 import com.github.comco.scrappy.CustomMatchers
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import com.github.comco.scrappy.SeqType
+import com.github.comco.scrappy.data.PrimitiveData
 import com.github.comco.scrappy.data.PrimitiveData.apply
 import com.github.comco.scrappy.data.SeqData
 import com.github.comco.scrappy.origin.OriginalOrigin
@@ -34,10 +35,10 @@ class OrderPickerSpec extends FlatSpec with CustomMatchers {
     
     val seq = result.asInstanceOf[OriginatedSeqData]
     seq.element(0) shouldEqual
-      OriginatedData.from(2, expectedOrigin.append(ElementStep(seqType, 1)))
+      OriginatedData.from(PrimitiveData(2), expectedOrigin.append(ElementStep(seqType, 1)))
     seq.element(1) shouldEqual
-      OriginatedData.from(3, expectedOrigin.append(ElementStep(seqType, 0)))
+      OriginatedData.from(PrimitiveData(3), expectedOrigin.append(ElementStep(seqType, 0)))
     seq.element(2) shouldEqual
-      OriginatedData.from(4, expectedOrigin.append(ElementStep(seqType, 2)))
+      OriginatedData.from(PrimitiveData(4), expectedOrigin.append(ElementStep(seqType, 2)))
   }
 }

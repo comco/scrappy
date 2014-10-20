@@ -30,7 +30,7 @@ class ApplyPickerSpec extends FlatSpec with CustomMatchers {
 
   it should "pickOriginatedData" in {
     val originated = OriginatedData.from(data, OriginalOrigin(SelfPointer(IntPrimitiveType)))
-    val origin = OriginatedData.from(4, 
+    val origin = OriginatedData.from(PrimitiveData(4), 
         ComputedOrigin(IntPrimitiveType, IntPrimitiveType, Set(SelfPointer(IntPrimitiveType))))
     val result = incPicker.pickOriginatedData(originated)
     result shouldEqual origin

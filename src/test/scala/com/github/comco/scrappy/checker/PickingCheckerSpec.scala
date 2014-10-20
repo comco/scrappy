@@ -31,7 +31,7 @@ class PickingCheckerSpec extends FlatSpec with CustomMatchers {
   }
 
   it should "checkOriginatedData" in {
-    val originated = OriginatedData.fromSelf(data).asInstanceOf[OriginatedTupleData]
+    val originated = OriginatedData.fromSelf(data)
     val result = pickingChecker.checkOriginatedData(originated)
     result.successful shouldEqual true
     result.scope shouldEqual originated.origin

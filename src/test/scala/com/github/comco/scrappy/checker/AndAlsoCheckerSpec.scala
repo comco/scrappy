@@ -41,7 +41,7 @@ class AndAlsoCheckerSpec extends FlatSpec with CustomMatchers {
   }
 
   it should "checkOriginatedData when valid" in {
-    val originatedDataTrue = OriginatedData.fromSelf(dataTrue).asInstanceOf[OriginatedTupleData]
+    val originatedDataTrue = OriginatedData.fromSelf(dataTrue)
     val result = andChecker.checkOriginatedData(originatedDataTrue)
     result.successful shouldEqual true
     result.scope shouldEqual originatedDataTrue.origin
@@ -52,7 +52,7 @@ class AndAlsoCheckerSpec extends FlatSpec with CustomMatchers {
   }
   
   it should "checkOriginatedData when first invalid" in {
-    val originatedDataFalse1 = OriginatedData.fromSelf(dataFalse1).asInstanceOf[OriginatedTupleData]
+    val originatedDataFalse1 = OriginatedData.fromSelf(dataFalse1)
     val result = andChecker.checkOriginatedData(originatedDataFalse1)
     result.successful shouldEqual false
     result.scope shouldEqual originatedDataFalse1.origin
@@ -62,7 +62,7 @@ class AndAlsoCheckerSpec extends FlatSpec with CustomMatchers {
   }
   
   it should "checkOriginatedData when second invalid" in {
-    val originatedDataFalse2 = OriginatedData.fromSelf(dataFalse2).asInstanceOf[OriginatedTupleData]
+    val originatedDataFalse2 = OriginatedData.fromSelf(dataFalse2)
     val result = andChecker.checkOriginatedData(originatedDataFalse2)
     result.successful shouldEqual false
     result.scope shouldEqual originatedDataFalse2.origin

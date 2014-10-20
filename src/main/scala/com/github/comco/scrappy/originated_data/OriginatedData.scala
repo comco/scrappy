@@ -27,6 +27,10 @@ import com.github.comco.scrappy.originated_data.simple.SimpleOriginalTupleData
 import com.github.comco.scrappy.originated_data.simple.SimpleOriginatedNoneData
 import com.github.comco.scrappy.originated_data.simple.SimpleOriginatedPrimitiveData
 import com.github.comco.scrappy.pointer.SelfPointer
+import com.github.comco.scrappy.originated_data.simple.SimpleOriginatedNoneData
+import com.github.comco.scrappy.origin.OriginalOrigin
+import com.github.comco.scrappy.pointer.SelfPointer
+import com.github.comco.scrappy.origin.ComputedOrigin
 
 sealed abstract class OriginatedData {
   require(data.datatype == origin.targetType,
@@ -50,22 +54,80 @@ object OriginatedData {
     case data: OriginatedOptionData => data.isSome
     case _ => true
   }
-
+  
+  /**
+   * Methods for constructing originated data.
+   */
+  def from[T](data: PrimitiveData[T], origin: Origin) = OriginatedPrimitiveData[T](data, origin)
+  def from(data: TupleData, origin: Origin) = OriginatedTupleData.original(data, origin)
+  def from(data: StructData, origin: Origin) = OriginatedStructData.original(data, origin)
+  def from(data: SeqData, origin: Origin) = OriginatedSeqData.original(data, origin)
+  def from(data: SomeData, origin: Origin) = OriginatedSomeData.original(data, origin)
+  def from(data: NoneData, origin: Origin) = OriginatedNoneData.simple(origin)
+  
+  def from(data: OptionData, origin: Origin): OriginatedOptionData = data match {
+    case data: SomeData => from(data, origin)
+    case data: NoneData => from(data, origin)
+  }
+  
   def from(data: Data, origin: Origin): OriginatedData = data match {
-    case data: PrimitiveData[t] => OriginatedPrimitiveData[t](data, origin)
-    case data: TupleData => OriginatedTupleData.original(data, origin)
-    case data: StructData => OriginatedStructData.original(data, origin)
-    case data: SeqData => OriginatedSeqData.original(data, origin)
-    case data: SomeData => OriginatedSomeData.original(data, origin)
-    case data: NoneData => SimpleOriginatedNoneData(origin)
+    case data: PrimitiveData[t] => from(data, origin)
+    case data: TupleData => from(data, origin)
+    case data: StructData => from(data, origin)
+    case data: SeqData => from(data, origin)
+    case data: OptionData => from(data, origin)
   }
-
-  def from(data: Data, source: OriginatedData): OriginatedData = {
-    from(data, source.origin.computedWithTargetType(data.datatype))
+  
+  /**
+   * Methods for constructing originated data by computing the target type.
+   */
+  private def mkComputedOrigin(data: Data, source: OriginatedData): ComputedOrigin = {
+    source.origin.computedWithTargetType(data.datatype)
   }
-
-  def fromSelf(data: Data): OriginatedData = {
-    from(data, OriginalOrigin(SelfPointer(data.datatype)))
+  
+  def from[T](data: PrimitiveData[T], source: OriginatedData): OriginatedPrimitiveData[T] = from(data, mkComputedOrigin(data, source))
+  def from(data: TupleData, source: OriginatedData): OriginatedTupleData = from(data, mkComputedOrigin(data, source))
+  def from(data: StructData, source: OriginatedData): OriginatedStructData = from(data, mkComputedOrigin(data, source))
+  def from(data: SeqData, source: OriginatedData): OriginatedSeqData = from(data, mkComputedOrigin(data, source))
+  def from(data: SomeData, source: OriginatedData): OriginatedSomeData = from(data, mkComputedOrigin(data, source))
+  def from(data: NoneData, source: OriginatedData): OriginatedNoneData = from(data, mkComputedOrigin(data, source))
+  
+  def from(data: OptionData, source: OriginatedData): OriginatedOptionData = data match {
+    case data: SomeData => from(data, source)
+    case data: NoneData => from(data, source)
+  }
+  
+  def from(data: Data, source: OriginatedData): OriginatedData = data match {
+    case data: PrimitiveData[t] => from(data, source)
+    case data: TupleData => from(data, source)
+    case data: StructData => from(data, source)
+    case data: SeqData => from(data, source)
+    case data: OptionData => from(data, source)
+  }
+  
+  /**
+   * Methods for constructing originated data with self origin.
+   */
+  private def mkOriginalOrigin(data: Data) = OriginalOrigin(SelfPointer(data.datatype))
+  
+  def fromSelf[T](data: PrimitiveData[T]): OriginatedPrimitiveData[T] = from(data, mkOriginalOrigin(data))
+  def fromSelf(data: TupleData): OriginatedTupleData = from(data, mkOriginalOrigin(data))
+  def fromSelf(data: StructData): OriginatedStructData = from(data, mkOriginalOrigin(data))
+  def fromSelf(data: SeqData): OriginatedSeqData = from(data, mkOriginalOrigin(data))
+  def fromSelf(data: SomeData): OriginatedSomeData = from(data, mkOriginalOrigin(data))
+  def fromSelf(data: NoneData): OriginatedNoneData = from(data, mkOriginalOrigin(data))
+  
+  def fromSelf(data: OptionData): OriginatedOptionData = data match {
+    case data: SomeData => fromSelf(data)
+    case data: NoneData => fromSelf(data)
+  }
+  
+  def fromSelf(data: Data): OriginatedData = data match {
+    case data: PrimitiveData[t] => fromSelf(data)
+    case data: TupleData => fromSelf(data)
+    case data: StructData => fromSelf(data)
+    case data: SeqData => fromSelf(data)
+    case data: OptionData => fromSelf(data)
   }
 }
 
@@ -89,6 +151,12 @@ sealed abstract class OriginatedOptionData extends OriginatedData {
 }
 
 abstract class OriginatedNoneData extends OriginatedOptionData
+
+object OriginatedNoneData {
+  def simple(origin: Origin): OriginatedNoneData = {
+    SimpleOriginatedNoneData(origin)
+  }
+}
 
 abstract class OriginatedSomeData extends OriginatedOptionData {
   def datatype = data.datatype

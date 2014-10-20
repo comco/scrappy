@@ -33,12 +33,21 @@ class ExistsCheckerSpec extends FlatSpec with CustomMatchers {
     checker4.checkData(data).successful shouldEqual false  
   }
   
-  it should "checkOriginatedData" in {
-    val originated = OriginatedData.fromSelf(data).asInstanceOf[OriginatedSeqData]
+  it should "checkOriginatedData when valid" in {
+    val originated = OriginatedData.fromSelf(data)
     val result = checker3.checkOriginatedData(originated)
     result.successful shouldEqual true
     result.scope shouldEqual originated.origin
     result.checker shouldEqual checker3
     result.witnesses shouldEqual Set(elementChecker3.checkOriginatedData(originated.element(2)))
+  }
+  
+  it should "checkOriginatedData when invalid" in {
+    val originated = OriginatedData.fromSelf(data)
+    val result = checker4.checkOriginatedData(originated)
+    result.successful shouldEqual false
+    result.scope shouldEqual originated.origin
+    result.checker shouldEqual checker4
+    result.witnesses shouldEqual Set.empty
   }
 }

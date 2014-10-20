@@ -40,7 +40,7 @@ class OrElseCheckerSpec extends FlatSpec with CustomMatchers {
   }
 
   it should "checkOriginatedData when first valid" in {
-    val originatedDataTrue1 = OriginatedData.fromSelf(dataTrue1).asInstanceOf[OriginatedTupleData]
+    val originatedDataTrue1 = OriginatedData.fromSelf(dataTrue1)
     val result = orChecker.checkOriginatedData(originatedDataTrue1)
     result.successful shouldEqual true
     result.scope shouldEqual originatedDataTrue1.origin
@@ -50,7 +50,7 @@ class OrElseCheckerSpec extends FlatSpec with CustomMatchers {
   }
   
   it should "checkOriginatedData when second valid" in {
-    val originatedDataTrue2 = OriginatedData.fromSelf(dataTrue2).asInstanceOf[OriginatedTupleData]
+    val originatedDataTrue2 = OriginatedData.fromSelf(dataTrue2)
     val result = orChecker.checkOriginatedData(originatedDataTrue2)
     result.successful shouldEqual true
     result.scope shouldEqual originatedDataTrue2.origin
@@ -60,7 +60,7 @@ class OrElseCheckerSpec extends FlatSpec with CustomMatchers {
   }
   
   it should "checkOriginatedData when invalid" in {
-    val originatedDataFalse = OriginatedData.fromSelf(dataFalse).asInstanceOf[OriginatedTupleData]
+    val originatedDataFalse = OriginatedData.fromSelf(dataFalse)
     val result = orChecker.checkOriginatedData(originatedDataFalse)
     result.successful shouldEqual false
     result.scope shouldEqual originatedDataFalse.origin
