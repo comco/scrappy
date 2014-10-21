@@ -26,6 +26,11 @@ class SeqDataSpec extends FlatSpec with CustomMatchers {
     (-1 to 3).map(optionSeqData.isOccupied(_)) shouldEqual
       Seq(false, true, false, true, false)
   }
+  
+  it should "check element index in element" in {
+    itShouldBeDisallowed calling seqData.element(-1)
+    itShouldBeDisallowed calling seqData.element(3)
+  }
 
   "A SeqData during construction" should "check the types of elements" in {
     itShouldBeDisallowed calling

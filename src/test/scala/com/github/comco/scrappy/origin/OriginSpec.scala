@@ -21,16 +21,27 @@ class OriginSpec extends FlatSpec with CustomMatchers {
   val struct = StructData(structType)("a" -> point, "b" -> 4)
   val original = OriginalOrigin(pointer)
   
-   "An Original origin" should "have the right sourceType" in {
+  "An Origin" should "provide merge" in {
+    val result = original.merge(original)
+    result.sourceType shouldEqual original.sourceType
+    result.targetType shouldEqual original.targetType
+    result.pointers shouldEqual Set(original.pointer, original.pointer)
+  }
+  
+   "An Original origin" should "provide sourceType" in {
     original.sourceType shouldEqual structType
   }
   
-  it should "have the right targetType" in {
+  it should "provide targetType" in {
     original.targetType shouldEqual IntPrimitiveType
   }
   
   it should "transform to computed" in {
     original.computed.pointers shouldEqual Set(pointer)
+  }
+  
+  it should "provide pointers" in {
+    original.pointers shouldEqual Set(pointer)
   }
   
   it should "support appending" in {
