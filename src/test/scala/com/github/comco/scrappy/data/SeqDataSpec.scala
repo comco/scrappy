@@ -40,4 +40,8 @@ class SeqDataSpec extends FlatSpec with CustomMatchers {
   it should "support assigning raw values to optional elements" in {
     optionSeqData.element(0) shouldEqual SomeData(1)
   }
+  
+  it should "check the compatibility of types when assigning raw values to optional elements" in {
+    itShouldBeDisallowed calling SeqData(optionSeqType, Seq(PrimitiveData(1), NoneData(optionType), PrimitiveData("hi")))
+  }
 }

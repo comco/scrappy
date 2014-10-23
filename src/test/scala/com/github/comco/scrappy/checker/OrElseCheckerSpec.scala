@@ -70,7 +70,7 @@ class OrElseCheckerSpec extends FlatSpec with CustomMatchers {
         secondChecker.checkOriginatedData(originatedDataFalse))
   }
 
-  "An AndAlsoChecker during construction" should "check the source types of its arguments" in {
-    itShouldBeDisallowed calling AndAlsoChecker(firstChecker, thirdChecker)
+  "An OrElseChecker during construction" should "check the source types of its arguments" in {
+    itShouldBeDisallowed calling OrElseChecker(firstChecker, thirdChecker)
   }
 }

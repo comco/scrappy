@@ -28,6 +28,10 @@ class OriginSpec extends FlatSpec with CustomMatchers {
     result.pointers shouldEqual Set(original.pointer, original.pointer)
   }
   
+  it should "check compatibility during merge" in {
+    itShouldBeDisallowed calling original.merge(OriginalOrigin(SelfPointer(structType)))
+  }
+  
    "An Original origin" should "provide sourceType" in {
     original.sourceType shouldEqual structType
   }

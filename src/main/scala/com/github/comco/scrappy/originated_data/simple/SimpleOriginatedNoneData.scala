@@ -5,12 +5,15 @@ import com.github.comco.scrappy.origin.Origin
 import com.github.comco.scrappy.data.NoneData
 import com.github.comco.scrappy.originated_data.OriginatedNoneData
 
-case class SimpleOriginatedNoneData(val origin: Origin)
+case class SimpleOriginatedNoneData private(val origin: Origin, val datatype: OptionType)
     extends OriginatedNoneData {
-  require(origin.targetType.isInstanceOf[OptionType],
-    s"Origin: $origin doesn't have an option targetType.")
+  def data = NoneData(datatype)
+}
 
-  def datatype = origin.targetType.asInstanceOf[OptionType]
-
-  lazy val data = NoneData(datatype)
+object SimpleOriginatedNoneData {
+  def apply(origin: Origin): SimpleOriginatedNoneData = {
+    require(origin.targetType.isInstanceOf[OptionType],
+      s"Origin: $origin doesn't have an option targetType.")
+      SimpleOriginatedNoneData(origin, origin.targetType.asInstanceOf[OptionType])
+  }
 }
