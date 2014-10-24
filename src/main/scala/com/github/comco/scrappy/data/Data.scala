@@ -15,6 +15,12 @@ import com.github.comco.scrappy.data.simple.SimpleSomeData
 import com.github.comco.scrappy.data.simple.SimpleStructData
 import com.github.comco.scrappy.data.simple.SimpleTupleData
 
+/**
+ * Base class for scrappy Data.
+ * Represents a piece of immutable, typed and interchangable data.
+ * This data is intended to be independent of the specific representation,
+ * so the equals methods of the derivable subclasses are final.
+ */
 sealed abstract class Data {
   /**
    * The type of this data.
@@ -62,6 +68,15 @@ abstract class PrimitiveData[T] extends Data {
    * The raw value of this primitive data.
    */
   def value: T
+  
+  private def state = (datatype, value)
+  
+  final override def equals(that: Any) = that match {
+    case that: PrimitiveData[T] => this.state == that.state
+    case _ => false
+  }
+  
+  final override def hashCode() = state.hashCode()
 }
 
 object PrimitiveData {
@@ -81,6 +96,15 @@ sealed abstract class OptionData extends Data {
 
 abstract class NoneData extends OptionData {
   def isSome = false
+  
+  private def state = (datatype)
+  
+  final override def equals(that: Any) = that match {
+    case that: NoneData => this.state == that.state
+    case _ => false
+  }
+  
+  final override def hashCode() = state.hashCode()
 }
 
 object NoneData {
@@ -95,6 +119,15 @@ abstract class SomeData extends OptionData {
    * The value of this option data.
    */
   def value: Data
+  
+  private def state = (datatype, value)
+  
+  final override def equals(that: Any) = that match {
+    case that: SomeData => this.state == that.state
+    case _ => false
+  }
+  
+  final override def hashCode() = state.hashCode()
 }
 
 object SomeData {
@@ -151,6 +184,15 @@ abstract class TupleData extends Data {
 
     coordinates(position)
   }
+  
+  private def state = (datatype, coordinates)
+  
+  final override def equals(that: Any) = that match {
+    case that: TupleData => this.state == that.state
+    case _ => false
+  }
+  
+  final override def hashCode() = state.hashCode()
 }
 
 object TupleData {
@@ -199,6 +241,15 @@ abstract class SeqData extends Data {
    * The length of this seq data.
    */
   def length: Int = elements.length
+  
+  private def state = (datatype, elements)
+  
+  final override def equals(that: Any) = that match {
+    case that: SeqData => this.state == that.state
+    case _ => false
+  }
+  
+  final override def hashCode() = state.hashCode()
 }
 
 object SeqData {
@@ -248,6 +299,15 @@ abstract class StructData extends Data {
 
     features(name)
   }
+  
+  private def state = (datatype, features)
+  
+  final override def equals(that: Any) = that match {
+    case that: StructData => this.state == that.state
+    case _ => false
+  }
+  
+  final override def hashCode() = state.hashCode()
 }
 
 object StructData {

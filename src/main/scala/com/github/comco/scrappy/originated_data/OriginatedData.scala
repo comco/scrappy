@@ -32,6 +32,9 @@ import com.github.comco.scrappy.origin.OriginalOrigin
 import com.github.comco.scrappy.pointer.SelfPointer
 import com.github.comco.scrappy.origin.ComputedOrigin
 
+/**
+ * Base class for scrappy originated data - a piece of data with an origin.
+ */
 sealed abstract class OriginatedData {
   require(data.datatype == origin.targetType,
     s"Datatype of data: $data and targetType of origin: $origin does not match.")
@@ -135,6 +138,14 @@ abstract class OriginatedPrimitiveData[T] extends OriginatedData {
   def datatype: PrimitiveType[T] = data.datatype
   def data: PrimitiveData[T]
   def value: T = data.value
+  
+  private def state = (datatype, data)
+  
+  final override def equals(that: Any) = that match {
+    case that: OriginatedPrimitiveData[T] => this.state == that.state
+  }
+  
+  final override def hashCode() = state.hashCode()
 }
 
 object OriginatedPrimitiveData {
@@ -150,7 +161,16 @@ sealed abstract class OriginatedOptionData extends OriginatedData {
   def isSome = data.isSome
 }
 
-abstract class OriginatedNoneData extends OriginatedOptionData
+abstract class OriginatedNoneData extends OriginatedOptionData {
+  private def state = (datatype, data)
+  
+  final override def equals(that: Any) = that match {
+    case that: OriginatedNoneData => this.state == that.state
+    case _ => false
+  }
+  
+  final override def hashCode() = state.hashCode()
+}
 
 object OriginatedNoneData {
   def simple(origin: Origin): OriginatedNoneData = {
@@ -163,6 +183,15 @@ abstract class OriginatedSomeData extends OriginatedOptionData {
   def data: SomeData
 
   def value: OriginatedData
+  
+  private def state = (datatype, data)
+  
+  final override def equals(that: Any) = that match {
+    case that: OriginatedSomeData => this.state == that.state
+    case _ => false
+  }
+  
+  final override def hashCode() = state.hashCode()
 }
 
 object OriginatedSomeData {
@@ -207,6 +236,15 @@ abstract class OriginatedTupleData extends OriginatedData {
 
     coordinates(position)
   }
+  
+  private def state = (datatype, coordinates)
+  
+  final override def equals(that: Any) = that match {
+    case that: OriginatedTupleData => this.state == that.state
+    case _ => false
+  }
+  
+  final override def hashCode() = state.hashCode()
 }
 
 object OriginatedTupleData {
@@ -264,6 +302,15 @@ abstract class OriginatedStructData extends OriginatedData {
 
     features(name)
   }
+  
+  private def state = (datatype, features)
+  
+  final override def equals(that: Any) = that match {
+    case that: OriginatedStructData => this.state == that.state
+    case _ => false
+  }
+  
+  final override def hashCode() = state.hashCode()
 }
 
 object OriginatedStructData {
@@ -308,6 +355,15 @@ abstract class OriginatedSeqData extends OriginatedData {
    * The length of this seq data.
    */
   def length: Int = elements.length
+  
+  private def state = (datatype, elements)
+  
+  final override def equals(that: Any) = that match {
+    case that: OriginatedSeqData => this.state == that.state
+    case _ => false
+  }
+  
+  final override def hashCode() = state.hashCode()
 }
 
 object OriginatedSeqData {
