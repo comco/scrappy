@@ -1,19 +1,17 @@
 package com.github.comco.scrappy.pointer.dsl
 
 import scala.language.implicitConversions
-import com.github.comco.scrappy.Type
-import com.github.comco.scrappy.pointer.SelfPointer
-import com.github.comco.scrappy.pointer.Pointer
+
+import com.github.comco.scrappy.SeqType
 import com.github.comco.scrappy.StructType
-import com.github.comco.scrappy.pointer.FeatureStep
-import com.github.comco.scrappy.pointer.CoordinateStep
 import com.github.comco.scrappy.TupleType
-import com.github.comco.scrappy.pointer.ElementStep
-import com.github.comco.scrappy.SeqType
-import com.github.comco.scrappy.pointer.Step
-import com.github.comco.scrappy.SeqType
+import com.github.comco.scrappy.Type
 import com.github.comco.scrappy.pointer.CoordinateStep
 import com.github.comco.scrappy.pointer.ElementStep
+import com.github.comco.scrappy.pointer.FeatureStep
+import com.github.comco.scrappy.pointer.Pointer
+import com.github.comco.scrappy.pointer.SelfPointer
+import com.github.comco.scrappy.pointer.Step
 
 object Pointers {
   implicit class RichPointer(val pointer: Pointer) {
@@ -46,7 +44,13 @@ object Pointers {
      */
     def /@(step: Step): RichPointer = RichPointer(pointer.append(step))
     
-    // TODO: Add Apply with a sequence of Step-s
+    /**
+     * Appends a sequence of Steps to the pointer.
+     */
+    def apply(steps: Step*): RichPointer = {
+      if (steps.isEmpty) this
+      else (this /@ steps.head)(steps.tail : _*)
+    }
     
   }
 

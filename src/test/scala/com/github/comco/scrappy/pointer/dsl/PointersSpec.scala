@@ -35,6 +35,12 @@ class PointersSpec extends FlatSpec with CustomMatchers {
       StepPointer(StepPointer(StepPointer(SelfPointer(seqType), ElementStep(seqType, 3)), FeatureStep(structType, "a")), CoordinateStep(tupleType, 1))
   }
   
+  it should "check RichPointer feature type" in {
+    itShouldBeDisallowed calling pointerTo(tupleType).feature("b")
+    itShouldBeDisallowed calling pointerTo(tupleType).element(3)
+    itShouldBeDisallowed calling pointerTo(structType).coordinate(4)
+  }
+  
   it should "provide Typed Steps construction" in {
     // Strongly-typed
     (tupleType $ 0) shouldEqual CoordinateStep(tupleType, 0)
@@ -55,5 +61,10 @@ class PointersSpec extends FlatSpec with CustomMatchers {
   it should "support appending steps directly" in {
     (pointerTo(seqType) /@ (seqType $ 0) /@ (structType $ "a") /@ (tupleType $ 1)).pointer shouldEqual
       StepPointer(StepPointer(StepPointer(SelfPointer(seqType), ElementStep(seqType, 0)), FeatureStep(structType, "a")), CoordinateStep(tupleType, 1))
+  }
+  
+  it should "support appending a sequence of Steps at once" in {
+    pointerTo(seqType)(seqType $ 0, structType $ "a").pointer shouldEqual
+      StepPointer(StepPointer(SelfPointer(seqType), ElementStep(seqType, 0)), FeatureStep(structType, "a"))
   }
 }
