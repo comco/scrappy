@@ -8,6 +8,7 @@ import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
 import com.github.comco.scrappy.TupleType
 import PrimitiveData.apply
 import com.github.comco.scrappy.OptionType
+import java.util.HashSet
 
 class TupleDataSpec extends FlatSpec with CustomMatchers {
   val tupleType = TupleType(IntPrimitiveType, StringPrimitiveType, BooleanPrimitiveType)
@@ -59,5 +60,13 @@ class TupleDataSpec extends FlatSpec with CustomMatchers {
 
   it should "check the types of coordinates" in {
     itShouldBeDisallowed calling TupleData(tupleType)(3, "hi", "bye")
+  }
+  
+  it should "check equality" in {
+    (tupleData == PrimitiveData(3)) shouldEqual false
+    val s = new HashSet[Data]()
+    s.add(tupleData)
+    s.contains(tupleData) shouldEqual true
+    
   }
 }

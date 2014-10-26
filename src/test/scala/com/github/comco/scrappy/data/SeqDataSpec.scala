@@ -1,13 +1,12 @@
 package com.github.comco.scrappy.data
 
 import org.scalatest.FlatSpec
-
 import com.github.comco.scrappy.CustomMatchers
 import com.github.comco.scrappy.OptionType
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import com.github.comco.scrappy.SeqType
-
 import PrimitiveData.apply
+import java.util.HashSet
 
 class SeqDataSpec extends FlatSpec with CustomMatchers {
   val seqType = SeqType(IntPrimitiveType)
@@ -43,5 +42,12 @@ class SeqDataSpec extends FlatSpec with CustomMatchers {
   
   it should "check the compatibility of types when assigning raw values to optional elements" in {
     itShouldBeDisallowed calling SeqData(optionSeqType, Seq(PrimitiveData(1), NoneData(optionType), PrimitiveData("hi")))
+  }
+  
+  it should "check equality" in {
+    (seqData == PrimitiveData(3)) shouldEqual false
+    val s = new HashSet[Data]()
+    s.add(seqData)
+    s.contains(seqData) shouldEqual true
   }
 }

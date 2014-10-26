@@ -7,6 +7,7 @@ import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
 import com.github.comco.scrappy.StructType
 import PrimitiveData.apply
 import com.github.comco.scrappy.OptionType
+import java.util.HashSet
 
 class StructDataSpec extends FlatSpec with CustomMatchers {
   val optionType = OptionType(IntPrimitiveType)
@@ -68,5 +69,12 @@ class StructDataSpec extends FlatSpec with CustomMatchers {
         "b" -> "hi",
         "d" -> 5)
     structWithBlanks.feature("d") shouldEqual SomeData(5)
+  }
+  
+  it should "check equality" in {
+    (structData == PrimitiveData(3)) shouldEqual false
+    val s = new HashSet[Data]()
+    s.add(structData)
+    s.contains(structData) shouldEqual true
   }
 }
