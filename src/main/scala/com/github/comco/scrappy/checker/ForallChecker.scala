@@ -16,7 +16,7 @@ case class ForallChecker(val elementChecker: Checker) extends BaseSeqChecker {
     for (element <- data.elements) {
       val result = elementChecker.checkOriginatedData(element)
       if (!result.successful) {
-        val total = OriginatedCheckResult(false, data.origin, Set(result), this)
+        return OriginatedCheckResult(false, data.origin, Set(result), this)
       }
     }
     return OriginatedCheckResult(true, data.origin, Set.empty, this)

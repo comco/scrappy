@@ -6,6 +6,7 @@ import com.github.comco.scrappy.PrimitiveType.BooleanPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
 import java.util.HashSet
+import com.github.comco.scrappy.TupleType
 
 class PrimitiveDataSpec extends FlatSpec with CustomMatchers {
   val intData = PrimitiveData(3)
@@ -34,6 +35,7 @@ class PrimitiveDataSpec extends FlatSpec with CustomMatchers {
   
   it should "check equality" in {
     (PrimitiveData(3) == PrimitiveData("hi")) shouldEqual false
+    (PrimitiveData(3) == TupleData(TupleType(IndexedSeq.empty), IndexedSeq.empty))
     val s = new HashSet[Data]()
     s.add(intData)
     s.contains(intData) shouldEqual true
