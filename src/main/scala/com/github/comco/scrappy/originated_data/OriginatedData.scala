@@ -57,7 +57,7 @@ object OriginatedData {
     case data: OriginatedOptionData => data.isSome
     case _ => true
   }
-  
+
   /**
    * Methods for constructing originated data.
    */
@@ -67,12 +67,12 @@ object OriginatedData {
   def from(data: SeqData, origin: Origin) = OriginatedSeqData.original(data, origin)
   def from(data: SomeData, origin: Origin) = OriginatedSomeData.original(data, origin)
   def from(data: NoneData, origin: Origin) = OriginatedNoneData.simple(origin)
-  
+
   def from(data: OptionData, origin: Origin): OriginatedOptionData = data match {
     case data: SomeData => from(data, origin)
     case data: NoneData => from(data, origin)
   }
-  
+
   def from(data: Data, origin: Origin): OriginatedData = data match {
     case data: PrimitiveData[t] => from(data, origin)
     case data: TupleData => from(data, origin)
@@ -80,26 +80,26 @@ object OriginatedData {
     case data: SeqData => from(data, origin)
     case data: OptionData => from(data, origin)
   }
-  
+
   /**
    * Methods for constructing originated data by computing the target type.
    */
   private def mkComputedOrigin(data: Data, source: OriginatedData): ComputedOrigin = {
     source.origin.computedWithTargetType(data.datatype)
   }
-  
+
   def from[T](data: PrimitiveData[T], source: OriginatedData): OriginatedPrimitiveData[T] = from(data, mkComputedOrigin(data, source))
   def from(data: TupleData, source: OriginatedData): OriginatedTupleData = from(data, mkComputedOrigin(data, source))
   def from(data: StructData, source: OriginatedData): OriginatedStructData = from(data, mkComputedOrigin(data, source))
   def from(data: SeqData, source: OriginatedData): OriginatedSeqData = from(data, mkComputedOrigin(data, source))
   def from(data: SomeData, source: OriginatedData): OriginatedSomeData = from(data, mkComputedOrigin(data, source))
   def from(data: NoneData, source: OriginatedData): OriginatedNoneData = from(data, mkComputedOrigin(data, source))
-  
+
   def from(data: OptionData, source: OriginatedData): OriginatedOptionData = data match {
     case data: SomeData => from(data, source)
     case data: NoneData => from(data, source)
   }
-  
+
   def from(data: Data, source: OriginatedData): OriginatedData = data match {
     case data: PrimitiveData[t] => from(data, source)
     case data: TupleData => from(data, source)
@@ -107,24 +107,24 @@ object OriginatedData {
     case data: SeqData => from(data, source)
     case data: OptionData => from(data, source)
   }
-  
+
   /**
    * Methods for constructing originated data with self origin.
    */
   private def mkOriginalOrigin(data: Data) = OriginalOrigin(SelfPointer(data.datatype))
-  
+
   def fromSelf[T](data: PrimitiveData[T]): OriginatedPrimitiveData[T] = from(data, mkOriginalOrigin(data))
   def fromSelf(data: TupleData): OriginatedTupleData = from(data, mkOriginalOrigin(data))
   def fromSelf(data: StructData): OriginatedStructData = from(data, mkOriginalOrigin(data))
   def fromSelf(data: SeqData): OriginatedSeqData = from(data, mkOriginalOrigin(data))
   def fromSelf(data: SomeData): OriginatedSomeData = from(data, mkOriginalOrigin(data))
   def fromSelf(data: NoneData): OriginatedNoneData = from(data, mkOriginalOrigin(data))
-  
+
   def fromSelf(data: OptionData): OriginatedOptionData = data match {
     case data: SomeData => fromSelf(data)
     case data: NoneData => fromSelf(data)
   }
-  
+
   def fromSelf(data: Data): OriginatedData = data match {
     case data: PrimitiveData[t] => fromSelf(data)
     case data: TupleData => fromSelf(data)
@@ -138,13 +138,13 @@ abstract class OriginatedPrimitiveData[T] extends OriginatedData {
   def datatype: PrimitiveType[T] = data.datatype
   def data: PrimitiveData[T]
   def value: T = data.value
-  
+
   private def state = (datatype, data)
-  
+
   final override def equals(that: Any) = that match {
     case that: OriginatedPrimitiveData[T] => this.state == that.state
   }
-  
+
   final override def hashCode() = state.hashCode()
 }
 
@@ -157,18 +157,18 @@ object OriginatedPrimitiveData {
 sealed abstract class OriginatedOptionData extends OriginatedData {
   def datatype: OptionType
   def data: OptionData
-  
+
   def isSome = data.isSome
 }
 
 abstract class OriginatedNoneData extends OriginatedOptionData {
   private def state = (datatype, data)
-  
+
   final override def equals(that: Any) = that match {
     case that: OriginatedNoneData => this.state == that.state
     case _ => false
   }
-  
+
   final override def hashCode() = state.hashCode()
 }
 
@@ -183,14 +183,14 @@ abstract class OriginatedSomeData extends OriginatedOptionData {
   def data: SomeData
 
   def value: OriginatedData
-  
+
   private def state = (datatype, data)
-  
+
   final override def equals(that: Any) = that match {
     case that: OriginatedSomeData => this.state == that.state
     case _ => false
   }
-  
+
   final override def hashCode() = state.hashCode()
 }
 
@@ -198,7 +198,7 @@ object OriginatedSomeData {
   def original(data: SomeData, origin: Origin): OriginatedSomeData = {
     SimpleOriginalSomeData(data, origin)
   }
-  
+
   def computed(data: SomeData, origin: Origin, value: OriginatedData): OriginatedSomeData = {
     SimpleComputedSomeData(data, origin, value)
   }
@@ -236,14 +236,14 @@ abstract class OriginatedTupleData extends OriginatedData {
 
     coordinates(position)
   }
-  
+
   private def state = (datatype, coordinates)
-  
+
   final override def equals(that: Any) = that match {
     case that: OriginatedTupleData => this.state == that.state
     case _ => false
   }
-  
+
   final override def hashCode() = state.hashCode()
 }
 
@@ -283,7 +283,7 @@ abstract class OriginatedStructData extends OriginatedData {
    * The features of this originated struct data.
    */
   def features: Map[String, OriginatedData]
-  
+
   /**
    * Checks if this struct data has a feature with some name.
    * Names of optional features which are not filled-in
@@ -302,14 +302,14 @@ abstract class OriginatedStructData extends OriginatedData {
 
     features(name)
   }
-  
+
   private def state = (datatype, features)
-  
+
   final override def equals(that: Any) = that match {
     case that: OriginatedStructData => this.state == that.state
     case _ => false
   }
-  
+
   final override def hashCode() = state.hashCode()
 }
 
@@ -340,7 +340,7 @@ abstract class OriginatedSeqData extends OriginatedData {
   def isOccupied(index: Int): Boolean = {
     0 <= index && index < length && OriginatedData.isFilled(elements(index))
   }
-  
+
   /**
    * Retrieves the element of this seq data at some index.
    */
@@ -350,19 +350,19 @@ abstract class OriginatedSeqData extends OriginatedData {
 
     elements(index)
   }
-  
+
   /**
    * The length of this seq data.
    */
   def length: Int = elements.length
-  
+
   private def state = (datatype, elements)
-  
+
   final override def equals(that: Any) = that match {
     case that: OriginatedSeqData => this.state == that.state
     case _ => false
   }
-  
+
   final override def hashCode() = state.hashCode()
 }
 

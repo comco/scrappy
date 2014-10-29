@@ -68,14 +68,14 @@ abstract class PrimitiveData[T] extends Data {
    * The raw value of this primitive data.
    */
   def value: T
-  
+
   private def state = (datatype, value)
-  
+
   final override def equals(that: Any) = that match {
     case that: PrimitiveData[T] => this.state == that.state
     case _ => false
   }
-  
+
   final override def hashCode() = state.hashCode()
 }
 
@@ -96,14 +96,14 @@ sealed abstract class OptionData extends Data {
 
 abstract class NoneData extends OptionData {
   def isSome = false
-  
+
   private def state = (datatype)
-  
+
   final override def equals(that: Any) = that match {
     case that: NoneData => this.state == that.state
     case _ => false
   }
-  
+
   final override def hashCode() = state.hashCode()
 }
 
@@ -119,14 +119,14 @@ abstract class SomeData extends OptionData {
    * The value of this option data.
    */
   def value: Data
-  
+
   private def state = (datatype, value)
-  
+
   final override def equals(that: Any) = that match {
     case that: SomeData => this.state == that.state
     case _ => false
   }
-  
+
   final override def hashCode() = state.hashCode()
 }
 
@@ -184,14 +184,14 @@ abstract class TupleData extends Data {
 
     coordinates(position)
   }
-  
+
   private def state = (datatype, coordinates)
-  
+
   final override def equals(that: Any) = that match {
     case that: TupleData => this.state == that.state
     case _ => false
   }
-  
+
   final override def hashCode() = state.hashCode()
 }
 
@@ -241,14 +241,14 @@ abstract class SeqData extends Data {
    * The length of this seq data.
    */
   def length: Int = elements.length
-  
+
   private def state = (datatype, elements)
-  
+
   final override def equals(that: Any) = that match {
     case that: SeqData => this.state == that.state
     case _ => false
   }
-  
+
   final override def hashCode() = state.hashCode()
 }
 
@@ -299,14 +299,14 @@ abstract class StructData extends Data {
 
     features(name)
   }
-  
+
   private def state = (datatype, features)
-  
+
   final override def equals(that: Any) = that match {
     case that: StructData => this.state == that.state
     case _ => false
   }
-  
+
   final override def hashCode() = state.hashCode()
 }
 
