@@ -70,9 +70,12 @@ class OrderPicker2Spec extends FlatSpec with CustomMatchers {
   }
 
   "An OrderPicker2 during construction" should "check the datatypes of its arguments" in {
-    an[IllegalArgumentException] should be thrownBy
+    itShouldBeDisallowed calling
       OrderPicker2(firstNamePicker, IntOrderingStrategies.Ascending)(
         lastNamePicker, StringOrderingStrategies.Ascending)
+    itShouldBeDisallowed calling OrderPicker2(
+      firstNamePicker, StringOrderingStrategies.Ascending)(
+        lastNamePicker, IntOrderingStrategies.Ascending)
   }
 
   it should "check that the two by-pickers have the same sourceType" in {
