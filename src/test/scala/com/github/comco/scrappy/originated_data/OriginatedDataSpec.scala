@@ -46,20 +46,25 @@ class OriginatedDataSpec extends FlatSpec with CustomMatchers {
     val source = OriginatedData.fromSelf(PrimitiveData(3))
     val tupleData = TupleData(3, 4)
     OriginatedData.from(tupleData, source).origin shouldEqual source.origin.computedWithTargetType(tupleData.datatype)
+    OriginatedData.from(tupleData: Data, source).origin shouldEqual source.origin.computedWithTargetType(tupleData.datatype)
     val structType = StructType("name", "a" -> IntPrimitiveType)
     val structData = StructData(structType)("a" -> 2)
     OriginatedData.from(structData, source).origin shouldEqual source.origin.computedWithTargetType(structData.datatype)
+    OriginatedData.from(structData: Data, source).origin shouldEqual source.origin.computedWithTargetType(structData.datatype)
     val seqType = SeqType(IntPrimitiveType)
     val seqData = SeqData(seqType)(1, 2, 3)
     OriginatedData.from(seqData, source).origin shouldEqual source.origin.computedWithTargetType(seqData.datatype)
+    OriginatedData.from(seqData: Data, source).origin shouldEqual source.origin.computedWithTargetType(seqData.datatype)
     val optionType = OptionType(IntPrimitiveType)
     val someData = SomeData(3)
     OriginatedData.from(someData, source).origin shouldEqual source.origin.computedWithTargetType(someData.datatype)
+    OriginatedData.from(someData: Data, source).origin shouldEqual source.origin.computedWithTargetType(someData.datatype)
     val noneData = NoneData(optionType)
     OriginatedData.from(noneData, source).origin shouldEqual source.origin.computedWithTargetType(noneData.datatype)
+    OriginatedData.from(noneData: Data, source).origin shouldEqual source.origin.computedWithTargetType(noneData.datatype)
 
     OriginatedData.from(someData: OptionData, source).origin shouldEqual source.origin.computedWithTargetType(someData.datatype)
-    OriginatedData.from(someData: OptionData, source).origin shouldEqual source.origin.computedWithTargetType(someData.datatype)
+    OriginatedData.from(noneData: OptionData, source).origin shouldEqual source.origin.computedWithTargetType(noneData.datatype)
   }
 
   it should "provide specialized fromSelf-s" in {

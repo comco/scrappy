@@ -143,6 +143,7 @@ abstract class OriginatedPrimitiveData[T] extends OriginatedData {
 
   final override def equals(that: Any) = that match {
     case that: OriginatedPrimitiveData[T] => this.state == that.state
+    case _ => false
   }
 
   final override def hashCode() = state.hashCode()

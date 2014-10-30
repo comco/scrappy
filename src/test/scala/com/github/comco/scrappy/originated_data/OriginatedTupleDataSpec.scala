@@ -1,9 +1,7 @@
 package com.github.comco.scrappy.originated_data
 
 import scala.IndexedSeq
-
 import org.scalatest.FlatSpec
-
 import com.github.comco.scrappy.CustomMatchers
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
@@ -14,6 +12,7 @@ import com.github.comco.scrappy.data.TupleData
 import com.github.comco.scrappy.origin.OriginalOrigin
 import com.github.comco.scrappy.pointer.CoordinateStep
 import com.github.comco.scrappy.pointer.SelfPointer
+import java.util.HashSet
 
 class OriginatedTupleDataSpec extends FlatSpec with CustomMatchers {
   val tupleType = TupleType(IntPrimitiveType, StringPrimitiveType)
@@ -24,40 +23,49 @@ class OriginatedTupleDataSpec extends FlatSpec with CustomMatchers {
   "An Original OriginatedTupleData" should "provide datatype" in {
     originalTupleData.datatype shouldEqual tupleType
   }
-  
+
   it should "provide data" in {
     originalTupleData.data shouldEqual tupleData
   }
-  
+
   it should "provide origin" in {
     originalTupleData.origin shouldEqual selfTupleOrigin
   }
-  
+
   it should "provide length" in {
     originalTupleData.length shouldEqual 2
   }
-  
+
   it should "support checking if a coordinate at a position is occupied" in {
     originalTupleData.isOccupied(0) shouldEqual true
     originalTupleData.isOccupied(1) shouldEqual true
     originalTupleData.isOccupied(2) shouldEqual false
     originalTupleData.isOccupied(-1) shouldEqual false
   }
-  
+
   it should "support retrieving a coordinate at a position by coordinate method" in {
     originalTupleData.coordinate(0) shouldEqual
       OriginatedPrimitiveData(3, selfTupleOrigin.append(CoordinateStep(tupleType, 0)))
-    
+
     originalTupleData.coordinate(1) shouldEqual
       OriginatedPrimitiveData("hi", selfTupleOrigin.append(CoordinateStep(tupleType, 1)))
   }
-  
+
+  it should "check equality" in {
+    val otherTupleData = TupleData(tupleType)(3, "hoi")
+    (originalTupleData == OriginatedTupleData.original(otherTupleData, selfTupleOrigin)) shouldEqual false
+    (originalTupleData == OriginatedData.fromSelf(PrimitiveData(3))) shouldEqual false
+    val s = new HashSet[TupleData]()
+    s.add(tupleData)
+    s.contains(tupleData) shouldEqual true
+  }
+
   val coord1 = OriginatedData.fromSelf(PrimitiveData(3))
   val coord2 = OriginatedData.fromSelf(PrimitiveData("hi"))
-  val computedTupleData = OriginatedTupleData.computed(tupleData, 
-      selfTupleOrigin, 
-      IndexedSeq(coord1, coord2))
-      
+  val computedTupleData = OriginatedTupleData.computed(tupleData,
+    selfTupleOrigin,
+    IndexedSeq(coord1, coord2))
+
   "A Computed OriginatedTupleData" should "provide coordinates" in {
     computedTupleData.coordinates shouldEqual IndexedSeq(coord1, coord2)
   }
