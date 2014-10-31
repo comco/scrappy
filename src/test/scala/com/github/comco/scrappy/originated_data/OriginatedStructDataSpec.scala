@@ -48,13 +48,18 @@ class OriginatedStructDataSpec extends FlatSpec with CustomMatchers {
       OriginatedPrimitiveData("hi", selfStructOrigin.append(FeatureStep(structType, "b")))
   }
 
+  it should "check the validity of feature names" in {
+    itShouldBeDisallowed calling originalStructData.feature("asdas")
+  }
+
   it should "check equality" in {
-    val otherStructData = StructData(structType)("a" -> 3, "b" -> "hoi")
-    (structData == otherStructData) shouldEqual false
-    (structData == OriginatedData.fromSelf(PrimitiveData(3))) shouldEqual false
+    val otherStructData = OriginatedData.fromSelf(StructData(structType)("a" -> 3, "b" -> "hoi"))
+    (originalStructData == otherStructData) shouldEqual false
+    (originalStructData == OriginatedData.fromSelf(PrimitiveData(3))) shouldEqual false
 
-    val s = new HashSet[StructData]()
-
+    val s = new HashSet[OriginatedStructData]()
+    s.add(originalStructData)
+    s.contains(originalStructData) shouldEqual true
   }
 
   val featureA = OriginatedData.fromSelf(PrimitiveData(3))

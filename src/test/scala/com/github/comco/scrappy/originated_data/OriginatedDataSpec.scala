@@ -1,7 +1,6 @@
 package com.github.comco.scrappy.originated_data
 
 import org.scalatest.FlatSpec
-
 import com.github.comco.scrappy.CustomMatchers
 import com.github.comco.scrappy.OptionType
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
@@ -18,12 +17,33 @@ import com.github.comco.scrappy.data.StructData
 import com.github.comco.scrappy.data.TupleData
 import com.github.comco.scrappy.origin.OriginalOrigin
 import com.github.comco.scrappy.pointer.SelfPointer
+import com.github.comco.scrappy.origin.OriginalOrigin
+import com.github.comco.scrappy.origin.OriginalOrigin
 
 class OriginatedDataSpec extends FlatSpec with CustomMatchers {
   "An OriginatedData" should "provide isFilled" in {
     OriginatedData.isFilled(OriginatedData.fromSelf(PrimitiveData(3))) shouldEqual true
     OriginatedData.isFilled(OriginatedData.fromSelf(SomeData(OptionType(IntPrimitiveType), PrimitiveData(3)))) shouldEqual true
     OriginatedData.isFilled(OriginatedData.fromSelf(NoneData(OptionType(IntPrimitiveType)))) shouldEqual false
+  }
+
+  it should "provide from with origin" in {
+    val primitiveData = PrimitiveData(3)
+    OriginatedData.from(primitiveData, OriginalOrigin(SelfPointer(primitiveData.datatype))).data shouldEqual primitiveData
+    OriginatedData.from(primitiveData: Data, OriginalOrigin(SelfPointer(primitiveData.datatype))).data shouldEqual primitiveData
+
+    val tupleData = TupleData(1, 2, 3)
+    OriginatedData.from(tupleData, OriginalOrigin(SelfPointer(tupleData.datatype))).data shouldEqual tupleData
+    OriginatedData.from(tupleData: Data, OriginalOrigin(SelfPointer(tupleData.datatype))).data shouldEqual tupleData
+
+    val structType = StructType("name", "a" -> IntPrimitiveType)
+    val structData = StructData(structType)("a" -> 3)
+    OriginatedData.from(structData, OriginalOrigin(SelfPointer(structData.datatype))).data shouldEqual structData
+    OriginatedData.from(structData: Data, OriginalOrigin(SelfPointer(structData.datatype))).data shouldEqual structData
+
+    val seqData = SeqData(1, 2, 3)
+    OriginatedData.from(seqData, OriginalOrigin(SelfPointer(seqData.datatype))).data shouldEqual seqData
+    OriginatedData.from(seqData: Data, OriginalOrigin(SelfPointer(seqData.datatype))).data shouldEqual seqData
   }
 
   it should "provide from with OptionData" in {

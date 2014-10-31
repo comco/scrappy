@@ -51,13 +51,18 @@ class OriginatedTupleDataSpec extends FlatSpec with CustomMatchers {
       OriginatedPrimitiveData("hi", selfTupleOrigin.append(CoordinateStep(tupleType, 1)))
   }
 
+  it should "check the validity of coordinate at a position" in {
+    itShouldBeDisallowed calling originalTupleData.coordinate(-1)
+    itShouldBeDisallowed calling originalTupleData.coordinate(2)
+  }
+
   it should "check equality" in {
     val otherTupleData = TupleData(tupleType)(3, "hoi")
     (originalTupleData == OriginatedTupleData.original(otherTupleData, selfTupleOrigin)) shouldEqual false
     (originalTupleData == OriginatedData.fromSelf(PrimitiveData(3))) shouldEqual false
-    val s = new HashSet[TupleData]()
-    s.add(tupleData)
-    s.contains(tupleData) shouldEqual true
+    val s = new HashSet[OriginatedTupleData]()
+    s.add(originalTupleData)
+    s.contains(originalTupleData) shouldEqual true
   }
 
   val coord1 = OriginatedData.fromSelf(PrimitiveData(3))
