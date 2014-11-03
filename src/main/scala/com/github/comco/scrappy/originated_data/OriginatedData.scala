@@ -322,6 +322,23 @@ object OriginatedStructData {
     origin: Origin,
     features: Map[String, OriginatedData]): OriginatedStructData =
     SimpleComputedStructData(data, origin, features)
+
+  def apply(data: StructData, origin: Origin): OriginatedStructData =
+    original(data, origin)
+
+  def apply(data: StructData,
+    origin: Origin,
+    features: Map[String, OriginatedData]): OriginatedStructData =
+    computed(data, origin, features)
+
+  def apply(datatype: StructType,
+    origin: Origin,
+    features: Map[String, OriginatedData]): OriginatedStructData = {
+    val data = StructData(datatype, features map {
+      case (name, originatedData) => (name, originatedData.data)
+    })
+    computed(data, origin, features)
+  }
 }
 
 abstract class OriginatedSeqData extends OriginatedData {
@@ -383,5 +400,12 @@ object OriginatedSeqData {
     origin: Origin,
     elements: Seq[OriginatedData]): OriginatedSeqData =
     computed(data, origin, elements)
+
+  def apply(datatype: SeqType,
+    origin: Origin,
+    elements: Seq[OriginatedData]): OriginatedSeqData = {
+    val data = SeqData(datatype, elements.map(_.data))
+    computed(data, origin, elements)
+  }
 }
 

@@ -87,5 +87,6 @@ final class OriginatedSeqDataSpec extends FlatSpec with CustomMatchers {
 
   it should "support construction with apply" in {
     OriginatedSeqData(seqData, originatedSeqData.origin) shouldEqual originatedSeqData
+    OriginatedSeqData(seqType, originatedSeqData.origin, originatedSeqData.elements) shouldEqual originatedSeqData
   }
 }

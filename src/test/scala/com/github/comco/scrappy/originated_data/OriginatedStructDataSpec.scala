@@ -63,6 +63,14 @@ final class OriginatedStructDataSpec extends FlatSpec with CustomMatchers {
     s.contains(originalStructData) shouldEqual true
   }
 
+  it should "provide apply" in {
+    val otherStructData = OriginatedStructData(structData, selfStructOrigin)
+    otherStructData shouldEqual originalStructData
+
+    val otherStructData2 = OriginatedStructData(structData, selfStructOrigin, originalStructData.features)
+    otherStructData2 shouldEqual originalStructData
+  }
+
   val featureA = OriginatedData.fromSelf(PrimitiveData(3))
   val featureB = OriginatedData.fromSelf(PrimitiveData("hi"))
   val originatedFeatures = Map("a" -> featureA, "b" -> featureB)
