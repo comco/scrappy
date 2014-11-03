@@ -1,14 +1,18 @@
 package com.github.comco.scrappy.data
 
+import java.util.HashSet
+
 import org.scalatest.FlatSpec
+
 import com.github.comco.scrappy.CustomMatchers
 import com.github.comco.scrappy.PrimitiveType.BooleanPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
-import java.util.HashSet
 import com.github.comco.scrappy.TupleType
 
-class PrimitiveDataSpec extends FlatSpec with CustomMatchers {
+import PrimitiveData.apply
+
+final class PrimitiveDataSpec extends FlatSpec with CustomMatchers {
   val intData = PrimitiveData(3)
   val stringData = PrimitiveData("hi")
   val booleanData = PrimitiveData(false)
@@ -32,7 +36,7 @@ class PrimitiveDataSpec extends FlatSpec with CustomMatchers {
     "hi".datatype shouldEqual StringPrimitiveType
     false.datatype shouldEqual BooleanPrimitiveType
   }
-  
+
   it should "check equality" in {
     (PrimitiveData(3) == PrimitiveData("hi")) shouldEqual false
     (PrimitiveData(3) == TupleData(TupleType(IndexedSeq.empty), IndexedSeq.empty))

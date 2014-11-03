@@ -14,7 +14,7 @@ import com.github.comco.scrappy.originated_data.OriginatedPrimitiveData
 import com.github.comco.scrappy.pointer.ElementStep
 import com.github.comco.scrappy.pointer.SelfPointer
 
-class ElementPickerSpec extends FlatSpec with CustomMatchers {
+final class ElementPickerSpec extends FlatSpec with CustomMatchers {
   val seqType = SeqType(IntPrimitiveType)
   val seqData = SeqData(seqType)(1, 2, 3)
   val elementPicker = ElementPicker(seqType, 1)

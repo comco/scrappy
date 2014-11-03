@@ -1,21 +1,23 @@
 package com.github.comco.scrappy.originated_data
 
+import java.util.HashSet
+
 import org.scalatest.FlatSpec
+
 import com.github.comco.scrappy.CustomMatchers
+import com.github.comco.scrappy.OptionType
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import com.github.comco.scrappy.SeqType
+import com.github.comco.scrappy.data.NoneData
 import com.github.comco.scrappy.data.PrimitiveData
 import com.github.comco.scrappy.data.PrimitiveData.apply
 import com.github.comco.scrappy.data.SeqData
+import com.github.comco.scrappy.data.SomeData
 import com.github.comco.scrappy.origin.OriginalOrigin
 import com.github.comco.scrappy.pointer.ElementStep
 import com.github.comco.scrappy.pointer.SelfPointer
-import com.github.comco.scrappy.OptionType
-import com.github.comco.scrappy.data.NoneData
-import com.github.comco.scrappy.data.SomeData
-import java.util.HashSet
 
-class OriginatedSeqDataSpec extends FlatSpec with CustomMatchers {
+final class OriginatedSeqDataSpec extends FlatSpec with CustomMatchers {
   val seqType = SeqType(IntPrimitiveType)
   val seqData = SeqData(seqType)(1, 2, 3)
   val originatedSeqData = OriginatedData.fromSelf(seqData)
@@ -81,5 +83,9 @@ class OriginatedSeqDataSpec extends FlatSpec with CustomMatchers {
     val s = new HashSet[OriginatedSeqData]()
     s.add(originatedSeqData)
     s.contains(originatedSeqData) shouldEqual true
+  }
+
+  it should "support construction with apply" in {
+    OriginatedSeqData(seqData, originatedSeqData.origin) shouldEqual originatedSeqData
   }
 }

@@ -1,20 +1,21 @@
 package com.github.comco.scrappy.originated_data
 
+import java.util.HashSet
+
 import org.scalatest.FlatSpec
+
 import com.github.comco.scrappy.CustomMatchers
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
 import com.github.comco.scrappy.StructType
-import com.github.comco.scrappy.pointer.SelfPointer
-import com.github.comco.scrappy.origin.OriginalOrigin
-import com.github.comco.scrappy.data.StructData
-import com.github.comco.scrappy.data.PrimitiveData.apply
-import com.github.comco.scrappy.pointer.FeatureStep
-import com.github.comco.scrappy.pointer.FeatureStep
 import com.github.comco.scrappy.data.PrimitiveData
-import java.util.HashSet
+import com.github.comco.scrappy.data.PrimitiveData.apply
+import com.github.comco.scrappy.data.StructData
+import com.github.comco.scrappy.origin.OriginalOrigin
+import com.github.comco.scrappy.pointer.FeatureStep
+import com.github.comco.scrappy.pointer.SelfPointer
 
-class OriginatedStructDataSpec extends FlatSpec with CustomMatchers {
+final class OriginatedStructDataSpec extends FlatSpec with CustomMatchers {
   val structType = StructType("name",
     "a" -> IntPrimitiveType, "b" -> StringPrimitiveType)
   val selfStructOrigin = OriginalOrigin(SelfPointer(structType))

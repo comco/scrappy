@@ -20,7 +20,7 @@ import com.github.comco.scrappy.picker.ordering.strategy.StringOrderingStrategie
 import com.github.comco.scrappy.pointer.ElementStep
 import com.github.comco.scrappy.pointer.SelfPointer
 
-class OrderPicker2Spec extends FlatSpec with CustomMatchers {
+final class OrderPicker2Spec extends FlatSpec with CustomMatchers {
   val structType = StructType("person",
     "firstName" -> StringPrimitiveType,
     "lastName" -> StringPrimitiveType)

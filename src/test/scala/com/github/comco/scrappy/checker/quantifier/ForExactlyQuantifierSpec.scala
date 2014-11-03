@@ -1,9 +1,10 @@
 package com.github.comco.scrappy.checker.quantifier
 
 import org.scalatest.FlatSpec
+
 import com.github.comco.scrappy.CustomMatchers
 
-class ForExactlyQuantifierSpec extends FlatSpec with CustomMatchers {
+final class ForExactlyQuantifierSpec extends FlatSpec with CustomMatchers {
   "A ForExactlyQuantifier" should "be invalid when empty" in {
     val q0 = ForExactlyQuantifier.from(0).createEmpty()
     q0.finish()
@@ -12,7 +13,7 @@ class ForExactlyQuantifierSpec extends FlatSpec with CustomMatchers {
     q1.finish()
     q1.valid shouldEqual false
   }
-  
+
   it should "be valid when fed the right number of trues" in {
     val q = ForExactlyQuantifier.from(2).createEmpty()
     q.put(false)
@@ -24,7 +25,7 @@ class ForExactlyQuantifierSpec extends FlatSpec with CustomMatchers {
     q.finish()
     q.valid shouldEqual true
   }
-  
+
   it should "be invalid when less number of trues are put" in {
     val q = ForExactlyQuantifier.from(2).createEmpty()
     q.put(false)
@@ -32,7 +33,7 @@ class ForExactlyQuantifierSpec extends FlatSpec with CustomMatchers {
     q.finish()
     q.valid shouldEqual false
   }
-  
+
   it should "be invalid when more number of trues are put" in {
     val q = ForExactlyQuantifier.from(2).createEmpty()
     q.put(true)
@@ -40,7 +41,7 @@ class ForExactlyQuantifierSpec extends FlatSpec with CustomMatchers {
     q.put(true)
     q.valid shouldEqual false
   }
-  
+
   "A ForExactlyQuantifier during construction" should "check for non-negative count" in {
     itShouldBeDisallowed calling ForExactlyQuantifier.from(-1)
   }

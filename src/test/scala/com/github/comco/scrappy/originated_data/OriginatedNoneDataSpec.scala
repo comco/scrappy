@@ -1,19 +1,20 @@
 package com.github.comco.scrappy.originated_data
 
+import java.util.HashSet
+
 import org.scalatest.FlatSpec
+
 import com.github.comco.scrappy.CustomMatchers
 import com.github.comco.scrappy.OptionType
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
-import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
 import com.github.comco.scrappy.data.NoneData
+import com.github.comco.scrappy.data.PrimitiveData
+import com.github.comco.scrappy.data.SomeData
 import com.github.comco.scrappy.origin.OriginalOrigin
 import com.github.comco.scrappy.originated_data.simple.SimpleOriginatedNoneData
 import com.github.comco.scrappy.pointer.SelfPointer
-import com.github.comco.scrappy.data.SomeData
-import com.github.comco.scrappy.data.PrimitiveData
-import java.util.HashSet
 
-class OriginatedNoneDataSpec extends FlatSpec with CustomMatchers {
+final class OriginatedNoneDataSpec extends FlatSpec with CustomMatchers {
   val optionType = OptionType(IntPrimitiveType)
   val origin = OriginalOrigin(SelfPointer(optionType))
   val data = NoneData(optionType)

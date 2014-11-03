@@ -1,7 +1,11 @@
 package com.github.comco.scrappy.originated_data
 
+import java.util.HashSet
+
 import scala.IndexedSeq
+
 import org.scalatest.FlatSpec
+
 import com.github.comco.scrappy.CustomMatchers
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
@@ -12,9 +16,8 @@ import com.github.comco.scrappy.data.TupleData
 import com.github.comco.scrappy.origin.OriginalOrigin
 import com.github.comco.scrappy.pointer.CoordinateStep
 import com.github.comco.scrappy.pointer.SelfPointer
-import java.util.HashSet
 
-class OriginatedTupleDataSpec extends FlatSpec with CustomMatchers {
+final class OriginatedTupleDataSpec extends FlatSpec with CustomMatchers {
   val tupleType = TupleType(IntPrimitiveType, StringPrimitiveType)
   val selfTupleOrigin = OriginalOrigin(SelfPointer(tupleType))
   val tupleData = TupleData(tupleType)(3, "hi")
@@ -22,6 +25,11 @@ class OriginatedTupleDataSpec extends FlatSpec with CustomMatchers {
 
   "An Original OriginatedTupleData" should "provide datatype" in {
     originalTupleData.datatype shouldEqual tupleType
+  }
+
+  it should "support construction with apply" in {
+    val originated2 = OriginatedTupleData(tupleData, selfTupleOrigin)
+    originated2 shouldEqual originalTupleData
   }
 
   it should "provide data" in {
@@ -73,5 +81,26 @@ class OriginatedTupleDataSpec extends FlatSpec with CustomMatchers {
 
   "A Computed OriginatedTupleData" should "provide coordinates" in {
     computedTupleData.coordinates shouldEqual IndexedSeq(coord1, coord2)
+  }
+
+  it should "support construction using apply" in {
+    val computed = OriginatedTupleData(tupleData, selfTupleOrigin, originalTupleData.coordinates)
+    computed shouldEqual originalTupleData
+  }
+
+  "An OriginatedTupleData" should "support pattern-matching" in {
+    originalTupleData match {
+      case OriginatedTupleData(data, origin, coordinates) =>
+        data shouldEqual originalTupleData.data
+        origin shouldEqual originalTupleData.origin
+        coordinates shouldEqual originalTupleData.coordinates
+    }
+
+    computedTupleData match {
+      case OriginatedTupleData(data, origin, coordinates) =>
+        data shouldEqual computedTupleData.data
+        origin shouldEqual computedTupleData.origin
+        coordinates shouldEqual computedTupleData.coordinates
+    }
   }
 }

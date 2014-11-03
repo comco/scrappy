@@ -12,7 +12,7 @@ import com.github.comco.scrappy.picker.AndThenPicker
 import com.github.comco.scrappy.picker.CoordinatePicker
 import com.github.comco.scrappy.picker.SelfPicker
 
-class PointerSpec extends FlatSpec with CustomMatchers {
+final class PointerSpec extends FlatSpec with CustomMatchers {
   "A SelfPointer" should "have the right targetType" in {
     SelfPointer(IntPrimitiveType).targetType shouldEqual IntPrimitiveType
   }
@@ -38,12 +38,12 @@ class PointerSpec extends FlatSpec with CustomMatchers {
     StepPointer(SelfPointer(tupleType), CoordinateStep(tupleType, 1)).picker shouldEqual
       AndThenPicker(SelfPicker(tupleType), CoordinatePicker(tupleType, 1))
   }
-  
+
   def tt(i: Int): TupleType = {
     if (i == 0) TupleType(IntPrimitiveType, StringPrimitiveType)
     else TupleType(IntPrimitiveType, StringPrimitiveType, tt(i - 1))
   }
-  
+
   "A Pointer" should "support concat" in {
     SelfPointer(tt(4)).concat(SelfPointer(tt(4))) shouldEqual SelfPointer(tt(4))
     val pt2 = SelfPointer(tt(4)).append(CoordinateStep(tt(4), 1))
@@ -54,12 +54,12 @@ class PointerSpec extends FlatSpec with CustomMatchers {
     val pt5 = pt3.append(CoordinateStep(tt(3), 2))
     pt3.concat(pt4) shouldEqual pt5
   }
-  
+
   it should "validate pointer types during concat" in {
     val pt1 = SelfPointer(tt(0)).append(CoordinateStep(tt(0), 0))
     itShouldBeDisallowed calling pt1.concat(pt1)
   }
-  
+
   it should "support longestCommonAncestor" in {
     val pt1 = SelfPointer(tt(4)).append(CoordinateStep(tt(4), 2)).append(CoordinateStep(tt(3), 2)).append(CoordinateStep(tt(2), 1))
     val pt2 = SelfPointer(tt(4)).append(CoordinateStep(tt(4), 2)).append(CoordinateStep(tt(3), 1))
@@ -67,7 +67,7 @@ class PointerSpec extends FlatSpec with CustomMatchers {
     pt1.longestCommonAncestor(pt2) shouldEqual pt3
     itShouldBeDisallowed calling pt1.longestCommonAncestor(SelfPointer(tt(3)))
   }
-  
+
   it should "provide steps" in {
     val pt1 = SelfPointer(tt(4))
     pt1.steps shouldEqual List.empty

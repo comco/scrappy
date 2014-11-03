@@ -8,7 +8,7 @@ import com.github.comco.scrappy.data.PrimitiveData
 import com.github.comco.scrappy.originated_data.OriginatedData
 import com.github.comco.scrappy.picker.ordering.strategy.IntOrderingStrategies
 
-class DescendingOrderingStrategySpec extends FlatSpec with Matchers {
+final class DescendingOrderingStrategySpec extends FlatSpec with Matchers {
   val x = PrimitiveData[Int](3)
   val y = PrimitiveData[Int](5)
 
@@ -18,7 +18,7 @@ class DescendingOrderingStrategySpec extends FlatSpec with Matchers {
     ordering.compare(y, x) shouldEqual -1
     ordering.compare(y, y) shouldEqual 0
   }
-  
+
   it should "have the right type" in {
     IntOrderingStrategies.Descending.datatype shouldEqual IntPrimitiveType
   }

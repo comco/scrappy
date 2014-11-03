@@ -15,7 +15,7 @@ import com.github.comco.scrappy.originated_data.OriginatedPrimitiveData
 import com.github.comco.scrappy.originated_data.OriginatedTupleData
 import com.github.comco.scrappy.pointer.SelfPointer
 
-class TuplePickerSpec extends FlatSpec with CustomMatchers {
+final class TuplePickerSpec extends FlatSpec with CustomMatchers {
   val data = PrimitiveData(3)
   val pick0 = ApplyPicker[Int, Int](_ + 1)
   val pick1 = ApplyPicker[Int, String](_.toString)
@@ -50,7 +50,7 @@ class TuplePickerSpec extends FlatSpec with CustomMatchers {
       OriginatedPrimitiveData("3",
         ComputedOrigin(IntPrimitiveType, StringPrimitiveType, Set(SelfPointer(IntPrimitiveType))))
   }
-  
+
   "A TuplePicker during construction" should "check against no coordinates given" in {
     itShouldBeDisallowed calling TuplePicker(IndexedSeq.empty)
   }
@@ -58,4 +58,5 @@ class TuplePickerSpec extends FlatSpec with CustomMatchers {
   it should "check that all the coordinate pickers have the same sourceType" in {
     val pickString = ApplyPicker[String, String](a => a)
     an[IllegalArgumentException] should be thrownBy TuplePicker(pick0, pickString)
-  }}
+  }
+}

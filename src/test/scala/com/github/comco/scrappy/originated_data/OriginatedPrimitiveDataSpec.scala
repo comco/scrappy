@@ -1,17 +1,19 @@
 package com.github.comco.scrappy.originated_data
 
+import java.util.HashSet
+
 import org.scalatest.FlatSpec
+
 import com.github.comco.scrappy.CustomMatchers
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
 import com.github.comco.scrappy.data.PrimitiveData
 import com.github.comco.scrappy.data.PrimitiveData.apply
+import com.github.comco.scrappy.data.TupleData
 import com.github.comco.scrappy.origin.OriginalOrigin
 import com.github.comco.scrappy.pointer.SelfPointer
-import java.util.HashSet
-import com.github.comco.scrappy.data.TupleData
 
-class OriginatedPrimitiveDataSpec extends FlatSpec with CustomMatchers {
+final class OriginatedPrimitiveDataSpec extends FlatSpec with CustomMatchers {
   val selfIntOrigin = OriginalOrigin(SelfPointer(IntPrimitiveType))
   val selfStringOrigin = OriginalOrigin(SelfPointer(StringPrimitiveType))
   val intData: PrimitiveData[Int] = 3

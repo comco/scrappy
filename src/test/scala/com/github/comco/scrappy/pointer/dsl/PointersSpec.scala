@@ -23,46 +23,46 @@ import Pointers.RichTupleType
 import Pointers.RichType
 import Pointers.pointerTo
 
-class PointersSpec extends FlatSpec with CustomMatchers {
+final class PointersSpec extends FlatSpec with CustomMatchers {
   val tupleType = TupleType(IntPrimitiveType, StringPrimitiveType)
   val structType = StructType("str", "a" -> tupleType, "b" -> BooleanPrimitiveType)
   val seqType = SeqType(structType)
-  
+
   "Pointers" should "provide implicit RichPointer construction & deconstruction" in {
     pointerTo(tupleType).sourceType shouldEqual tupleType
     pointerTo(tupleType).coordinate(0).pointer shouldEqual StepPointer(SelfPointer(tupleType), CoordinateStep(tupleType, 0))
     pointerTo(seqType).element(3).feature("a").coordinate(1).pointer shouldEqual
       StepPointer(StepPointer(StepPointer(SelfPointer(seqType), ElementStep(seqType, 3)), FeatureStep(structType, "a")), CoordinateStep(tupleType, 1))
   }
-  
+
   it should "check RichPointer feature type" in {
     itShouldBeDisallowed calling pointerTo(tupleType).feature("b")
     itShouldBeDisallowed calling pointerTo(tupleType).element(3)
     itShouldBeDisallowed calling pointerTo(structType).coordinate(4)
   }
-  
+
   it should "provide Typed Steps construction" in {
     // Strongly-typed
     (tupleType $ 0) shouldEqual CoordinateStep(tupleType, 0)
     (structType $ "b") shouldEqual FeatureStep(structType, "b")
     (seqType $ 3) shouldEqual ElementStep(seqType, 3)
     // Weakly-typed
-    ((tupleType : Type) $ 0) shouldEqual CoordinateStep(tupleType, 0)
-    ((structType : Type) $ "b") shouldEqual FeatureStep(structType, "b")
-    ((seqType : Type) $ 3) shouldEqual ElementStep(seqType, 3)
+    ((tupleType: Type) $ 0) shouldEqual CoordinateStep(tupleType, 0)
+    ((structType: Type) $ "b") shouldEqual FeatureStep(structType, "b")
+    ((seqType: Type) $ 3) shouldEqual ElementStep(seqType, 3)
   }
-  
+
   it should "check argument types in weakly-typed Steps construction" in {
-    itShouldBeDisallowed calling ((tupleType : Type) $ "hi")
-    itShouldBeDisallowed calling ((structType : Type) $ 3)
-    itShouldBeDisallowed calling ((seqType : Type) $ false)
+    itShouldBeDisallowed calling ((tupleType: Type) $ "hi")
+    itShouldBeDisallowed calling ((structType: Type) $ 3)
+    itShouldBeDisallowed calling ((seqType: Type) $ false)
   }
-  
+
   it should "support appending steps directly" in {
     (pointerTo(seqType) /@ (seqType $ 0) /@ (structType $ "a") /@ (tupleType $ 1)).pointer shouldEqual
       StepPointer(StepPointer(StepPointer(SelfPointer(seqType), ElementStep(seqType, 0)), FeatureStep(structType, "a")), CoordinateStep(tupleType, 1))
   }
-  
+
   it should "support appending a sequence of Steps at once" in {
     pointerTo(seqType)(seqType $ 0, structType $ "a").pointer shouldEqual
       StepPointer(StepPointer(SelfPointer(seqType), ElementStep(seqType, 0)), FeatureStep(structType, "a"))

@@ -2,9 +2,11 @@ package com.github.comco.scrappy
 
 import org.scalatest.FlatSpec
 
-import com.github.comco.scrappy.PrimitiveType._
+import com.github.comco.scrappy.PrimitiveType.BooleanPrimitiveType
+import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
+import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
 
-class TupleTypeSpec extends FlatSpec with CustomMatchers {
+final class TupleTypeSpec extends FlatSpec with CustomMatchers {
   val booleanType = BooleanPrimitiveType
   val stringType = StringPrimitiveType
   val intType = IntPrimitiveType
@@ -78,7 +80,7 @@ class SeqTypeSpec extends FlatSpec with CustomMatchers {
 
 class OptionTypeSpec extends FlatSpec with CustomMatchers {
   val optionType = OptionType(IntPrimitiveType)
-  
+
   "An OptionType" should "provide someType" in {
     optionType.someType shouldEqual IntPrimitiveType
   }

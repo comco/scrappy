@@ -1,6 +1,7 @@
 package com.github.comco.scrappy.checker
 
 import org.scalatest.FlatSpec
+
 import com.github.comco.scrappy.CustomMatchers
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
@@ -8,13 +9,12 @@ import com.github.comco.scrappy.TupleType
 import com.github.comco.scrappy.data.PrimitiveData
 import com.github.comco.scrappy.data.PrimitiveData.apply
 import com.github.comco.scrappy.data.TupleData
+import com.github.comco.scrappy.originated_data.OriginatedData
 import com.github.comco.scrappy.picker.ConstPicker
 import com.github.comco.scrappy.picker.CoordinatePicker
 import com.github.comco.scrappy.picker.SelfPicker
-import com.github.comco.scrappy.originated_data.OriginatedData
-import com.github.comco.scrappy.originated_data.OriginatedTupleData
 
-class OrElseCheckerSpec extends FlatSpec with CustomMatchers {
+final class OrElseCheckerSpec extends FlatSpec with CustomMatchers {
   val tupleType = TupleType(IntPrimitiveType, StringPrimitiveType)
   val firstChecker = EqualChecker(
     ConstPicker(tupleType, PrimitiveData(3)),
@@ -46,9 +46,9 @@ class OrElseCheckerSpec extends FlatSpec with CustomMatchers {
     result.scope shouldEqual originatedDataTrue1.origin
     result.checker shouldEqual orChecker
     result.witnesses shouldEqual Set(
-        firstChecker.checkOriginatedData(originatedDataTrue1))
+      firstChecker.checkOriginatedData(originatedDataTrue1))
   }
-  
+
   it should "checkOriginatedData when second valid" in {
     val originatedDataTrue2 = OriginatedData.fromSelf(dataTrue2)
     val result = orChecker.checkOriginatedData(originatedDataTrue2)
@@ -56,9 +56,9 @@ class OrElseCheckerSpec extends FlatSpec with CustomMatchers {
     result.scope shouldEqual originatedDataTrue2.origin
     result.checker shouldEqual orChecker
     result.witnesses shouldEqual Set(
-        secondChecker.checkOriginatedData(originatedDataTrue2))
+      secondChecker.checkOriginatedData(originatedDataTrue2))
   }
-  
+
   it should "checkOriginatedData when invalid" in {
     val originatedDataFalse = OriginatedData.fromSelf(dataFalse)
     val result = orChecker.checkOriginatedData(originatedDataFalse)
@@ -66,8 +66,8 @@ class OrElseCheckerSpec extends FlatSpec with CustomMatchers {
     result.scope shouldEqual originatedDataFalse.origin
     result.checker shouldEqual orChecker
     result.witnesses shouldEqual Set(
-        firstChecker.checkOriginatedData(originatedDataFalse),
-        secondChecker.checkOriginatedData(originatedDataFalse))
+      firstChecker.checkOriginatedData(originatedDataFalse),
+      secondChecker.checkOriginatedData(originatedDataFalse))
   }
 
   "An OrElseChecker during construction" should "check the source types of its arguments" in {

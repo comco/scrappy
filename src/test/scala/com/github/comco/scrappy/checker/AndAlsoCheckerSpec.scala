@@ -1,21 +1,20 @@
 package com.github.comco.scrappy.checker
 
 import org.scalatest.FlatSpec
+
 import com.github.comco.scrappy.CustomMatchers
-import com.github.comco.scrappy.TupleType
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
-import com.github.comco.scrappy.picker.ConstPicker
+import com.github.comco.scrappy.TupleType
 import com.github.comco.scrappy.data.PrimitiveData
-import com.github.comco.scrappy.data.PrimitiveData._
-import com.github.comco.scrappy.picker.CoordinatePicker
+import com.github.comco.scrappy.data.PrimitiveData.apply
 import com.github.comco.scrappy.data.TupleData
-import com.github.comco.scrappy.picker.SelfPicker
-import com.github.comco.scrappy.picker.SelfPicker
 import com.github.comco.scrappy.originated_data.OriginatedData
-import com.github.comco.scrappy.originated_data.OriginatedTupleData
+import com.github.comco.scrappy.picker.ConstPicker
+import com.github.comco.scrappy.picker.CoordinatePicker
+import com.github.comco.scrappy.picker.SelfPicker
 
-class AndAlsoCheckerSpec extends FlatSpec with CustomMatchers {
+final class AndAlsoCheckerSpec extends FlatSpec with CustomMatchers {
   val tupleType = TupleType(IntPrimitiveType, StringPrimitiveType)
   val firstChecker = EqualChecker(
     ConstPicker(tupleType, PrimitiveData(3)),
@@ -50,7 +49,7 @@ class AndAlsoCheckerSpec extends FlatSpec with CustomMatchers {
       firstChecker.checkOriginatedData(originatedDataTrue),
       secondChecker.checkOriginatedData(originatedDataTrue))
   }
-  
+
   it should "checkOriginatedData when first invalid" in {
     val originatedDataFalse1 = OriginatedData.fromSelf(dataFalse1)
     val result = andChecker.checkOriginatedData(originatedDataFalse1)
@@ -58,9 +57,9 @@ class AndAlsoCheckerSpec extends FlatSpec with CustomMatchers {
     result.scope shouldEqual originatedDataFalse1.origin
     result.checker shouldEqual andChecker
     result.witnesses shouldEqual Set(
-        firstChecker.checkOriginatedData(originatedDataFalse1))
+      firstChecker.checkOriginatedData(originatedDataFalse1))
   }
-  
+
   it should "checkOriginatedData when second invalid" in {
     val originatedDataFalse2 = OriginatedData.fromSelf(dataFalse2)
     val result = andChecker.checkOriginatedData(originatedDataFalse2)
@@ -68,7 +67,7 @@ class AndAlsoCheckerSpec extends FlatSpec with CustomMatchers {
     result.scope shouldEqual originatedDataFalse2.origin
     result.checker shouldEqual andChecker
     result.witnesses shouldEqual Set(
-        secondChecker.checkOriginatedData(originatedDataFalse2))
+      secondChecker.checkOriginatedData(originatedDataFalse2))
   }
 
   "An AndAlsoChecker during construction" should "check the source types of its arguments" in {

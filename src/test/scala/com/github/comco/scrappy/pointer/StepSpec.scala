@@ -1,20 +1,21 @@
 package com.github.comco.scrappy.pointer
 
 import org.scalatest.FlatSpec
+
 import com.github.comco.scrappy.CustomMatchers
-import com.github.comco.scrappy.TupleType
+import com.github.comco.scrappy.OptionType
+import com.github.comco.scrappy.PrimitiveType.BooleanPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
-import com.github.comco.scrappy.picker.CoordinatePicker
-import com.github.comco.scrappy.PrimitiveType.BooleanPrimitiveType
-import com.github.comco.scrappy.StructType
-import com.github.comco.scrappy.picker.FeaturePicker
 import com.github.comco.scrappy.SeqType
-import com.github.comco.scrappy.OptionType
+import com.github.comco.scrappy.StructType
+import com.github.comco.scrappy.TupleType
+import com.github.comco.scrappy.picker.CoordinatePicker
 import com.github.comco.scrappy.picker.ElementPicker
+import com.github.comco.scrappy.picker.FeaturePicker
 import com.github.comco.scrappy.picker.SomePicker
 
-class StepSpec extends FlatSpec with CustomMatchers {
+final class StepSpec extends FlatSpec with CustomMatchers {
   val tupleType = TupleType(IntPrimitiveType, StringPrimitiveType)
   val coordinateStep0 = CoordinateStep(tupleType, 0)
   val coordinateStep1 = CoordinateStep(tupleType, 1)
@@ -84,7 +85,7 @@ class StepSpec extends FlatSpec with CustomMatchers {
   "A SomeStep" should "have the right picker" in {
     SomeStep(OptionType(seqType)).picker shouldEqual SomePicker(OptionType(seqType))
   }
-  
+
   it should "provide targetType" in {
     SomeStep(OptionType(seqType)).targetType shouldEqual seqType
   }

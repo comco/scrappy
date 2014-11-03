@@ -1,21 +1,25 @@
 package com.github.comco.scrappy.picker.ordering
 
-import com.github.comco.scrappy.CustomMatchers
-import com.github.comco.scrappy.TupleType
 import org.scalatest.FlatSpec
-import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
-import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
-import com.github.comco.scrappy.data._
-import com.github.comco.scrappy.originated_data._
-import PrimitiveData.apply
 
-class OrderingStrategySpec extends FlatSpec with CustomMatchers {
+import com.github.comco.scrappy.CustomMatchers
+import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
+import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
+import com.github.comco.scrappy.TupleType
+import com.github.comco.scrappy.data.PrimitiveData
+import com.github.comco.scrappy.data.PrimitiveData.apply
+import com.github.comco.scrappy.data.TupleData
+import com.github.comco.scrappy.originated_data.OriginatedData
+import com.github.comco.scrappy.originated_data.OriginatedPrimitiveData
+import com.github.comco.scrappy.originated_data.OriginatedTupleData
+
+final class OrderingStrategySpec extends FlatSpec with CustomMatchers {
   val tupleType = TupleType(StringPrimitiveType, IntPrimitiveType)
 
   object TestOrderingStrategy extends OrderingStrategy with OrderingStrategy.SpecificDatatypeOrderingStrategy {
     type SpecificData = TupleData
     type SpecificOriginatedData = OriginatedTupleData
-    
+
     def datatype = tupleType
 
     def doCompareData(x: TupleData,

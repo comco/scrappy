@@ -1,6 +1,7 @@
 package com.github.comco.scrappy.originated_data
 
 import org.scalatest.FlatSpec
+
 import com.github.comco.scrappy.CustomMatchers
 import com.github.comco.scrappy.OptionType
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
@@ -17,10 +18,8 @@ import com.github.comco.scrappy.data.StructData
 import com.github.comco.scrappy.data.TupleData
 import com.github.comco.scrappy.origin.OriginalOrigin
 import com.github.comco.scrappy.pointer.SelfPointer
-import com.github.comco.scrappy.origin.OriginalOrigin
-import com.github.comco.scrappy.origin.OriginalOrigin
 
-class OriginatedDataSpec extends FlatSpec with CustomMatchers {
+final class OriginatedDataSpec extends FlatSpec with CustomMatchers {
   "An OriginatedData" should "provide isFilled" in {
     OriginatedData.isFilled(OriginatedData.fromSelf(PrimitiveData(3))) shouldEqual true
     OriginatedData.isFilled(OriginatedData.fromSelf(SomeData(OptionType(IntPrimitiveType), PrimitiveData(3)))) shouldEqual true

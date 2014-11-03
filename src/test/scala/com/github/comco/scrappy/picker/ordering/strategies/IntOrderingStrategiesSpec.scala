@@ -1,12 +1,13 @@
 package com.github.comco.scrappy.picker.ordering.strategies
 
-import org.scalatest.Matchers
-import com.github.comco.scrappy.picker.ordering.strategy.IntOrderingStrategies
-import com.github.comco.scrappy.data.PrimitiveData
 import org.scalatest.FlatSpec
-import com.github.comco.scrappy.originated_data.OriginatedData
+import org.scalatest.Matchers
 
-class IntOrderingStrategiesSpec extends FlatSpec with Matchers {
+import com.github.comco.scrappy.data.PrimitiveData
+import com.github.comco.scrappy.originated_data.OriginatedData
+import com.github.comco.scrappy.picker.ordering.strategy.IntOrderingStrategies
+
+final class IntOrderingStrategiesSpec extends FlatSpec with Matchers {
   val x = PrimitiveData[Int](3)
   val y = PrimitiveData[Int](5)
 

@@ -15,7 +15,7 @@ import com.github.comco.scrappy.originated_data.OriginatedPrimitiveData
 import com.github.comco.scrappy.pointer.CoordinateStep
 import com.github.comco.scrappy.pointer.SelfPointer
 
-class AndThenPickerSpec extends FlatSpec with CustomMatchers {
+final class AndThenPickerSpec extends FlatSpec with CustomMatchers {
   val tupleType = TupleType(IntPrimitiveType, StringPrimitiveType)
   val firstPicker = SelfPicker(tupleType)
   val nextPicker = CoordinatePicker(tupleType, 1)
