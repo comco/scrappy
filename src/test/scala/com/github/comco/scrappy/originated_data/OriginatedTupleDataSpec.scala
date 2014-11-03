@@ -88,6 +88,11 @@ final class OriginatedTupleDataSpec extends FlatSpec with CustomMatchers {
     computed shouldEqual originalTupleData
   }
 
+  it should "support coordinate-only construction using apply" in {
+    val computed = OriginatedTupleData(tupleData.datatype, selfTupleOrigin, originalTupleData.coordinates)
+    computed shouldEqual originalTupleData
+  }
+
   "An OriginatedTupleData" should "support pattern-matching" in {
     originalTupleData match {
       case OriginatedTupleData(data, origin, coordinates) =>
