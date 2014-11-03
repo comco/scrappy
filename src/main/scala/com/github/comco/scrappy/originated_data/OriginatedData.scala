@@ -203,6 +203,23 @@ object OriginatedSomeData {
   def computed(data: SomeData, origin: Origin, value: OriginatedData): OriginatedSomeData = {
     SimpleComputedSomeData(data, origin, value)
   }
+
+  def apply(data: SomeData, origin: Origin): OriginatedSomeData = {
+    original(data, origin)
+  }
+
+  def apply(data: SomeData,
+    origin: Origin,
+    value: OriginatedData): OriginatedSomeData = {
+    computed(data, origin, value)
+  }
+
+  def apply(datatype: OptionType,
+    origin: Origin,
+    value: OriginatedData): OriginatedSomeData = {
+    val data = SomeData(datatype, value.data)
+    computed(data, origin, value)
+  }
 }
 
 abstract class OriginatedTupleData extends OriginatedData {

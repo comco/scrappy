@@ -136,7 +136,7 @@ object SomeData {
 
   def apply(datatype: OptionType, value: Data): SomeData = {
     require(value.datatype == datatype.someType,
-      s"SomeData: $this cannot be created with value of type: ${value.datatype}")
+      s"SomeData of datatype: $datatype cannot be created with value of type: ${value.datatype}")
     doApply(datatype, value)
   }
 

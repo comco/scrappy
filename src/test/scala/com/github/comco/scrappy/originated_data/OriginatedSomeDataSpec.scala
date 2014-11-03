@@ -41,6 +41,12 @@ final class OriginatedSomeDataSpec extends FlatSpec with CustomMatchers {
     originalOptionData.isSome shouldEqual true
   }
 
+  it should "construct using apply" in {
+    OriginatedSomeData(optionData, selfOptionOrigin) shouldEqual originalOptionData
+    OriginatedSomeData(optionData, selfOptionOrigin, originalOptionData.value) shouldEqual originalOptionData
+    OriginatedSomeData(optionType, selfOptionOrigin, originalOptionData.value) shouldEqual originalOptionData
+  }
+
   it should "check equality" in {
     (originalOptionData == OriginatedData.fromSelf(PrimitiveData(3))) shouldEqual false
     (originalOptionData == OriginatedData.fromSelf(NoneData(OptionType(IntPrimitiveType)))) shouldEqual false
