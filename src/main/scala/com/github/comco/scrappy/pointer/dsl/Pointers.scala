@@ -20,6 +20,10 @@ import com.github.comco.scrappy.OptionType
 import com.github.comco.scrappy.pointer.SomeStep
 import com.github.comco.scrappy.OptionType
 import com.github.comco.scrappy.pointer.SomeStep
+import scala.util.parsing.combinator.JavaTokenParsers
+import com.github.comco.scrappy.pointer.CoordinateStep
+import com.github.comco.scrappy.pointer.CoordinateStep
+import scala.util.Try
 
 object Pointers {
   implicit class RichPointer(val pointer: Pointer) {
@@ -119,32 +123,54 @@ object Pointers {
       def r = new util.matching.Regex(sc.parts.mkString, sc.parts.tail.map(_ => "x"): _*)
     }
 
-    def mkPointer(sourceType: Type, string: String): Option[Pointer] = (sourceType, string) match {
-      case (sourceType, "") => Some(SelfPointer(sourceType))
-
-      case (sourceType: TupleType, r"/(\d+)$positionText(.*)$rest") => {
-        val position = positionText.toInt
-        for {
-          restPointer <- mkPointer(sourceType.coordinateType(position), rest)
-        } yield restPointer.prepend(sourceType $ position)
+    object PointerParser extends JavaTokenParsers {
+      def coordinate: Parser[Type => CoordinateStep] = "/" ~> wholeNumber ^^ {
+        position =>
+          {
+            case tupleType: TupleType => CoordinateStep(tupleType, position.toInt)
+          }
       }
 
-      case (sourceType: StructType, r"/(\w+)$name(.*)$rest") => for {
-        restPointer <- mkPointer(sourceType.featureType(name), rest)
-      } yield restPointer.prepend(sourceType $ name)
-
-      case (sourceType: SeqType, r"\[(\d+)$indexText\](.*)$rest") => {
-        val index = indexText.toInt
-        for {
-          restPointer <- mkPointer(sourceType.elementType, rest)
-        } yield restPointer.prepend(sourceType $ index)
+      def feature: Parser[Type => FeatureStep] = "/" ~> ident ^^ {
+        name =>
+          {
+            case structType: StructType => FeatureStep(structType, name)
+          }
       }
 
-      case (sourceType: OptionType, r"$$(.*)$rest") => for {
-        restPointer <- mkPointer(sourceType.someType, rest)
-      } yield restPointer.prepend(sourceType $)
+      def element: Parser[Type => ElementStep] = "[" ~> wholeNumber <~ "]" ^^ {
+        index =>
+          {
+            case seqType: SeqType => ElementStep(seqType, index.toInt)
+          }
+      }
 
-      case _ => None
+      def some: Parser[Type => SomeStep] = "$" ^^ {
+        _ =>
+          {
+            case optionType: OptionType => SomeStep(optionType)
+          }
+      }
+
+      def full: Parser[Type => Pointer] = rep(coordinate | feature | element | some) ^^ {
+        steps =>
+          {
+            val f: Type => Pointer = { typ => SelfPointer(typ) }
+            steps.foldRight(f) {
+              case (h, f) => {
+                typ: Type =>
+                  {
+                    val head = h(typ)
+                    f(head.targetType).prepend(head)
+                  }
+              }
+            }
+          }
+      }
+    }
+
+    def mkPointer(sourceType: Type, string: String): Try[Pointer] = {
+      Try(PointerParser.parseAll(PointerParser.full, string).get(sourceType))
     }
   }
 

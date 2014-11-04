@@ -1,7 +1,6 @@
 package com.github.comco.scrappy.pointer.dsl
 
 import scala.language.postfixOps
-
 import org.scalatest.FlatSpec
 import com.github.comco.scrappy.CustomMatchers
 import com.github.comco.scrappy.PrimitiveType.BooleanPrimitiveType
@@ -25,6 +24,8 @@ import Pointers.pointerTo
 import com.github.comco.scrappy.pointer.dsl.Pointers.DefaultStringConvertor
 import com.github.comco.scrappy.pointer.SomeStep
 import com.github.comco.scrappy.OptionType
+import scala.util.Success
+import scala.util.Failure
 
 final class PointersSpec extends FlatSpec with CustomMatchers {
   val tupleType = TupleType(IntPrimitiveType, StringPrimitiveType)
@@ -80,13 +81,19 @@ final class PointersSpec extends FlatSpec with CustomMatchers {
 
   "A Pointers.DefaultStringConvertor" should "support mkString, mkPointer" in {
     val pointer = (pointerTo(seqType) /@ (seqType $ 0) /@ (structType $ "a") /@ (tupleType $ 1)).pointer
+    val optionPointer = (pointerTo(optionType) /@ (optionType $)).pointer
+    
     DefaultStringConvertor.mkString(pointer) shouldEqual "[0]/a/1"
-    DefaultStringConvertor.mkPointer(seqType, "[0]/a/1") shouldEqual Some(pointer)
+    DefaultStringConvertor.mkString(optionPointer) shouldEqual "$"
+    
+    DefaultStringConvertor.mkPointer(seqType, "") shouldEqual Success(SelfPointer(seqType))
+    DefaultStringConvertor.mkPointer(seqType, "[0]") shouldEqual Success(StepPointer(SelfPointer(seqType), ElementStep(seqType, 0)))
+    DefaultStringConvertor.mkPointer(seqType, "[0]/a/1") shouldEqual Success(pointer)
+    DefaultStringConvertor.mkPointer(optionType, "$") shouldEqual Success(optionPointer)
   }
 
   it should "check for wrong pointers" in {
-    DefaultStringConvertor.mkPointer(seqType, "/") shouldEqual None
-    DefaultStringConvertor.mkPointer(seqType, "/") shouldEqual None
-
+    DefaultStringConvertor.mkPointer(seqType, "/") shouldBe a[Failure[_]]
+    DefaultStringConvertor.mkPointer(structType, "//") shouldBe a[Failure[_]]
   }
 }
