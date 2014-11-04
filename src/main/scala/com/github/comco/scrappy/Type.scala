@@ -106,14 +106,19 @@ case class OptionType(val someType: Type) extends Type {
 
 object PrimitiveType {
   implicit case object IntPrimitiveType extends PrimitiveType[Int] {
-    final val typeName = "IntPrimitiveType"
+    final val typeName = "int"
   }
 
   implicit case object StringPrimitiveType extends PrimitiveType[String] {
-    final val typeName = "StringPrimitiveType"
+    final val typeName = "string"
   }
 
   implicit case object BooleanPrimitiveType extends PrimitiveType[Boolean] {
-    final val typeName = "BooleanPrimitiveType"
+    final val typeName = "boolean"
   }
+
+  val typeNames = Map[String, PrimitiveType[_]](
+    "int" -> IntPrimitiveType,
+    "string" -> StringPrimitiveType,
+    "boolean" -> BooleanPrimitiveType)
 }

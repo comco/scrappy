@@ -6,6 +6,14 @@ import com.github.comco.scrappy.PrimitiveType.BooleanPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
 
+final class PrimitiveTypeSpec extends FlatSpec with CustomMatchers {
+  "A PrimitiveType" should "contain type names" in {
+    PrimitiveType.typeNames("int") shouldEqual IntPrimitiveType
+    PrimitiveType.typeNames("string") shouldEqual StringPrimitiveType
+    PrimitiveType.typeNames("boolean") shouldEqual BooleanPrimitiveType
+  }
+}
+
 final class TupleTypeSpec extends FlatSpec with CustomMatchers {
   val booleanType = BooleanPrimitiveType
   val stringType = StringPrimitiveType

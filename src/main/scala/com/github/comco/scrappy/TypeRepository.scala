@@ -1,5 +1,6 @@
 package com.github.comco.scrappy
 
+import scala.language.postfixOps
 import scala.collection.mutable.{ Map => MutableMap }
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import scala.util.parsing.combinator.JavaTokenParsers
@@ -27,7 +28,7 @@ abstract class TypeRepository {
 }
 
 object TypeRepository {
-  object Default extends TypeRepository {
+  class Default extends TypeRepository {
     val registeredStructTypes: MutableMap[String, StructType] = MutableMap.empty
 
     def registerStructType(structType: StructType) {
@@ -47,15 +48,19 @@ object TypeRepository {
     }
 
     object Parser extends JavaTokenParsers {
-      def struct: Parser[StructType] = ident ^^ (registeredStructTypes(_))
+      def named: Parser[Type] = ident ^^ {
+        name => PrimitiveType.typeNames.getOrElse(name, registeredStructTypes(name))
+      }
       def tuple: Parser[TupleType] = ("(" ~> repsep(full, ",") <~ ")") ^^ {
         case types => TupleType(types.toIndexedSeq)
       }
       def seq: Parser[SeqType] = ("[" ~> full <~ "]") ^^ (SeqType(_))
-      def option: Parser[OptionType] = (full <~ "?") ^^ (OptionType(_))
-      def full: Parser[Type] = (tuple | seq | option | struct)
+      def full: Parser[Type] = ((named | tuple | seq) ~ opt("?")) ^^ {
+        case p~None => p
+        case p~Some(_) => OptionType(p)
+      }
     }
 
-    def getType(text: String) = ???
+    def getType(text: String): Type = Parser.parse(Parser.full, text).get
   }
 }
