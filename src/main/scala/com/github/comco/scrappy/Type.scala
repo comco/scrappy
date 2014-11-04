@@ -9,7 +9,9 @@ sealed abstract class Type
  * Base (type)class for primitive scrappy types.
  * These are predefined - user-defined types cannot be primitive.
  */
-sealed abstract class PrimitiveType[T] extends Type
+sealed abstract class PrimitiveType[T] extends Type {
+  def typeName: String
+}
 
 /**
  * Tuple type is for data having coordinates. The coordinates can be indexed by
@@ -103,7 +105,15 @@ case class OptionType(val someType: Type) extends Type {
 }
 
 object PrimitiveType {
-  implicit case object IntPrimitiveType extends PrimitiveType[Int]
-  implicit case object StringPrimitiveType extends PrimitiveType[String]
-  implicit case object BooleanPrimitiveType extends PrimitiveType[Boolean]
+  implicit case object IntPrimitiveType extends PrimitiveType[Int] {
+    final val typeName = "IntPrimitiveType"
+  }
+
+  implicit case object StringPrimitiveType extends PrimitiveType[String] {
+    final val typeName = "StringPrimitiveType"
+  }
+
+  implicit case object BooleanPrimitiveType extends PrimitiveType[Boolean] {
+    final val typeName = "BooleanPrimitiveType"
+  }
 }
