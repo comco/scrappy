@@ -55,6 +55,11 @@ final class PointerSpec extends FlatSpec with CustomMatchers {
     pt3.concat(pt4) shouldEqual pt5
   }
 
+  it should "support prepend" in {
+    SelfPointer(tt(3)).prepend(CoordinateStep(tt(4), 2)) shouldEqual
+      SelfPointer(tt(4)).append(CoordinateStep(tt(4), 2))
+  }
+
   it should "validate pointer types during concat" in {
     val pt1 = SelfPointer(tt(0)).append(CoordinateStep(tt(0), 0))
     itShouldBeDisallowed calling pt1.concat(pt1)

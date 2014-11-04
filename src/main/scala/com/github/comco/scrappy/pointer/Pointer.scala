@@ -16,40 +16,45 @@ sealed abstract class Pointer {
   def picker: Picker
 
   /**
-   * Appends a step to this pointer.
+   * Appends a step (at the end) to this pointer.
    */
   def append(step: Step): Pointer = StepPointer(this, step)
-  
+
+  /**
+   * Prepends a step (at the beginning) to this pointer.
+   */
+  def prepend(step: Step): Pointer = step.mkPointer().concat(this)
+
   /**
    * Concatenates a pointer to this pointer.
    */
   def concat(pointer: Pointer): Pointer = {
     require(targetType == pointer.sourceType,
-        s"Pointer $pointer has incompatible type for concatenation with $this.")
+      s"Pointer $pointer has incompatible type for concatenation with $this.")
     pointer match {
       case SelfPointer(_) => this
       case StepPointer(init, step) => concat(init).append(step)
     }
   }
-  
+
   /**
    * Constructs the longest common ancestor between this pointer and that pointer.
    */
   def longestCommonAncestor(that: Pointer): Pointer = {
     require(this.sourceType == that.sourceType,
-        s"Pointer $that has incompatible source type with $this.")
+      s"Pointer $that has incompatible source type with $this.")
     val results = steps.zip(that.steps).takeWhile({
       case (step1, step2) => step1 == step2
     }).map(_._1)
-    
+
     results.foldLeft[Pointer](SelfPointer(sourceType))(_.append(_))
   }
-  
+
   private def stepsImpl(result: List[Step]): List[Step] = this match {
     case SelfPointer(_) => result
     case StepPointer(init, step) => init.stepsImpl(step :: result)
   }
-  
+
   /**
    * Returns a list of the steps of this pointer.
    */

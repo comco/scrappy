@@ -20,6 +20,10 @@ final class StepSpec extends FlatSpec with CustomMatchers {
   val coordinateStep0 = CoordinateStep(tupleType, 0)
   val coordinateStep1 = CoordinateStep(tupleType, 1)
 
+  "A Step" should "provide mkPointer" in {
+    coordinateStep0.mkPointer shouldEqual StepPointer(SelfPointer(tupleType), coordinateStep0)
+  }
+
   "A CoordinateStep" should "have the right targetType" in {
     coordinateStep0.targetType shouldEqual IntPrimitiveType
     coordinateStep1.targetType shouldEqual StringPrimitiveType

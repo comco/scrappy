@@ -19,7 +19,15 @@ sealed abstract class Step {
   def sourceType: Type
   def targetType: Type
 
+  /**
+   * The picker associated with this step.
+   */
   def picker: Picker
+
+  /**
+   * Creates a single-step pointer from this step.
+   */
+  def mkPointer(): Pointer = StepPointer(SelfPointer(sourceType), this)
 }
 
 case class CoordinateStep(val sourceType: TupleType, val position: Int)
