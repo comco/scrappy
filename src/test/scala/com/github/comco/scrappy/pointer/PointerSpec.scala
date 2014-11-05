@@ -37,6 +37,7 @@ final class PointerSpec extends FlatSpec with CustomMatchers {
   it should "have the right composite picker" in {
     StepPointer(SelfPointer(tupleType), CoordinateStep(tupleType, 1)).picker shouldEqual
       CoordinatePicker(tupleType, 1)
+    
   }
 
   def tt(i: Int): TupleType = {
@@ -88,7 +89,7 @@ final class PointerSpec extends FlatSpec with CustomMatchers {
     val strType = StructType("name", "as" -> seqTupleType)
 
     import Pointers._
-    val ptr = (pointerTo(strType).feature("as") /@ (IntoStep(seqTupleType))).pointer
+    val ptr = pointerTo(strType).feature("as").into.pointer
     ptr.sourceType shouldEqual strType
     ptr.targetType shouldEqual tupleType
   }

@@ -43,6 +43,11 @@ object Pointers {
       case tt: OptionType => RichPointer(pointer.append(SomeStep(tt)))
       case _ => throw new IllegalArgumentException(s"${pointer.targetType} is not an OptionType.")
     }
+    
+    def into: RichPointer = pointer.targetType match {
+      case tt: SeqType => RichPointer(pointer.append(IntoStep(tt)))
+      case _ => throw new IllegalArgumentException(s"${pointer.targetType} is not a SeqType.")
+    }
 
     /**
      * Appends a Step to the pointer.
@@ -102,6 +107,7 @@ object Pointers {
           case FeatureStep(_, name) => s"/$name"
           case ElementStep(_, index) => s"[$index]"
           case SomeStep(_) => "$"
+          case IntoStep(_) => "[*]"
         }
         return initPart + stepPart
       }
@@ -143,8 +149,15 @@ object Pointers {
             case otherType => throw new IllegalArgumentException(s"For parsing an option (ending with ?) type, the type: $otherType should be a OptionType.")
           }
       }
+      
+      def into: Parser[Type => IntoStep] = "[*]" ^^ {
+        _ => {
+          case seqType: SeqType => IntoStep(seqType)
+          case otherType => throw new IllegalArgumentException(s"For parsit an into step ([*]), the type $otherType needs to be a SeqType.")
+        }
+      }
 
-      def full: Parser[Type => Pointer] = rep(coordinate | feature | element | some) ^^ {
+      def full: Parser[Type => Pointer] = rep(coordinate | feature | element | some | into) ^^ {
         steps =>
           {
             val f: Type => Pointer = { typ => SelfPointer(typ) }

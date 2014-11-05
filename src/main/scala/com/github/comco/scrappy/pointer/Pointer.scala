@@ -8,6 +8,8 @@ import com.github.comco.scrappy.SeqType
 import com.github.comco.scrappy.picker.MapPicker
 import com.github.comco.scrappy.picker.FlatMapPicker
 import com.github.comco.scrappy.picker.FlatMapPicker
+import com.github.comco.scrappy.picker.SelfPicker
+import com.github.comco.scrappy.picker.AndThenPicker
 
 /**
  * A pointer is a sequence of steps, identifying the position of a target
@@ -93,8 +95,12 @@ case class StepPointer(init: Pointer, step: Step) extends Pointer {
 
   lazy val picker: Picker = mkPicker(SelfPicker(targetType))
 
-  def mkPicker(tailPicker: Picker) = step match {
-    case step: IntoStep => init.mkPicker(MapPicker(tailPicker))
-    case _ => init.mkPicker(AndThenPicker(step.picker, tailPicker))
+  def mkPicker(tailPicker: Picker): Picker = {
+    if (tailPicker.isInstanceOf[SelfPicker]) {
+      init.mkPicker(step.picker)
+    } else step match {
+      case IntoStep(_) => init.mkPicker(MapPicker(tailPicker))
+      case _ => init.mkPicker(AndThenPicker(step.picker, tailPicker))
+    }
   }
 }

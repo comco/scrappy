@@ -89,6 +89,7 @@ final class PointersSpec extends FlatSpec with CustomMatchers {
     mkPointer(seqType, "[0]") shouldEqual StepPointer(SelfPointer(seqType), ElementStep(seqType, 0))
     mkPointer(seqType, "[0]/a/1") shouldEqual pointer
     mkPointer(optionType, "$") shouldEqual optionPointer
+    mkPointer(seqType, "[*]") shouldEqual StepPointer(SelfPointer(seqType), IntoStep(seqType))
   }
 
   it should "check for wrong pointers" in {
@@ -100,6 +101,9 @@ final class PointersSpec extends FlatSpec with CustomMatchers {
     implicit val repo = Types.Repository.empty.addType(seqType)
     mkPointer("str.") shouldEqual mkPointer(structType, "")
     mkPointer("[str].[0]/a/1") shouldEqual mkPointer(seqType, "[0]/a/1")
+    mkPointer("[str].[*]/a") shouldEqual mkPointer(seqType, "[*]/a")
     a[Types.TypeMissingException] should be thrownBy mkPointer("missin.")
+    a[IllegalArgumentException] should be thrownBy mkPointer("str.[*]")
+    mkPointer("[str].[*]/a/1") shouldEqual StepPointer(StepPointer(StepPointer(SelfPointer(seqType), IntoStep(seqType)), FeatureStep(structType, "a")), CoordinateStep(tupleType, 1))
   }
 }
