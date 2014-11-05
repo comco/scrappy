@@ -11,6 +11,7 @@ import com.github.comco.scrappy.picker.AndThenPicker
 import com.github.comco.scrappy.picker.CoordinatePicker
 import com.github.comco.scrappy.picker.SelfPicker
 import com.github.comco.scrappy.SeqType
+import com.github.comco.scrappy.Types
 
 final class PointerSpec extends FlatSpec with CustomMatchers {
   "A SelfPointer" should "have the right targetType" in {
@@ -72,6 +73,18 @@ final class PointerSpec extends FlatSpec with CustomMatchers {
     val pt3 = SelfPointer(tt(4)).append(CoordinateStep(tt(4), 2))
     pt1.longestCommonAncestor(pt2) shouldEqual pt3
     itShouldBeDisallowed calling pt1.longestCommonAncestor(SelfPointer(tt(3)))
+  }
+  
+  it should "support refining into steps" in {
+    val row = StructType("row", "number" -> IntPrimitiveType, "text" -> StringPrimitiveType)
+    val line = StructType("line", "rows" -> SeqType(row))
+    val page = StructType("page", "lines" -> SeqType(line))
+    val doc = StructType("doc", "pages" -> SeqType(page))
+    implicit val repo = Types.Repository.empty.addType(doc)
+    import Pointers.SimpleRepository.mkPointer
+    val pt1 = mkPointer("doc/pages[*]/lines[3]/rows[*]/number")
+    val pt2 = mkPointer("doc/pages[4]/lines[*]/rows[3]/text")
+    pt1.longestCommonAncestor(pt2) shouldEqual mkPointer("doc/pages[4]/lines[3]/rows[3]")
   }
 
   it should "provide steps" in {

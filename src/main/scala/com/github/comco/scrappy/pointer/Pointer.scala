@@ -52,8 +52,10 @@ sealed abstract class Pointer {
     require(this.sourceType == that.sourceType,
       s"Pointer $that has incompatible source type with $this.")
     val results = steps.zip(that.steps).takeWhile({
-      case (step1, step2) => step1 == step2
-    }).map(_._1)
+      case (step1, step2) => step1.intersect(step2).isDefined
+    }).map {
+      case (step1, step2) => step1.intersect(step2).get
+    }
 
     results.foldLeft[Pointer](SelfPointer(sourceType))(_.append(_))
   }
