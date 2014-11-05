@@ -172,20 +172,15 @@ object Pointers {
             }
           }
       }
-
-      def fullWithType: Parser[(String, Type => Pointer)] = ("""[^.]*""".r ~ "." ~ full) ^^ {
-        case part ~ _ ~ f => (part, f)
-      }
     }
 
     def mkPointer(sourceType: Type, string: String): Pointer = {
       Parser.parseAll(Parser.full, string).get(sourceType)
     }
-
+    
     def mkPointer(string: String)(implicit typeRepo: Types.Repository): Pointer = {
-      Parser.parseAll(Parser.fullWithType, string).get match {
-        case (typeText, f) => f(typeRepo.getType(typeText))
-      }
+      val typeResult = typeRepo.Parser.parse(typeRepo.Parser.full, string)
+      Parser.parseAll(Parser.full, typeResult.next).get(typeResult.get)
     }
   }
 

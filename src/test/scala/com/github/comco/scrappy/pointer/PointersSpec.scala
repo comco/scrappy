@@ -1,9 +1,7 @@
 package com.github.comco.scrappy.pointer
 
 import scala.language.postfixOps
-
 import org.scalatest.FlatSpec
-
 import com.github.comco.scrappy.CustomMatchers
 import com.github.comco.scrappy.OptionType
 import com.github.comco.scrappy.PrimitiveType.BooleanPrimitiveType
@@ -14,7 +12,6 @@ import com.github.comco.scrappy.StructType
 import com.github.comco.scrappy.TupleType
 import com.github.comco.scrappy.Type
 import com.github.comco.scrappy.Types
-
 import Pointers.RichPointer2Pointer
 import Pointers.RichSeqType
 import Pointers.RichStructType
@@ -23,6 +20,15 @@ import Pointers.RichType
 import Pointers.SimpleRepository.mkPointer
 import Pointers.SimpleRepository.mkString
 import Pointers.pointerTo
+import com.github.comco.scrappy.picker.SelfPicker
+import com.github.comco.scrappy.picker.ElementPicker
+import com.github.comco.scrappy.picker.AndThenPicker
+import com.github.comco.scrappy.picker.FeaturePicker
+import com.github.comco.scrappy.picker.MapPicker
+import com.github.comco.scrappy.picker.FeaturePicker
+import com.github.comco.scrappy.picker.CoordinatePicker
+import com.github.comco.scrappy.picker.FeaturePicker
+import com.github.comco.scrappy.picker.FeaturePicker
 
 final class PointersSpec extends FlatSpec with CustomMatchers {
   val tupleType = TupleType(IntPrimitiveType, StringPrimitiveType)
@@ -99,11 +105,44 @@ final class PointersSpec extends FlatSpec with CustomMatchers {
 
   it should "support implicit construction" in {
     implicit val repo = Types.Repository.empty.addType(seqType)
-    mkPointer("str.") shouldEqual mkPointer(structType, "")
-    mkPointer("[str].[0]/a/1") shouldEqual mkPointer(seqType, "[0]/a/1")
-    mkPointer("[str].[*]/a") shouldEqual mkPointer(seqType, "[*]/a")
+    mkPointer("str") shouldEqual mkPointer(structType, "")
+    mkPointer("[str][0]/a/1") shouldEqual mkPointer(seqType, "[0]/a/1")
+    mkPointer("[str][*]/a") shouldEqual mkPointer(seqType, "[*]/a")
     a[Types.TypeMissingException] should be thrownBy mkPointer("missin.")
-    a[IllegalArgumentException] should be thrownBy mkPointer("str.[*]")
-    mkPointer("[str].[*]/a/1") shouldEqual StepPointer(StepPointer(StepPointer(SelfPointer(seqType), IntoStep(seqType)), FeatureStep(structType, "a")), CoordinateStep(tupleType, 1))
+    a[RuntimeException] should be thrownBy mkPointer("str.[*]")
+    mkPointer("[str][*]/a/1") shouldEqual StepPointer(StepPointer(StepPointer(SelfPointer(seqType), IntoStep(seqType)), FeatureStep(structType, "a")), CoordinateStep(tupleType, 1))
+  }
+
+  it should "have correct pickers" in {
+    val line = StructType("line", "number" -> IntPrimitiveType, "content" -> StringPrimitiveType)
+    val page = StructType("page", "lines" -> SeqType(line))
+    val document = StructType("document", "pages" -> SeqType(page))
+
+    implicit val repo = Types.Repository.empty.addType(seqType).addType(document)
+
+    mkPointer("[str]").picker shouldEqual SelfPicker(seqType)
+    mkPointer("[str][0]").picker shouldEqual ElementPicker(seqType, 0)
+    mkPointer("[str][*]").picker shouldEqual SelfPicker(seqType)
+    mkPointer("[str][0]/a").picker shouldEqual
+      AndThenPicker(ElementPicker(seqType, 0), FeaturePicker(structType, "a"))
+
+    mkPointer("[str][*]/a").picker shouldEqual
+      MapPicker(FeaturePicker(structType, "a"))
+
+    mkPointer("[str][*]/a/1").picker shouldEqual
+      MapPicker(AndThenPicker(FeaturePicker(structType, "a"), CoordinatePicker(tupleType, 1)))
+
+    mkPointer("document/pages[*]").picker shouldEqual
+      FeaturePicker(document, "pages")
+
+    mkPointer("document/pages[*]/lines").picker shouldEqual
+      AndThenPicker(FeaturePicker(document, "pages"), MapPicker(FeaturePicker(page, "lines")))
+    
+    mkPointer("document/pages[*]/lines[*]").picker shouldEqual
+      AndThenPicker(FeaturePicker(document, "pages"), MapPicker(FeaturePicker(page, "lines")))
+    
+    mkPointer("document/pages[*]/lines[*]/number").picker shouldEqual
+      AndThenPicker(FeaturePicker(document, "pages"), MapPicker(
+          AndThenPicker(FeaturePicker(page, "lines"), MapPicker(FeaturePicker(line, "number")))))
   }
 }
