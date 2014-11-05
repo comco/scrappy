@@ -1,66 +1,93 @@
 package com.github.comco.scrappy
 
 import scala.language.postfixOps
-import scala.collection.mutable.{ Map => MutableMap }
-import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import scala.util.parsing.combinator.JavaTokenParsers
 
+/**
+ * A type repository represents an immutable collection of named types.
+ * It provides services like: registering a new type to the repository,
+ * conflict detection and resolution and textual representation-to-actual types
+ * convertion.
+ */
 abstract class TypeRepository {
   /**
-   * Registers a user-defined struct type with this repository.
+   * Adds a type and transitively adds all of it parts.
+   * Throws a TypeConflictException when a type with the same name has already been registered.
    */
-  def registerStructType(structType: StructType)
-
-  /**
-   * Unregisters a user-defined struct type with this repository.
-   */
-  def unregisterStructType(name: String)
+  def addType(typ: Type): TypeRepository
 
   /**
    * Creates a string representation of a type.
    */
-  def mkString(typ: Type): String
+  def mkString(typ: Type): String = typ match {
+    case typ: PrimitiveType[t] => typ.typeName
+    case TupleType(coordinateTypes) => coordinateTypes.map(mkString(_)).mkString("(", ", ", ")")
+    case StructType(name, _) => name
+    case SeqType(elementType) => s"[${mkString(elementType)}]"
+    case OptionType(someType) => s"${mkString(someType)}?"
+  }
 
   /**
-   * Returns a type from its textual representation.
+   * Constructs a type from its textual representation.
+   * Throws a TypeMissingException when a type cannot be found in the repository.
    */
-  def getType(text: String): Type
+  def getType(text: String): Type = Parser.parse(Parser.full, text).get
+
+  /**
+   * Returns a type of the given name.
+   */
+  def getNamedType(name: String): Type
+
+  /**
+   * Parser for textual representation of types.
+   */
+  object Parser extends JavaTokenParsers {
+    def named: Parser[Type] = ident ^^ (getNamedType(_))
+    def tuple: Parser[TupleType] = ("(" ~> repsep(full, ",") <~ ")") ^^ {
+      case types => TupleType(types.toIndexedSeq)
+    }
+    def seq: Parser[SeqType] = ("[" ~> full <~ "]") ^^ (SeqType(_))
+    def full: Parser[Type] = ((named | tuple | seq) ~ opt("?")) ^^ {
+      case p ~ None => p
+      case p ~ Some(_) => OptionType(p)
+    }
+  }
 }
 
+class TypeConflictException(message: String) extends IllegalStateException(message)
+class TypeMissingException(message: String) extends IllegalArgumentException(message)
+
 object TypeRepository {
-  class Default extends TypeRepository {
-    val registeredStructTypes: MutableMap[String, StructType] = MutableMap.empty
-
-    def registerStructType(structType: StructType) {
-      registeredStructTypes.update(structType.name, structType)
-    }
-
-    def unregisterStructType(name: String) {
-      registeredStructTypes.remove(name)
-    }
-
-    def mkString(typ: Type): String = typ match {
-      case typ: PrimitiveType[t] => typ.typeName
-      case TupleType(coordinateTypes) => coordinateTypes.map(mkString(_)).mkString("(", ", ", ")")
-      case StructType(name, _) => name
-      case SeqType(elementType) => s"[${mkString(elementType)}]"
-      case OptionType(someType) => s"${mkString(someType)}?"
-    }
-
-    object Parser extends JavaTokenParsers {
-      def named: Parser[Type] = ident ^^ {
-        name => PrimitiveType.typeNames.getOrElse(name, registeredStructTypes(name))
+  case class SimpleTypeRepository(typeRegistry: Map[String, Type]) extends TypeRepository {
+    def addType(typ: Type): SimpleTypeRepository = typ match {
+      case typ: PrimitiveType[_] => this
+      case StructType(name, featureTypes) => {
+        if (typeRegistry.contains(name)) {
+          typeRegistry.get(name) match {
+            case Some(inTyp) =>
+              if (inTyp != typ) {
+                throw new TypeConflictException(s"A type with name: $name already exists in the repository as: $inTyp which is different from the requested: $typ.")
+              }
+            case _ => // nothing
+          }
+        }
+        val repo = SimpleTypeRepository(typeRegistry + (name -> typ))
+        return (repo /: featureTypes.values) {
+          (repo, typ) => repo.addType(typ)
+        }
       }
-      def tuple: Parser[TupleType] = ("(" ~> repsep(full, ",") <~ ")") ^^ {
-        case types => TupleType(types.toIndexedSeq)
+      case TupleType(coordinateTypes) => (this /: coordinateTypes) {
+        (repo, typ) => repo.addType(typ)
       }
-      def seq: Parser[SeqType] = ("[" ~> full <~ "]") ^^ (SeqType(_))
-      def full: Parser[Type] = ((named | tuple | seq) ~ opt("?")) ^^ {
-        case p~None => p
-        case p~Some(_) => OptionType(p)
-      }
+      case OptionType(someType) => addType(someType)
+      case SeqType(elementType) => addType(elementType)
     }
 
-    def getType(text: String): Type = Parser.parse(Parser.full, text).get
+    def getNamedType(name: String) =
+      PrimitiveType.typeNames.getOrElse(name,
+        typeRegistry.getOrElse(name,
+          throw new TypeMissingException(s"Can't resolve type name: $name in this type repository.")))
   }
+
+  final val empty = SimpleTypeRepository(Map.empty)
 }

@@ -6,25 +6,18 @@ import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.BooleanPrimitiveType
 
 final class TypeRepositorySpec extends FlatSpec with CustomMatchers {
-  val repo = new TypeRepository.Default()
-  
+  var repo = TypeRepository.empty
+
   val line = StructType("line", "number" -> IntPrimitiveType, "text" -> StringPrimitiveType)
-  repo.registerStructType(line)
-  
   val page = StructType("page", "lines" -> SeqType(line))
-  repo.registerStructType(page)
-  
   val document = StructType("document", "pages" -> SeqType(page))
-  repo.registerStructType(document)
-  
+  repo = repo.addType(document)
+
   val linePageTuple = TupleType(line, page)
-  
   val someLineOption = OptionType(line)
-  
   val seqLine = SeqType(line)
-  
   val other = StructType("other", "a" -> IntPrimitiveType)
-  
+
   "A TypeRepository" should "provide mkString" in {
     repo.mkString(line) shouldEqual "line"
     repo.mkString(someLineOption) shouldEqual "line?"
@@ -32,7 +25,7 @@ final class TypeRepositorySpec extends FlatSpec with CustomMatchers {
     repo.mkString(seqLine) shouldEqual "[line]"
     repo.mkString(other) shouldEqual "other"
   }
-  
+
   it should "provide getType" in {
     repo.getType("int") shouldEqual IntPrimitiveType
     repo.getType("string") shouldEqual StringPrimitiveType
@@ -41,5 +34,10 @@ final class TypeRepositorySpec extends FlatSpec with CustomMatchers {
     repo.getType("line?") shouldEqual someLineOption
     repo.getType("[line]") shouldEqual seqLine
     repo.getType("(line, page)") shouldEqual linePageTuple
+  }
+
+  val otherLine = StructType("line", "a" -> IntPrimitiveType)
+  it should "check for conflicts" in {
+    a[TypeConflictException] should be thrownBy repo.addType(otherLine)
   }
 }
