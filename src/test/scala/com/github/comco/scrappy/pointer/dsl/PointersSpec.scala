@@ -21,11 +21,12 @@ import Pointers.RichStructType
 import Pointers.RichTupleType
 import Pointers.RichType
 import Pointers.pointerTo
-import com.github.comco.scrappy.pointer.dsl.Pointers.DefaultStringConvertor
 import com.github.comco.scrappy.pointer.SomeStep
 import com.github.comco.scrappy.OptionType
 import scala.util.Success
 import scala.util.Failure
+import Pointers.SimpleRepository._
+import com.github.comco.scrappy.Types
 
 final class PointersSpec extends FlatSpec with CustomMatchers {
   val tupleType = TupleType(IntPrimitiveType, StringPrimitiveType)
@@ -79,21 +80,30 @@ final class PointersSpec extends FlatSpec with CustomMatchers {
       StepPointer(StepPointer(SelfPointer(seqType), ElementStep(seqType, 0)), FeatureStep(structType, "a"))
   }
 
-  "A Pointers.DefaultStringConvertor" should "support mkString, mkPointer" in {
-    val pointer = (pointerTo(seqType) /@ (seqType $ 0) /@ (structType $ "a") /@ (tupleType $ 1)).pointer
-    val optionPointer = (pointerTo(optionType) /@ (optionType $)).pointer
-    
-    DefaultStringConvertor.mkString(pointer) shouldEqual "[0]/a/1"
-    DefaultStringConvertor.mkString(optionPointer) shouldEqual "$"
-    
-    DefaultStringConvertor.mkPointer(seqType, "") shouldEqual Success(SelfPointer(seqType))
-    DefaultStringConvertor.mkPointer(seqType, "[0]") shouldEqual Success(StepPointer(SelfPointer(seqType), ElementStep(seqType, 0)))
-    DefaultStringConvertor.mkPointer(seqType, "[0]/a/1") shouldEqual Success(pointer)
-    DefaultStringConvertor.mkPointer(optionType, "$") shouldEqual Success(optionPointer)
+  val pointer = (pointerTo(seqType) /@ (seqType $ 0) /@ (structType $ "a") /@ (tupleType $ 1)).pointer
+  val optionPointer = (pointerTo(optionType) /@ (optionType $)).pointer
+
+  "A Pointers.DefaultStringConvertor" should "support mkString" in {
+    mkString(pointer) shouldEqual "[0]/a/1"
+    mkString(optionPointer) shouldEqual "$"
+  }
+
+  it should "support mkPointer" in {
+    mkPointer(seqType, "") shouldEqual SelfPointer(seqType)
+    mkPointer(seqType, "[0]") shouldEqual StepPointer(SelfPointer(seqType), ElementStep(seqType, 0))
+    mkPointer(seqType, "[0]/a/1") shouldEqual pointer
+    mkPointer(optionType, "$") shouldEqual optionPointer
   }
 
   it should "check for wrong pointers" in {
-    DefaultStringConvertor.mkPointer(seqType, "/") shouldBe a[Failure[_]]
-    DefaultStringConvertor.mkPointer(structType, "//") shouldBe a[Failure[_]]
+    a[RuntimeException] should be thrownBy mkPointer(seqType, "/")
+    a[RuntimeException] should be thrownBy mkPointer(structType, "//")
+  }
+
+  it should "support implicit construction" in {
+    implicit val repo = Types.Repository.empty.addType(seqType)
+    mkPointer("str.") shouldEqual mkPointer(structType, "")
+    mkPointer("[str].[0]/a/1") shouldEqual mkPointer(seqType, "[0]/a/1")
+    a[Types.TypeMissingException] should be thrownBy mkPointer("missin.")
   }
 }

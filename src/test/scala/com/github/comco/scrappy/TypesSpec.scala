@@ -4,9 +4,10 @@ import org.scalatest.FlatSpec
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.BooleanPrimitiveType
+import Types._
 
 final class TypeRepositorySpec extends FlatSpec with CustomMatchers {
-  var repo = TypeRepository.empty
+  var repo = Repository.empty
 
   val line = StructType("line", "number" -> IntPrimitiveType, "text" -> StringPrimitiveType)
   val page = StructType("page", "lines" -> SeqType(line))

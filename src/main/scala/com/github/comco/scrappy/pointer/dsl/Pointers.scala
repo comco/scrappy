@@ -2,28 +2,23 @@ package com.github.comco.scrappy.pointer.dsl
 
 import scala.language.implicitConversions
 import scala.language.postfixOps
+import scala.util.parsing.combinator.JavaTokenParsers
+import scala.util.parsing.combinator.RegexParsers
+
+import com.github.comco.scrappy.OptionType
 import com.github.comco.scrappy.SeqType
 import com.github.comco.scrappy.StructType
 import com.github.comco.scrappy.TupleType
 import com.github.comco.scrappy.Type
+import com.github.comco.scrappy.Types
 import com.github.comco.scrappy.pointer.CoordinateStep
 import com.github.comco.scrappy.pointer.ElementStep
 import com.github.comco.scrappy.pointer.FeatureStep
 import com.github.comco.scrappy.pointer.Pointer
 import com.github.comco.scrappy.pointer.SelfPointer
+import com.github.comco.scrappy.pointer.SomeStep
 import com.github.comco.scrappy.pointer.Step
-import com.github.comco.scrappy.pointer.SelfPointer
 import com.github.comco.scrappy.pointer.StepPointer
-import com.github.comco.scrappy.pointer.CoordinateStep
-import com.github.comco.scrappy.pointer.SomeStep
-import com.github.comco.scrappy.OptionType
-import com.github.comco.scrappy.pointer.SomeStep
-import com.github.comco.scrappy.OptionType
-import com.github.comco.scrappy.pointer.SomeStep
-import scala.util.parsing.combinator.JavaTokenParsers
-import com.github.comco.scrappy.pointer.CoordinateStep
-import com.github.comco.scrappy.pointer.CoordinateStep
-import scala.util.Try
 
 object Pointers {
   implicit class RichPointer(val pointer: Pointer) {
@@ -104,7 +99,7 @@ object Pointers {
     }
   }
 
-  class StringConvertor {
+  class Repository {
     def mkString(pointer: Pointer): String = pointer match {
       case SelfPointer(_) => ""
       case StepPointer(init, step) => {
@@ -123,11 +118,12 @@ object Pointers {
       def r = new util.matching.Regex(sc.parts.mkString, sc.parts.tail.map(_ => "x"): _*)
     }
 
-    object PointerParser extends JavaTokenParsers {
+    object Parser extends JavaTokenParsers with RegexParsers {
       def coordinate: Parser[Type => CoordinateStep] = "/" ~> wholeNumber ^^ {
         position =>
           {
             case tupleType: TupleType => CoordinateStep(tupleType, position.toInt)
+            case otherType => throw new IllegalArgumentException(s"For parsing the position: $position, the type: $otherType should be a TupleType.")
           }
       }
 
@@ -135,6 +131,7 @@ object Pointers {
         name =>
           {
             case structType: StructType => FeatureStep(structType, name)
+            case otherType => throw new IllegalArgumentException(s"For parsing the name: $name, the type: $otherType should be a StructType.")
           }
       }
 
@@ -142,6 +139,7 @@ object Pointers {
         index =>
           {
             case seqType: SeqType => ElementStep(seqType, index.toInt)
+            case otherType => throw new IllegalArgumentException(s"For parsing the index: $index, the type: $otherType should be a SeqType.")
           }
       }
 
@@ -149,6 +147,7 @@ object Pointers {
         _ =>
           {
             case optionType: OptionType => SomeStep(optionType)
+            case otherType => throw new IllegalArgumentException(s"For parsing an option (ending with ?) type, the type: $otherType should be a OptionType.")
           }
       }
 
@@ -167,12 +166,22 @@ object Pointers {
             }
           }
       }
+
+      def fullWithType: Parser[(String, Type => Pointer)] = ("""[^.]*""".r ~ "." ~ full) ^^ {
+        case part ~ _ ~ f => (part, f)
+      }
     }
 
-    def mkPointer(sourceType: Type, string: String): Try[Pointer] = {
-      Try(PointerParser.parseAll(PointerParser.full, string).get(sourceType))
+    def mkPointer(sourceType: Type, string: String): Pointer = {
+      Parser.parseAll(Parser.full, string).get(sourceType)
+    }
+
+    def mkPointer(string: String)(implicit typeRepo: Types.Repository): Pointer = {
+      Parser.parseAll(Parser.fullWithType, string).get match {
+        case (typeText, f) => f(typeRepo.getType(typeText))
+      }
     }
   }
 
-  implicit object DefaultStringConvertor extends StringConvertor
+  implicit object SimpleRepository extends Repository
 }
