@@ -1,8 +1,11 @@
-package com.github.comco.scrappy.pointer.dsl
+package com.github.comco.scrappy.pointer
 
 import scala.language.postfixOps
+
 import org.scalatest.FlatSpec
+
 import com.github.comco.scrappy.CustomMatchers
+import com.github.comco.scrappy.OptionType
 import com.github.comco.scrappy.PrimitiveType.BooleanPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
@@ -10,23 +13,16 @@ import com.github.comco.scrappy.SeqType
 import com.github.comco.scrappy.StructType
 import com.github.comco.scrappy.TupleType
 import com.github.comco.scrappy.Type
-import com.github.comco.scrappy.pointer.CoordinateStep
-import com.github.comco.scrappy.pointer.ElementStep
-import com.github.comco.scrappy.pointer.FeatureStep
-import com.github.comco.scrappy.pointer.SelfPointer
-import com.github.comco.scrappy.pointer.StepPointer
+import com.github.comco.scrappy.Types
+
 import Pointers.RichPointer2Pointer
 import Pointers.RichSeqType
 import Pointers.RichStructType
 import Pointers.RichTupleType
 import Pointers.RichType
+import Pointers.SimpleRepository.mkPointer
+import Pointers.SimpleRepository.mkString
 import Pointers.pointerTo
-import com.github.comco.scrappy.pointer.SomeStep
-import com.github.comco.scrappy.OptionType
-import scala.util.Success
-import scala.util.Failure
-import Pointers.SimpleRepository._
-import com.github.comco.scrappy.Types
 
 final class PointersSpec extends FlatSpec with CustomMatchers {
   val tupleType = TupleType(IntPrimitiveType, StringPrimitiveType)
