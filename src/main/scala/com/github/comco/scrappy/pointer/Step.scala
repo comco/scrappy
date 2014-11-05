@@ -5,10 +5,12 @@ import com.github.comco.scrappy.SeqType
 import com.github.comco.scrappy.StructType
 import com.github.comco.scrappy.TupleType
 import com.github.comco.scrappy.Type
+import com.github.comco.scrappy.Utils.RichBoolean
 import com.github.comco.scrappy.picker.CoordinatePicker
 import com.github.comco.scrappy.picker.ElementPicker
 import com.github.comco.scrappy.picker.FeaturePicker
 import com.github.comco.scrappy.picker.Picker
+import com.github.comco.scrappy.picker.SelfPicker
 import com.github.comco.scrappy.picker.SomePicker
 
 /**
@@ -28,6 +30,15 @@ sealed abstract class Step {
    * Creates a single-step pointer from this step.
    */
   def mkPointer(): Pointer = StepPointer(SelfPointer(sourceType), this)
+
+  /**
+   * Creates a step which is common to both this step and that step, if possible.
+   */
+  def intersect(that: Step): Option[Step] = (this, that) match {
+    case (a @ ElementStep(ta, i), IntoStep(tb)) if ta == tb => Some(a)
+    case (IntoStep(ta), b @ ElementStep(tb, i)) if ta == tb => Some(b)
+    case (a, b) => (a == b).option(a)
+  }
 }
 
 case class CoordinateStep(val sourceType: TupleType, val position: Int)
@@ -57,6 +68,13 @@ case class ElementStep(val sourceType: SeqType, val index: Int)
   def targetType = sourceType.elementType
 
   def picker = ElementPicker(sourceType, index)
+}
+
+case class IntoStep(val sourceType: SeqType)
+    extends Step {
+  def targetType = sourceType.elementType
+
+  def picker = SelfPicker(sourceType)
 }
 
 case class SomeStep(val sourceType: OptionType)

@@ -1,7 +1,6 @@
 package com.github.comco.scrappy.pointer
 
 import org.scalatest.FlatSpec
-
 import com.github.comco.scrappy.CustomMatchers
 import com.github.comco.scrappy.PrimitiveType.BooleanPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
@@ -11,6 +10,7 @@ import com.github.comco.scrappy.TupleType
 import com.github.comco.scrappy.picker.AndThenPicker
 import com.github.comco.scrappy.picker.CoordinatePicker
 import com.github.comco.scrappy.picker.SelfPicker
+import com.github.comco.scrappy.SeqType
 
 final class PointerSpec extends FlatSpec with CustomMatchers {
   "A SelfPointer" should "have the right targetType" in {
@@ -36,7 +36,7 @@ final class PointerSpec extends FlatSpec with CustomMatchers {
 
   it should "have the right composite picker" in {
     StepPointer(SelfPointer(tupleType), CoordinateStep(tupleType, 1)).picker shouldEqual
-      AndThenPicker(SelfPicker(tupleType), CoordinatePicker(tupleType, 1))
+      CoordinatePicker(tupleType, 1)
   }
 
   def tt(i: Int): TupleType = {
@@ -80,5 +80,16 @@ final class PointerSpec extends FlatSpec with CustomMatchers {
     val st2 = CoordinateStep(tt(3), 1)
     val pt2 = pt1.append(st1).append(st2)
     pt2.steps shouldEqual List(st1, st2)
+  }
+
+  it should "support IntoStep-s" in {
+    val tupleType = TupleType(IntPrimitiveType, StringPrimitiveType)
+    val seqTupleType = SeqType(tupleType)
+    val strType = StructType("name", "as" -> seqTupleType)
+
+    import Pointers._
+    val ptr = (pointerTo(strType).feature("as") /@ (IntoStep(seqTupleType))).pointer
+    ptr.sourceType shouldEqual strType
+    ptr.targetType shouldEqual tupleType
   }
 }

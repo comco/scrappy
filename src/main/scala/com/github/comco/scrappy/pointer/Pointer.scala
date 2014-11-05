@@ -4,6 +4,10 @@ import com.github.comco.scrappy.Type
 import com.github.comco.scrappy.picker.Picker
 import com.github.comco.scrappy.picker.SelfPicker
 import com.github.comco.scrappy.picker.AndThenPicker
+import com.github.comco.scrappy.SeqType
+import com.github.comco.scrappy.picker.MapPicker
+import com.github.comco.scrappy.picker.FlatMapPicker
+import com.github.comco.scrappy.picker.FlatMapPicker
 
 /**
  * A pointer is a sequence of steps, identifying the position of a target
@@ -14,6 +18,8 @@ sealed abstract class Pointer {
   def targetType: Type
 
   def picker: Picker
+
+  def mkPicker(tailPicker: Picker): Picker
 
   /**
    * Appends a step (at the end) to this pointer.
@@ -67,7 +73,12 @@ sealed abstract class Pointer {
 case class SelfPointer(val sourceType: Type) extends Pointer {
   def targetType = sourceType
 
-  def picker = SelfPicker(sourceType)
+  lazy val picker = SelfPicker(sourceType)
+
+  def mkPicker(tailPicker: Picker): Picker = {
+    require(tailPicker.sourceType == sourceType)
+    tailPicker
+  }
 }
 
 /**
@@ -80,5 +91,10 @@ case class StepPointer(init: Pointer, step: Step) extends Pointer {
   lazy val sourceType = init.sourceType
   lazy val targetType = step.targetType
 
-  def picker = AndThenPicker(init.picker, step.picker)
+  lazy val picker: Picker = mkPicker(SelfPicker(targetType))
+
+  def mkPicker(tailPicker: Picker) = step match {
+    case step: IntoStep => init.mkPicker(MapPicker(tailPicker))
+    case _ => init.mkPicker(AndThenPicker(step.picker, tailPicker))
+  }
 }
