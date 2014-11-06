@@ -41,4 +41,9 @@ final class TypeRepositorySpec extends FlatSpec with CustomMatchers {
   it should "check for conflicts" in {
     a[TypeConflictException] should be thrownBy repo.addType(otherLine)
   }
+
+  it should "support creating using a dsl" in {
+    import Types.dsl._
+    struct("document", "lines" -> seq(int))
+  }
 }

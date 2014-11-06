@@ -1,17 +1,20 @@
 package com.github.comco.scrappy.pointer
 
 import org.scalatest.FlatSpec
+
 import com.github.comco.scrappy.CustomMatchers
 import com.github.comco.scrappy.PrimitiveType.BooleanPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
+import com.github.comco.scrappy.SeqType
 import com.github.comco.scrappy.StructType
 import com.github.comco.scrappy.TupleType
-import com.github.comco.scrappy.picker.AndThenPicker
+import com.github.comco.scrappy.Types
 import com.github.comco.scrappy.picker.CoordinatePicker
 import com.github.comco.scrappy.picker.SelfPicker
-import com.github.comco.scrappy.SeqType
-import com.github.comco.scrappy.Types
+
+import Pointers.SimpleRepository.mkPointer
+import Pointers.pointerTo
 
 final class PointerSpec extends FlatSpec with CustomMatchers {
   "A SelfPointer" should "have the right targetType" in {
@@ -38,7 +41,7 @@ final class PointerSpec extends FlatSpec with CustomMatchers {
   it should "have the right composite picker" in {
     StepPointer(SelfPointer(tupleType), CoordinateStep(tupleType, 1)).picker shouldEqual
       CoordinatePicker(tupleType, 1)
-    
+
   }
 
   def tt(i: Int): TupleType = {
@@ -74,7 +77,7 @@ final class PointerSpec extends FlatSpec with CustomMatchers {
     pt1.longestCommonAncestor(pt2) shouldEqual pt3
     itShouldBeDisallowed calling pt1.longestCommonAncestor(SelfPointer(tt(3)))
   }
-  
+
   it should "support refining into steps" in {
     val row = StructType("row", "number" -> IntPrimitiveType, "text" -> StringPrimitiveType)
     val line = StructType("line", "rows" -> SeqType(row))

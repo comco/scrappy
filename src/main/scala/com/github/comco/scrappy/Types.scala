@@ -1,6 +1,8 @@
 package com.github.comco.scrappy
 
+import scala.language.implicitConversions
 import scala.language.postfixOps
+
 import scala.util.parsing.combinator.JavaTokenParsers
 
 object Types {
@@ -94,5 +96,21 @@ object Types {
     }
 
     final val empty = Simple(Map.empty)
+  }
+
+  object dsl {
+    import PrimitiveType._
+
+    def tuple(coordinateTypes: Type*): TupleType = TupleType(coordinateTypes.toIndexedSeq)
+    def struct(name: String, features: (String, Type)*): StructType = StructType(name, features: _*)
+    def seq(elementType: Type): SeqType = SeqType(elementType)
+    def opt(someType: Type): OptionType = OptionType(someType)
+
+    val int = IntPrimitiveType
+    val string = StringPrimitiveType
+    val boolean = BooleanPrimitiveType
+
+    implicit def Tuple2_To_TupleType(coordinateTypes: (Type, Type)): TupleType = tuple(coordinateTypes._1, coordinateTypes._2)
+    implicit def Tuple3_To_TupleType(coordinateTypes: (Type, Type, Type)): TupleType = tuple(coordinateTypes._1, coordinateTypes._2, coordinateTypes._3)
   }
 }

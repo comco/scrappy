@@ -2,16 +2,15 @@ package com.github.comco.scrappy.pointer
 
 import scala.language.implicitConversions
 import scala.language.postfixOps
-
 import scala.util.parsing.combinator.JavaTokenParsers
 import scala.util.parsing.combinator.RegexParsers
-
 import com.github.comco.scrappy.OptionType
 import com.github.comco.scrappy.SeqType
 import com.github.comco.scrappy.StructType
 import com.github.comco.scrappy.TupleType
 import com.github.comco.scrappy.Type
 import com.github.comco.scrappy.Types
+import com.github.comco.scrappy.picker.SelfPicker
 
 object Pointers {
   implicit class RichPointer(val pointer: Pointer) {
@@ -43,7 +42,7 @@ object Pointers {
       case tt: OptionType => RichPointer(pointer.append(SomeStep(tt)))
       case _ => throw new IllegalArgumentException(s"${pointer.targetType} is not an OptionType.")
     }
-    
+
     def into: RichPointer = pointer.targetType match {
       case tt: SeqType => RichPointer(pointer.append(IntoStep(tt)))
       case _ => throw new IllegalArgumentException(s"${pointer.targetType} is not a SeqType.")
@@ -61,7 +60,6 @@ object Pointers {
       if (steps.isEmpty) this
       else (this /@ steps.head)(steps.tail: _*)
     }
-
   }
 
   def pointerTo(rootType: Type) = RichPointer(SelfPointer(rootType))
@@ -149,12 +147,13 @@ object Pointers {
             case otherType => throw new IllegalArgumentException(s"For parsing an option (ending with ?) type, the type: $otherType should be a OptionType.")
           }
       }
-      
+
       def into: Parser[Type => IntoStep] = "[*]" ^^ {
-        _ => {
-          case seqType: SeqType => IntoStep(seqType)
-          case otherType => throw new IllegalArgumentException(s"For parsit an into step ([*]), the type $otherType needs to be a SeqType.")
-        }
+        _ =>
+          {
+            case seqType: SeqType => IntoStep(seqType)
+            case otherType => throw new IllegalArgumentException(s"For parsit an into step ([*]), the type $otherType needs to be a SeqType.")
+          }
       }
 
       def full: Parser[Type => Pointer] = rep(coordinate | feature | element | some | into) ^^ {
@@ -177,7 +176,7 @@ object Pointers {
     def mkPointer(sourceType: Type, string: String): Pointer = {
       Parser.parseAll(Parser.full, string).get(sourceType)
     }
-    
+
     def mkPointer(string: String)(implicit typeRepo: Types.Repository): Pointer = {
       val typeResult = typeRepo.Parser.parse(typeRepo.Parser.full, string)
       Parser.parseAll(Parser.full, typeResult.next).get(typeResult.get)
