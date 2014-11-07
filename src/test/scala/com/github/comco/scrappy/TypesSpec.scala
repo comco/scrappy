@@ -4,7 +4,9 @@ import org.scalatest.FlatSpec
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.BooleanPrimitiveType
-import Types._
+import com.github.comco.scrappy.Types.dsl.TypeDefinitions
+import com.github.comco.scrappy.Types.TypeConflictException
+import com.github.comco.scrappy.Types.Repository
 
 final class TypeRepositorySpec extends FlatSpec with CustomMatchers {
   var repo = Repository.empty
@@ -43,7 +45,22 @@ final class TypeRepositorySpec extends FlatSpec with CustomMatchers {
   }
 
   it should "support creating using a dsl" in {
-    import Types.dsl._
-    struct("document", "lines" -> seq(int))
+    object TextDefinitions extends TypeDefinitions(Repository.empty) {
+      'point is 'coordinates -> (int, int)
+
+      'page is (
+        'number -> int,
+        'text -> string)
+
+      'document is (
+        'title -> string,
+        'pages -> seq('page))
+    }
+
+    import com.github.comco.scrappy.Types.dsl._
+
+    TextDefinitions.repository.getNamedType("document").isInstanceOf[StructType] shouldBe true
+    TextDefinitions.repository.getNamedType("point").asInstanceOf[StructType].featureType("coordinates") shouldEqual
+      TupleType(IntPrimitiveType, IntPrimitiveType)
   }
 }

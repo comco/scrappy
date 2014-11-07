@@ -99,18 +99,37 @@ object Types {
   }
 
   object dsl {
-    import PrimitiveType._
+    class TypeDefinitions(private[this] var _repo: Repository) {
+      import PrimitiveType._
 
-    def tuple(coordinateTypes: Type*): TupleType = TupleType(coordinateTypes.toIndexedSeq)
-    def struct(name: String, features: (String, Type)*): StructType = StructType(name, features: _*)
-    def seq(elementType: Type): SeqType = SeqType(elementType)
-    def opt(someType: Type): OptionType = OptionType(someType)
+      def tuple(coordinateTypes: Type*): TupleType = TupleType(coordinateTypes.toIndexedSeq)
+      def struct(name: String, features: (String, Type)*): StructType = StructType(name, features: _*)
+      def seq(elementType: Type): SeqType = SeqType(elementType)
+      def opt(someType: Type): OptionType = OptionType(someType)
 
-    val int = IntPrimitiveType
-    val string = StringPrimitiveType
-    val boolean = BooleanPrimitiveType
+      val int = IntPrimitiveType
+      val string = StringPrimitiveType
+      val boolean = BooleanPrimitiveType
 
-    implicit def Tuple2_To_TupleType(coordinateTypes: (Type, Type)): TupleType = tuple(coordinateTypes._1, coordinateTypes._2)
-    implicit def Tuple3_To_TupleType(coordinateTypes: (Type, Type, Type)): TupleType = tuple(coordinateTypes._1, coordinateTypes._2, coordinateTypes._3)
+      implicit class RichSymbol(symbol: Symbol) {
+        def is(features: (Symbol, Type)*): StructType = {
+          val s = struct(symbol.name, features.map {
+            case (s, t) => (s.name, t)
+          }: _*)
+
+          _repo = _repo.addType(s)
+          s
+        }
+      }
+
+      implicit def repository: Repository = _repo
+
+      implicit def Tuple2_To_TupleType(coordinateTypes: (Type, Type)): TupleType = tuple(coordinateTypes._1, coordinateTypes._2)
+      implicit def Tuple3_To_TupleType(coordinateTypes: (Type, Type, Type)): TupleType = tuple(coordinateTypes._1, coordinateTypes._2, coordinateTypes._3)
+
+      implicit def Symbol_To_Type(symbol: Symbol)(implicit repo: Types.Repository): Type = {
+        repo.getNamedType(symbol.name)
+      }
+    }
   }
 }
