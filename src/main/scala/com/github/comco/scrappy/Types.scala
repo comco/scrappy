@@ -10,7 +10,7 @@ object Types {
    * A type repository represents an immutable collection of named types.
    * It provides services like: registering a new type to the repository,
    * conflict detection and resolution and textual representation-to-actual types
-   * convertion.
+   * conversion.
    */
   abstract class Repository {
     /**
@@ -96,22 +96,31 @@ object Types {
     }
 
     final val empty = Simple(Map.empty)
-  }
 
-  object dsl {
-    class TypeDefinitions(private[this] var _repo: Repository) {
+    /**
+     * Provides a domain-specific language for easily defining new struct types
+     * based on an existing type repository.
+     * WARNING: This is a class meant as a utility, don't play funny games with it!
+     */
+    abstract class Extension(private[this] var _repo: Repository = empty) extends Repository {
+      implicit def repository: Repository = _repo
+
+      def addType(typ: Type) = repository.addType(typ)
+
+      def getNamedType(name: String) = repository.getNamedType(name)
+
       import PrimitiveType._
+      
+      protected def tuple(coordinateTypes: Type*): TupleType = TupleType(coordinateTypes.toIndexedSeq)
+      protected def struct(name: String, features: (String, Type)*): StructType = StructType(name, features: _*)
+      protected def seq(elementType: Type): SeqType = SeqType(elementType)
+      protected def opt(someType: Type): OptionType = OptionType(someType)
+      
+      protected val int = IntPrimitiveType
+      protected val string = StringPrimitiveType
+      protected val boolean = BooleanPrimitiveType
 
-      def tuple(coordinateTypes: Type*): TupleType = TupleType(coordinateTypes.toIndexedSeq)
-      def struct(name: String, features: (String, Type)*): StructType = StructType(name, features: _*)
-      def seq(elementType: Type): SeqType = SeqType(elementType)
-      def opt(someType: Type): OptionType = OptionType(someType)
-
-      val int = IntPrimitiveType
-      val string = StringPrimitiveType
-      val boolean = BooleanPrimitiveType
-
-      implicit class RichSymbol(symbol: Symbol) {
+      protected implicit class RichSymbol(symbol: Symbol) {
         def is(features: (Symbol, Type)*): StructType = {
           val s = struct(symbol.name, features.map {
             case (s, t) => (s.name, t)
@@ -122,12 +131,11 @@ object Types {
         }
       }
 
-      implicit def repository: Repository = _repo
+      protected implicit def Tuple2_To_TupleType(coordinateTypes: (Type, Type)): TupleType = tuple(coordinateTypes._1, coordinateTypes._2)
 
-      implicit def Tuple2_To_TupleType(coordinateTypes: (Type, Type)): TupleType = tuple(coordinateTypes._1, coordinateTypes._2)
-      implicit def Tuple3_To_TupleType(coordinateTypes: (Type, Type, Type)): TupleType = tuple(coordinateTypes._1, coordinateTypes._2, coordinateTypes._3)
+      protected implicit def Tuple3_To_TupleType(coordinateTypes: (Type, Type, Type)): TupleType = tuple(coordinateTypes._1, coordinateTypes._2, coordinateTypes._3)
 
-      implicit def Symbol_To_Type(symbol: Symbol)(implicit repo: Types.Repository): Type = {
+      protected implicit def Symbol_To_Type(symbol: Symbol)(implicit repo: Types.Repository): Type = {
         repo.getNamedType(symbol.name)
       }
     }

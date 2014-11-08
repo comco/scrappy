@@ -4,7 +4,6 @@ import org.scalatest.FlatSpec
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.BooleanPrimitiveType
-import com.github.comco.scrappy.Types.dsl.TypeDefinitions
 import com.github.comco.scrappy.Types.TypeConflictException
 import com.github.comco.scrappy.Types.Repository
 
@@ -45,7 +44,7 @@ final class TypeRepositorySpec extends FlatSpec with CustomMatchers {
   }
 
   it should "support creating using a dsl" in {
-    object TextDefinitions extends TypeDefinitions(Repository.empty) {
+    val textRepo = new Repository.Extension {
       'point is 'coordinates -> (int, int)
 
       'page is (
@@ -56,11 +55,17 @@ final class TypeRepositorySpec extends FlatSpec with CustomMatchers {
         'title -> string,
         'pages -> seq('page))
     }
+    
+    val bookRepo = new Repository.Extension(textRepo) {
+      'book is (
+          'title -> string, 
+          'author -> string,
+          'chapters -> seq('document))
+    }
 
-    import com.github.comco.scrappy.Types.dsl._
-
-    TextDefinitions.repository.getNamedType("document").isInstanceOf[StructType] shouldBe true
-    TextDefinitions.repository.getNamedType("point").asInstanceOf[StructType].featureType("coordinates") shouldEqual
+    textRepo.getNamedType("document").isInstanceOf[StructType] shouldBe true
+    textRepo.getNamedType("point").asInstanceOf[StructType].featureType("coordinates") shouldEqual
       TupleType(IntPrimitiveType, IntPrimitiveType)
+    bookRepo.getNamedType("book").isInstanceOf[StructType] shouldBe true
   }
 }
