@@ -55,12 +55,12 @@ final class TypeRepositorySpec extends FlatSpec with CustomMatchers {
         'title -> string,
         'pages -> seq('page))
     }
-    
+
     val bookRepo = new Repository.Extension(textRepo) {
       'book is (
-          'title -> string, 
-          'author -> string,
-          'chapters -> seq('document))
+        'title -> string,
+        'author -> string,
+        'chapters -> seq('document))
     }
 
     textRepo.getNamedType("document").isInstanceOf[StructType] shouldBe true

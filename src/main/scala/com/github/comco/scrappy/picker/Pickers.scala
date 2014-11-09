@@ -8,6 +8,7 @@ import com.github.comco.scrappy.TupleType
 import com.github.comco.scrappy.SeqType
 import com.github.comco.scrappy.OptionType
 import com.github.comco.scrappy.PrimitiveType
+import com.github.comco.scrappy.Types
 
 object Pickers {
   implicit class RichPicker(val picker: Picker) {
@@ -57,6 +58,10 @@ object Pickers {
   }
 
   object dsl {
+    implicit def Symbol2RichPicker(symbol: Symbol)(implicit repo: Types.Repository): RichPicker = {
+      RichPicker(SelfPicker(repo.getNamedType(symbol)))
+    }
+    
     implicit def Type2Picker(typ: Type): Picker = SelfPicker(typ)
     implicit def Type2RichPicker(typ: Type): RichPicker = RichPicker(Type2Picker(typ))
   }

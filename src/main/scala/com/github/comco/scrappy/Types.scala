@@ -41,6 +41,8 @@ object Types {
      */
     def getNamedType(name: String): Type
 
+    def getNamedType(symbol: Symbol): Type = getNamedType(symbol.name)
+    
     /**
      * Parser for textual representation of types.
      */
