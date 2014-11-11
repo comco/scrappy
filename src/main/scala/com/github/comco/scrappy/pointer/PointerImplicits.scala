@@ -9,10 +9,11 @@ import com.github.comco.scrappy.SeqType
 import com.github.comco.scrappy.StructType
 import com.github.comco.scrappy.TupleType
 import com.github.comco.scrappy.Type
-import com.github.comco.scrappy.Types
 import com.github.comco.scrappy.picker.SelfPicker
+import com.github.comco.scrappy.repository.TypeRepository
 
-object Pointers {
+trait PointerImplicits {
+
   implicit class RichPointer(val pointer: Pointer) {
     /**
      * Appends a FeatureStep to this pointer if its target is a StructType.
@@ -21,6 +22,8 @@ object Pointers {
       case tt: StructType => RichPointer(pointer.append(FeatureStep(tt, name)))
       case _ => throw new IllegalArgumentException(s"${pointer.targetType} is not a StructType.")
     }
+
+    def feature(name: Symbol): RichPointer = feature(name.name)
 
     /**
      * Appends a CoordinateStep to this pointer if its target is a TupleType.
@@ -62,8 +65,9 @@ object Pointers {
     }
   }
 
-  def pointerTo(rootType: Type) = RichPointer(SelfPointer(rootType))
-  implicit def RichPointer2Pointer(rich: RichPointer): Pointer = rich.pointer
+  implicit def RichPointer_To_Pointer(rich: RichPointer): Pointer = rich.pointer
+
+  def pointerTo(rootType: Type): RichPointer = RichPointer(SelfPointer(rootType))
 
   implicit class RichStructType(structType: StructType) {
     def $(name: String) = FeatureStep(structType, name)
@@ -93,95 +97,93 @@ object Pointers {
       case typ: OptionType => RichOptionType(typ) $
       case _ => throw new IllegalArgumentException(s"Cannot construct option pointer step from type: $typ.")
     }
+
+    def to: RichPointer = pointerTo(typ)
   }
 
-  class Repository {
-    def mkString(pointer: Pointer): String = pointer match {
-      case SelfPointer(_) => ""
-      case StepPointer(init, step) => {
-        val initPart = mkString(init)
-        val stepPart = step match {
-          case CoordinateStep(_, position) => s"/$position"
-          case FeatureStep(_, name) => s"/$name"
-          case ElementStep(_, index) => s"[$index]"
-          case SomeStep(_) => "$"
-          case IntoStep(_) => "[*]"
+  implicit class RichSymbol(sym: Symbol)(implicit repo: TypeRepository) {
+    def to: RichPointer = pointerTo(repo.getNamedType(sym))
+  }
+
+  def mkString(pointer: Pointer): String = pointer match {
+    case SelfPointer(_) => ""
+    case StepPointer(init, step) => {
+      val initPart = mkString(init)
+      val stepPart = step match {
+        case CoordinateStep(_, position) => s"/$position"
+        case FeatureStep(_, name) => s"/$name"
+        case ElementStep(_, index) => s"[$index]"
+        case SomeStep(_) => "$"
+        case IntoStep(_) => "[*]"
+      }
+      return initPart + stepPart
+    }
+  }
+
+  object Parser extends JavaTokenParsers with RegexParsers {
+    def coordinate: Parser[Type => CoordinateStep] = "/" ~> wholeNumber ^^ {
+      position =>
+        {
+          case tupleType: TupleType => CoordinateStep(tupleType, position.toInt)
+          case otherType => throw new IllegalArgumentException(s"For parsing the position: $position, the type: $otherType should be a TupleType.")
         }
-        return initPart + stepPart
-      }
     }
 
-    implicit class Regex(sc: StringContext) {
-      def r = new util.matching.Regex(sc.parts.mkString, sc.parts.tail.map(_ => "x"): _*)
+    def feature: Parser[Type => FeatureStep] = "/" ~> ident ^^ {
+      name =>
+        {
+          case structType: StructType => FeatureStep(structType, name)
+          case otherType => throw new IllegalArgumentException(s"For parsing the name: $name, the type: $otherType should be a StructType.")
+        }
     }
 
-    object Parser extends JavaTokenParsers with RegexParsers {
-      def coordinate: Parser[Type => CoordinateStep] = "/" ~> wholeNumber ^^ {
-        position =>
-          {
-            case tupleType: TupleType => CoordinateStep(tupleType, position.toInt)
-            case otherType => throw new IllegalArgumentException(s"For parsing the position: $position, the type: $otherType should be a TupleType.")
-          }
-      }
+    def element: Parser[Type => ElementStep] = "[" ~> wholeNumber <~ "]" ^^ {
+      index =>
+        {
+          case seqType: SeqType => ElementStep(seqType, index.toInt)
+          case otherType => throw new IllegalArgumentException(s"For parsing the index: $index, the type: $otherType should be a SeqType.")
+        }
+    }
 
-      def feature: Parser[Type => FeatureStep] = "/" ~> ident ^^ {
-        name =>
-          {
-            case structType: StructType => FeatureStep(structType, name)
-            case otherType => throw new IllegalArgumentException(s"For parsing the name: $name, the type: $otherType should be a StructType.")
-          }
-      }
+    def some: Parser[Type => SomeStep] = "$" ^^ {
+      _ =>
+        {
+          case optionType: OptionType => SomeStep(optionType)
+          case otherType => throw new IllegalArgumentException(s"For parsing an option (ending with ?) type, the type: $otherType should be a OptionType.")
+        }
+    }
 
-      def element: Parser[Type => ElementStep] = "[" ~> wholeNumber <~ "]" ^^ {
-        index =>
-          {
-            case seqType: SeqType => ElementStep(seqType, index.toInt)
-            case otherType => throw new IllegalArgumentException(s"For parsing the index: $index, the type: $otherType should be a SeqType.")
-          }
-      }
+    def into: Parser[Type => IntoStep] = "[*]" ^^ {
+      _ =>
+        {
+          case seqType: SeqType => IntoStep(seqType)
+          case otherType => throw new IllegalArgumentException(s"For parsit an into step ([*]), the type $otherType needs to be a SeqType.")
+        }
+    }
 
-      def some: Parser[Type => SomeStep] = "$" ^^ {
-        _ =>
-          {
-            case optionType: OptionType => SomeStep(optionType)
-            case otherType => throw new IllegalArgumentException(s"For parsing an option (ending with ?) type, the type: $otherType should be a OptionType.")
-          }
-      }
-
-      def into: Parser[Type => IntoStep] = "[*]" ^^ {
-        _ =>
-          {
-            case seqType: SeqType => IntoStep(seqType)
-            case otherType => throw new IllegalArgumentException(s"For parsit an into step ([*]), the type $otherType needs to be a SeqType.")
-          }
-      }
-
-      def full: Parser[Type => Pointer] = rep(coordinate | feature | element | some | into) ^^ {
-        steps =>
-          {
-            val f: Type => Pointer = { typ => SelfPointer(typ) }
-            steps.foldRight(f) {
-              case (h, f) => {
-                typ: Type =>
-                  {
-                    val head = h(typ)
-                    f(head.targetType).prepend(head)
-                  }
-              }
+    def full: Parser[Type => Pointer] = rep(coordinate | feature | element | some | into) ^^ {
+      steps =>
+        {
+          val f: Type => Pointer = { typ => SelfPointer(typ) }
+          steps.foldRight(f) {
+            case (h, f) => {
+              typ: Type =>
+                {
+                  val head = h(typ)
+                  f(head.targetType).prepend(head)
+                }
             }
           }
-      }
-    }
-
-    def mkPointer(sourceType: Type, string: String): Pointer = {
-      Parser.parseAll(Parser.full, string).get(sourceType)
-    }
-
-    def mkPointer(string: String)(implicit typeRepo: Types.Repository): Pointer = {
-      val typeResult = typeRepo.Parser.parse(typeRepo.Parser.full, string)
-      Parser.parseAll(Parser.full, typeResult.next).get(typeResult.get)
+        }
     }
   }
 
-  implicit object SimpleRepository extends Repository
+  def mkPointer(sourceType: Type, string: String): Pointer = {
+    Parser.parseAll(Parser.full, string).get(sourceType)
+  }
+
+  def mkPointer(string: String)(implicit typeRepo: TypeRepository): Pointer = {
+    val typeResult = typeRepo.Parser.parse(typeRepo.Parser.full, string)
+    Parser.parseAll(Parser.full, typeResult.next).get(typeResult.get)
+  }
 }

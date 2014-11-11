@@ -1,16 +1,17 @@
 package com.github.comco.scrappy.picker
 
 import scala.language.implicitConversions
-import com.github.comco.scrappy.data.Data
-import com.github.comco.scrappy.Type
-import com.github.comco.scrappy.StructType
-import com.github.comco.scrappy.TupleType
-import com.github.comco.scrappy.SeqType
+
 import com.github.comco.scrappy.OptionType
 import com.github.comco.scrappy.PrimitiveType
-import com.github.comco.scrappy.Types
+import com.github.comco.scrappy.SeqType
+import com.github.comco.scrappy.StructType
+import com.github.comco.scrappy.TupleType
+import com.github.comco.scrappy.Type
+import com.github.comco.scrappy.data.Data
+import com.github.comco.scrappy.repository.TypeRepository
 
-object Pickers {
+trait PickerImplicits {
   implicit class RichPicker(val picker: Picker) {
     def andThen(next: Picker): RichPicker = {
       require(picker.targetType == next.sourceType,
@@ -28,6 +29,8 @@ object Pickers {
       case targetType: StructType => picker andThen FeaturePicker(targetType, name)
       case _ => throw new IllegalArgumentException(s"Target type of picker: $picker must be a StructType.")
     }
+
+    def feature(symbol: Symbol): RichPicker = feature(symbol.name)
 
     def coordinate(position: Int): RichPicker = picker.targetType match {
       case targetType: TupleType => picker andThen CoordinatePicker(targetType, position)
@@ -52,18 +55,26 @@ object Pickers {
       picker andThen StructPicker(structType)(features: _*)
     }
 
+    def struct(symbol: Symbol)(features: (Symbol, Picker)*)(implicit repo: TypeRepository): RichPicker = {
+      struct(repo.getStructType(symbol))(features.map {
+        case (s, p) => (s.name, p)
+      }: _*)
+    }
+
     def map(f: Picker): RichPicker = picker andThen MapPicker(f)
 
     def const(data: Data): RichPicker = picker andThen ConstPicker(picker.targetType, data)
   }
 
-  object dsl {
-    implicit def Symbol2RichPicker(symbol: Symbol)(implicit repo: Types.Repository): RichPicker = {
-      RichPicker(SelfPicker(repo.getNamedType(symbol)))
-    }
-    
-    implicit def Type2Picker(typ: Type): Picker = SelfPicker(typ)
-    implicit def Type2RichPicker(typ: Type): RichPicker = RichPicker(Type2Picker(typ))
+  implicit class PickerRichSymbol(symbol: Symbol)(implicit repo: TypeRepository) {
+    def pick: RichPicker = RichPicker(SelfPicker(repo.getNamedType(symbol)))
+  }
+
+  implicit def Type2Picker(typ: Type): Picker = SelfPicker(typ)
+  //implicit def Type2RichPicker(typ: Type): RichPicker = RichPicker(Type2Picker(typ))
+
+  implicit class PickerRichType(typ: Type) {
+    def pick: RichPicker = RichPicker(SelfPicker(typ))
   }
 
   implicit def RichPicker2Picker(richPicker: RichPicker): Picker = richPicker.picker

@@ -1,7 +1,6 @@
 package com.github.comco.scrappy.pointer
 
 import org.scalatest.FlatSpec
-
 import com.github.comco.scrappy.CustomMatchers
 import com.github.comco.scrappy.PrimitiveType.BooleanPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
@@ -9,12 +8,10 @@ import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
 import com.github.comco.scrappy.SeqType
 import com.github.comco.scrappy.StructType
 import com.github.comco.scrappy.TupleType
-import com.github.comco.scrappy.Types
 import com.github.comco.scrappy.picker.CoordinatePicker
 import com.github.comco.scrappy.picker.SelfPicker
-
-import Pointers.SimpleRepository.mkPointer
-import Pointers.pointerTo
+import com.github.comco.scrappy.repository.TypeRepository
+import com.github.comco.scrappy.Implicits
 
 final class PointerSpec extends FlatSpec with CustomMatchers {
   "A SelfPointer" should "have the right targetType" in {
@@ -83,8 +80,8 @@ final class PointerSpec extends FlatSpec with CustomMatchers {
     val line = StructType("line", "rows" -> SeqType(row))
     val page = StructType("page", "lines" -> SeqType(line))
     val doc = StructType("doc", "pages" -> SeqType(page))
-    implicit val repo = Types.Repository.empty.addType(doc)
-    import Pointers.SimpleRepository.mkPointer
+    implicit val repo = TypeRepository.empty.addType(doc)
+    import Implicits._
     val pt1 = mkPointer("doc/pages[*]/lines[3]/rows[*]/number")
     val pt2 = mkPointer("doc/pages[4]/lines[*]/rows[3]/text")
     pt1.longestCommonAncestor(pt2) shouldEqual mkPointer("doc/pages[4]/lines[3]/rows[3]")
@@ -103,8 +100,7 @@ final class PointerSpec extends FlatSpec with CustomMatchers {
     val tupleType = TupleType(IntPrimitiveType, StringPrimitiveType)
     val seqTupleType = SeqType(tupleType)
     val strType = StructType("name", "as" -> seqTupleType)
-
-    import Pointers._
+    import Implicits._
     val ptr = pointerTo(strType).feature("as").into.pointer
     ptr.sourceType shouldEqual strType
     ptr.targetType shouldEqual tupleType

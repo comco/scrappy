@@ -1,14 +1,13 @@
-package com.github.comco.scrappy
+package com.github.comco.scrappy.repository
 
 import org.scalatest.FlatSpec
-import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
-import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
-import com.github.comco.scrappy.PrimitiveType.BooleanPrimitiveType
-import com.github.comco.scrappy.Types.TypeConflictException
-import com.github.comco.scrappy.Types.Repository
+import com.github.comco.scrappy.CustomMatchers
+import com.github.comco.scrappy.StructType
+import com.github.comco.scrappy.PrimitiveType._
+import com.github.comco.scrappy._
 
 final class TypeRepositorySpec extends FlatSpec with CustomMatchers {
-  var repo = Repository.empty
+  var repo = TypeRepository.empty
 
   val line = StructType("line", "number" -> IntPrimitiveType, "text" -> StringPrimitiveType)
   val page = StructType("page", "lines" -> SeqType(line))
@@ -44,8 +43,8 @@ final class TypeRepositorySpec extends FlatSpec with CustomMatchers {
   }
 
   it should "support creating using a dsl" in {
-    val textRepo = new Repository.Extension {
-      'point is 'coordinates -> (int, int)
+    val textRepo = new TypeRepository.Extension {
+      'point is 'coordinates -> tuple(int, int)
 
       'page is (
         'number -> int,
@@ -56,7 +55,7 @@ final class TypeRepositorySpec extends FlatSpec with CustomMatchers {
         'pages -> seq('page))
     }
 
-    val bookRepo = new Repository.Extension(textRepo) {
+    val bookRepo = new TypeRepository.Extension(textRepo) {
       'book is (
         'title -> string,
         'author -> string,
