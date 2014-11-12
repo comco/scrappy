@@ -295,7 +295,7 @@ abstract class StructData extends Data {
    */
   def feature(name: String): Data = {
     require(datatype.hasFeature(name),
-      s"StructData doesn't contain a feature named: $name")
+      s"StructData: $this doesn't contain a feature named: $name")
 
     features(name)
   }

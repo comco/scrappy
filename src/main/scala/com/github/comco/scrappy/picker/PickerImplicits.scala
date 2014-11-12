@@ -66,22 +66,27 @@ trait PickerImplicits {
     def const(data: Data): RichPicker = picker andThen ConstPicker(picker.targetType, data)
   }
 
-  implicit class PickerRichSymbol(symbol: Symbol)(implicit repo: TypeRepository) {
-    def pick: RichPicker = RichPicker(SelfPicker(repo.getNamedType(symbol)))
+  implicit def Type_To_Picker(typ: Type): Picker = SelfPicker(typ)
+  implicit def Type_To_RichPicker(typ: Type): RichPicker = RichPicker(SelfPicker(typ))
+
+  implicit def Symbol_To_Picker(symbol: Symbol)(implicit repo: TypeRepository): Picker = {
+    SelfPicker(repo.getNamedType(symbol))
   }
 
-  implicit def Type2Picker(typ: Type): Picker = SelfPicker(typ)
-  //implicit def Type2RichPicker(typ: Type): RichPicker = RichPicker(Type2Picker(typ))
-
-  implicit class PickerRichType(typ: Type) {
+  implicit class Picker_RichType(typ: Type) {
     def pick: RichPicker = RichPicker(SelfPicker(typ))
+  }
+
+  implicit class Picker_RichSymbol(symbol: Symbol)(implicit repo: TypeRepository) {
+    def pick: RichPicker = RichPicker(SelfPicker(repo.getNamedType(symbol)))
   }
 
   implicit def RichPicker2Picker(richPicker: RichPicker): Picker = richPicker.picker
 
-  implicit def PrimitiveFunction2ApplyPicker[A, R](f: A => R)(
-    implicit sourceType: PrimitiveType[A], targetType: PrimitiveType[R]) =
+  implicit def PrimitiveFunction_To_ApplyPicker[A, R](f: A => R)(
+    implicit sourceType: PrimitiveType[A], targetType: PrimitiveType[R]) = {
     ApplyPicker[A, R](f)
+  }
 
   def pickerTo(sourceType: Type): RichPicker = RichPicker(SelfPicker(sourceType))
 }
