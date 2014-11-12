@@ -14,7 +14,7 @@ import com.github.comco.scrappy.picker.SelfPicker
 
 final class QuantifierCheckerSpec extends FlatSpec with CustomMatchers {
   val quantifier = ForSomeQuantifier
-  val checker = EqualChecker(SelfPicker(IntPrimitiveType), ConstPicker(IntPrimitiveType, PrimitiveData(3)))
+  val checker = EqualChecker(SelfPicker(IntPrimitiveType), ConstPicker(PrimitiveData(3)))
   val quantifierChecker = QuantifierChecker(quantifier, checker)
   val okData = SeqData(2, 3, 4)
   val badData = SeqData(4, 4, 5)

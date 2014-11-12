@@ -2,8 +2,42 @@ package com.github.comco.scrappy
 
 /**
  * Base class for scrappy types.
+ *
+ * Types have a lattice structure.
  */
-sealed abstract class Type
+sealed abstract class Type {
+  def isSubtypeOf(that: Type) = that match {
+    // Top type is a supertype of anything
+    case TopType => true
+    case _ => this match {
+      // Bottom type is a subtype of anything
+      case BotType => true
+      case _ => (this == that)
+    }
+  }
+
+  def join(that: Type): Type = {
+    if (this == BotType) that
+    else if (that == BotType) this
+    else if (this == that) this
+    else TopType
+  }
+
+  def meet(that: Type): Type = {
+    if (this == TopType) that
+    else if (that == TopType) this
+    else if (this == that) this
+    else BotType
+  }
+}
+
+object Type {
+  def join(types: Seq[Type]) = ((BotType: Type) /: types)(_.join(_))
+  def meet(types: Seq[Type]) = ((TopType: Type) /: types)(_.meet(_))
+}
+
+object TopType extends Type
+object BotType extends Type
 
 /**
  * Base (type)class for primitive scrappy types.

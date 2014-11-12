@@ -17,10 +17,10 @@ import com.github.comco.scrappy.picker.SelfPicker
 final class AndAlsoCheckerSpec extends FlatSpec with CustomMatchers {
   val tupleType = TupleType(IntPrimitiveType, StringPrimitiveType)
   val firstChecker = EqualChecker(
-    ConstPicker(tupleType, PrimitiveData(3)),
+    ConstPicker(PrimitiveData(3)),
     CoordinatePicker(tupleType, 0))
   val secondChecker = EqualChecker(
-    ConstPicker(tupleType, PrimitiveData("hi")),
+    ConstPicker(PrimitiveData("hi")),
     CoordinatePicker(tupleType, 1))
   val thirdChecker = EqualChecker(SelfPicker(IntPrimitiveType), SelfPicker(IntPrimitiveType))
   val andChecker = AndAlsoChecker(firstChecker, secondChecker)

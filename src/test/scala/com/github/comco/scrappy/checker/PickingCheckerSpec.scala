@@ -17,7 +17,7 @@ final class PickingCheckerSpec extends FlatSpec with CustomMatchers {
   val tupleType = TupleType(IntPrimitiveType, IntPrimitiveType)
   val armPicker = CoordinatePicker(tupleType, 1)
   val childChecker = EqualChecker(
-    ConstPicker(IntPrimitiveType, PrimitiveData(3)), SelfPicker(IntPrimitiveType))
+    ConstPicker(PrimitiveData(3)), SelfPicker(IntPrimitiveType))
   val pickingChecker = PickingChecker(armPicker, childChecker)
 
   val data = TupleData(1, 3)

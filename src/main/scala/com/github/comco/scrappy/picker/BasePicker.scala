@@ -8,16 +8,16 @@ import com.github.comco.scrappy.originated_data.OriginatedData
  */
 abstract class BasePicker extends Picker {
   def pickData(source: Data) = {
-    require(source.datatype == sourceType)
+    require(source.datatype.isSubtypeOf(sourceType))
     doPickData(source)
-  } ensuring (_.datatype == targetType)
-  
+  } ensuring (_.datatype.isSubtypeOf(targetType))
+
   def doPickData(source: Data): Data
-  
+
   def pickOriginatedData(source: OriginatedData) = {
-    require(source.datatype == sourceType)
+    require(source.datatype.isSubtypeOf(sourceType))
     doPickOriginatedData(source)
-  } ensuring (_.datatype == targetType)
-  
+  } ensuring (_.datatype.isSubtypeOf(targetType))
+
   def doPickOriginatedData(source: OriginatedData): OriginatedData
 }

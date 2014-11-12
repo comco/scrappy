@@ -2,7 +2,6 @@ package com.github.comco.scrappy.picker
 
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers
-
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
 import com.github.comco.scrappy.SeqType
@@ -10,14 +9,15 @@ import com.github.comco.scrappy.data.PrimitiveData
 import com.github.comco.scrappy.data.PrimitiveData.apply
 import com.github.comco.scrappy.data.SeqData
 import com.github.comco.scrappy.originated_data.OriginatedData
+import com.github.comco.scrappy.TopType
 
 final class ConstPickerSpec extends FlatSpec with Matchers {
   val data = SeqData(1, 2, 3)
   val c = PrimitiveData("hi")
-  val const = ConstPicker(data.datatype, c)
+  val const = ConstPicker(c)
 
   "A ConstPicker" should "provide sourceType" in {
-    const.sourceType shouldEqual SeqType(IntPrimitiveType)
+    const.sourceType shouldEqual TopType
   }
 
   it should "provide targetType" in {

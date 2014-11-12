@@ -14,7 +14,7 @@ import com.github.comco.scrappy.repository.TypeRepository
 trait PickerImplicits {
   implicit class RichPicker(val picker: Picker) {
     def andThen(next: Picker): RichPicker = {
-      require(picker.targetType == next.sourceType,
+      require(picker.targetType.isSubtypeOf(next.sourceType),
         s"The targetType of the picker: $picker must be the same as the sourceType of: $next")
       if (picker.isInstanceOf[SelfPicker]) {
         next
@@ -63,7 +63,7 @@ trait PickerImplicits {
 
     def map(f: Picker): RichPicker = picker andThen MapPicker(f)
 
-    def const(data: Data): RichPicker = picker andThen ConstPicker(picker.targetType, data)
+    def const(data: Data): RichPicker = picker andThen ConstPicker(data)
   }
 
   implicit def Type_To_Picker(typ: Type): Picker = SelfPicker(typ)

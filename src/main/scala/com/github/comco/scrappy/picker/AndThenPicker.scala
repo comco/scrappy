@@ -8,13 +8,13 @@ import com.github.comco.scrappy.originated_data.OriginatedData
  */
 case class AndThenPicker(val first: Picker, val next: Picker)
     extends Picker {
-  require(first.targetType == next.sourceType)
-  
+  require(first.targetType.isSubtypeOf(next.sourceType))
+
   def sourceType = first.sourceType
   def targetType = next.targetType
-  
+
   def pickData(source: Data) = next.pickData(first.pickData(source))
-  
-  def pickOriginatedData(source: OriginatedData) = 
+
+  def pickOriginatedData(source: OriginatedData) =
     next.pickOriginatedData(first.pickOriginatedData(source))
 }

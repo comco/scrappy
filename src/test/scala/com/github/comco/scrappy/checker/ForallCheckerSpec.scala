@@ -16,7 +16,7 @@ final class ForallCheckerSpec extends FlatSpec with CustomMatchers {
   val intSeqType = data.datatype
 
   // does some element equal x
-  def mkElementChecker(n: Int) = EqualChecker(ConstPicker(IntPrimitiveType, n), SelfPicker(IntPrimitiveType))
+  def mkElementChecker(n: Int) = EqualChecker(ConstPicker(n), SelfPicker(IntPrimitiveType))
 
   val elementChecker3 = mkElementChecker(3)
 
