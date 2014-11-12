@@ -66,6 +66,8 @@ trait PickerImplicits {
     def const(data: Data): RichPicker = picker andThen ConstPicker(data)
   }
 
+  def const(data: Data): RichPicker = RichPicker(ConstPicker(data))
+
   implicit def Type_To_Picker(typ: Type): Picker = SelfPicker(typ)
   implicit def Type_To_RichPicker(typ: Type): RichPicker = RichPicker(SelfPicker(typ))
 

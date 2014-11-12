@@ -68,7 +68,7 @@ final class ImplicitsSpec extends FlatSpec with CustomMatchers {
   // Create some pickers
   val k = 'page.pick.feature('lines)
   val mkChapter = seq('page).pick.struct('chapter)(
-    'number -> seq('page).const(3),
+    'number -> const(3),
     'title -> seq('page).const("title"),
     'pages -> seq('page))
 
