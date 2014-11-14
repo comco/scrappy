@@ -29,6 +29,9 @@ sealed abstract class Type {
     else if (this == that) this
     else BotType
   }
+
+  def compatibleWith(that: Type) =
+    (this meet that) != BotType
 }
 
 object Type {

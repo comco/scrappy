@@ -14,4 +14,6 @@ abstract class Picker {
 
   def pickData(source: Data): Data
   def pickOriginatedData(source: OriginatedData): OriginatedData
+
+  def compatibleWith(that: Picker) = this.sourceType compatibleWith that.sourceType
 }

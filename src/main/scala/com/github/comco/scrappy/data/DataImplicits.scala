@@ -8,6 +8,9 @@ import com.github.comco.scrappy.TypeImplicits
 import com.github.comco.scrappy.repository.TypeRepository
 
 trait DataImplicits {
+  def tuple(coordinates: Data*): TupleData = {
+    TupleData(coordinates: _*)
+  }
 
   def seq(elements: Data*): SeqData = {
     SeqData(elements.head, elements.tail: _*)

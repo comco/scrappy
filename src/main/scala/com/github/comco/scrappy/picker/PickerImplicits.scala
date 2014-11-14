@@ -16,13 +16,7 @@ trait PickerImplicits {
     def andThen(next: Picker): RichPicker = {
       require(picker.targetType.isSubtypeOf(next.sourceType),
         s"The targetType of the picker: $picker must be the same as the sourceType of: $next")
-      if (picker.isInstanceOf[SelfPicker]) {
-        next
-      } else if (next.isInstanceOf[SelfPicker]) {
-        this
-      } else {
-        AndThenPicker(picker, next)
-      }
+      AndThenPicker(picker, next)
     }
 
     def feature(name: String): RichPicker = picker.targetType match {

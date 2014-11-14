@@ -6,6 +6,20 @@ import com.github.comco.scrappy.PrimitiveType.BooleanPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.IntPrimitiveType
 import com.github.comco.scrappy.PrimitiveType.StringPrimitiveType
 
+final class TypeSpec extends FlatSpec with CustomMatchers {
+  "A Type" should "support join" in {
+    IntPrimitiveType.join(StringPrimitiveType) shouldEqual TopType
+  }
+
+  it should "support meet" in {
+    IntPrimitiveType.meet(StringPrimitiveType) shouldEqual BotType
+  }
+
+  it should "support compatibleWith" in {
+    IntPrimitiveType compatibleWith StringPrimitiveType shouldEqual false
+  }
+}
+
 final class PrimitiveTypeSpec extends FlatSpec with CustomMatchers {
   "A PrimitiveType" should "contain type names" in {
     PrimitiveType.typeNames("int") shouldEqual IntPrimitiveType
