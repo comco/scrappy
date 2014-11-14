@@ -12,10 +12,9 @@ import com.github.comco.scrappy.originated_data.OriginatedData
 import com.github.comco.scrappy.originated_data.OriginatedTupleData
 import com.github.comco.scrappy.pointer.ElementStep
 
-case class ZipPicker(firstPicker: Picker, secondPicker: Picker) extends BasePicker {
+case class ZipPicker(firstPicker: Picker with Picker.ReturningSeq,
+    secondPicker: Picker with Picker.ReturningSeq) extends BasePicker {
   require(firstPicker compatibleWith secondPicker, s"Arguments to ZipPicker should be compatible: $firstPicker and $secondPicker")
-  require(firstPicker.targetType.isInstanceOf[SeqType] && secondPicker.targetType.isInstanceOf[SeqType],
-    s"For construction of a ZipPicker, both pickers: $firstPicker and $secondPicker need to be SeqType-s.")
 
   lazy val sourceType: Type = {
     val r = firstPicker.sourceType.meet(secondPicker.sourceType)
@@ -23,23 +22,23 @@ case class ZipPicker(firstPicker: Picker, secondPicker: Picker) extends BasePick
     r
   }
 
-  def firstTargetType = firstPicker.targetType.asInstanceOf[SeqType]
-  def secondTargetType = secondPicker.targetType.asInstanceOf[SeqType]
+  def firstTargetType = firstPicker.targetType
+  def secondTargetType = secondPicker.targetType
 
   lazy val tupleType = TupleType(firstTargetType.elementType, secondTargetType.elementType)
   lazy val targetType: SeqType = SeqType(tupleType)
 
   def doPickData(source: Data): SeqData = {
-    val firstResult = firstPicker.pickData(source).asInstanceOf[SeqData]
-    val secondResult = secondPicker.pickData(source).asInstanceOf[SeqData]
+    val firstResult = firstPicker.pickData(source)
+    val secondResult = secondPicker.pickData(source)
     return SeqData(targetType, firstResult.elements.zip(secondResult.elements).map {
       case (a, b) => TupleData(tupleType)(a, b)
     })
   }
 
   def doPickOriginatedData(source: OriginatedData): OriginatedSeqData = {
-    val firstResult = firstPicker.pickOriginatedData(source).asInstanceOf[OriginatedSeqData]
-    val secondResult = secondPicker.pickOriginatedData(source).asInstanceOf[OriginatedSeqData]
+    val firstResult = firstPicker.pickOriginatedData(source)
+    val secondResult = secondPicker.pickOriginatedData(source)
     val origin = source.origin.computedWithTargetType(targetType)
     val elements = firstResult.elements.zip(secondResult.elements).zipWithIndex.map {
       case ((a, b), i) => {

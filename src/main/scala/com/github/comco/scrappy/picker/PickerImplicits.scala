@@ -49,6 +49,12 @@ trait PickerImplicits {
       picker andThen StructPicker(structType)(features: _*)
     }
 
+    def zip(first: Picker, second: Picker): RichPicker = {
+      picker andThen ZipPicker(
+        first.asInstanceOf[Picker with Picker.ReturningSeq],
+        second.asInstanceOf[Picker with Picker.ReturningSeq])
+    }
+
     def struct(symbol: Symbol)(features: (Symbol, Picker)*)(implicit repo: TypeRepository): RichPicker = {
       struct(repo.getStructType(symbol))(features.map {
         case (s, p) => (s.name, p)
