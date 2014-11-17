@@ -10,7 +10,7 @@ case class AndAlsoChecker(val firstChecker: Checker, val secondChecker: Checker)
     
   def sourceType = firstChecker.sourceType
   
-  def doCheckData(source: Data): CheckResult = {
+  def doCheckData(source: Data.Any): CheckResult = {
     val firstResult = firstChecker.checkData(source)
     if (!firstResult.successful) {
       return firstResult
@@ -19,7 +19,7 @@ case class AndAlsoChecker(val firstChecker: Checker, val secondChecker: Checker)
     }
   }
   
-  def doCheckOriginatedData(source: OriginatedData): OriginatedCheckResult = {
+  def doCheckOriginatedData(source: OriginatedData.Any): OriginatedCheckResult = {
     val firstResult = firstChecker.checkOriginatedData(source)
     if (!firstResult.successful) {
       return OriginatedCheckResult(false, source.origin, Set(firstResult), this)

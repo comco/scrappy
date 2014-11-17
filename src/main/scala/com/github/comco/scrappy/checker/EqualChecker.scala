@@ -3,7 +3,6 @@ package com.github.comco.scrappy.checker
 import com.github.comco.scrappy.data.Data
 import com.github.comco.scrappy.originated_data.OriginatedData
 import com.github.comco.scrappy.picker.Picker
-import com.github.comco.scrappy.BotType
 
 case class EqualChecker(val firstPicker: Picker, val secondPicker: Picker) extends BaseChecker {
   require(sourceType != BotType &&
@@ -12,14 +11,14 @@ case class EqualChecker(val firstPicker: Picker, val secondPicker: Picker) exten
 
   def sourceType = firstPicker.sourceType.meet(secondPicker.sourceType)
 
-  def doCheckData(source: Data): CheckResult = {
+  def doCheckData(source: Data.Any): CheckResult = {
     val firstResult = firstPicker.pickData(source)
     val secondResult = secondPicker.pickData(source)
     val equal = (firstResult == secondResult)
     return CheckResult(equal)
   }
 
-  def doCheckOriginatedData(source: OriginatedData): OriginatedCheckResult = {
+  def doCheckOriginatedData(source: OriginatedData.Any): OriginatedCheckResult = {
     val firstResult = firstPicker.pickOriginatedData(source)
     val secondResult = secondPicker.pickOriginatedData(source)
     val equal = (firstResult.data == secondResult.data)

@@ -9,7 +9,7 @@ import com.github.comco.scrappy.Type
  */
 case class AndThenPicker[A, B, C](val first: Picker[Type[A], Type[B]], val next: Picker[Type[B], Type[C]])
     extends Picker[Type[A], Type[C]] {
-  require(first.targetType.isSubtypeOf(next.sourceType))
+  require(first.targetType <:< next.sourceType)
 
   override def sourceType = first.sourceType
   override def targetType = next.targetType

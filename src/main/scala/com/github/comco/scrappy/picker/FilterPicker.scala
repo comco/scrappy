@@ -9,16 +9,14 @@ import com.github.comco.scrappy.originated_data.OriginatedSeqData
 import com.github.comco.scrappy.Type
 import com.github.comco.scrappy.originated_data.OriginatedData
 
-case class FilterPicker(val cond: Picker[Type[Any], PrimitiveType[Boolean]])
-    extends Picker[SeqType, SeqType] {
-  require(cond.targetType == PrimitiveType.BooleanPrimitiveType,
-    s"FilterPicker argument: $cond should be a boolean picker.")
-
+case class FilterPicker[SourceType >: Type.Nil <: Type.Any](val cond: Picker[SourceType, Type.Primitive[Boolean]])
+    extends Picker[Type.Seq, Type.Seq] {
+  
   def sourceType = SeqType(cond.sourceType)
   def targetType = sourceType
 
-  def check(data: Data[Type[Any]]): Boolean =
-    cond.pickData(data).value
+  def check(data: Data.Any): Boolean =
+    cond.pickData(data.asInstanceOf[Data[SourceType]]).value
 
   def doPickData(source: Data[SeqType]) =
     SeqData(sourceType, source.elements.filter(check))

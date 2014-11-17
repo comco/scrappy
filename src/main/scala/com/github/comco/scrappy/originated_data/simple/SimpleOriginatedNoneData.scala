@@ -7,7 +7,6 @@ import com.github.comco.scrappy.originated_data.OriginatedNoneData
 
 case class SimpleOriginatedNoneData private(val origin: Origin, val datatype: OptionType)
     extends OriginatedNoneData {
-  def data = NoneData(datatype)
 }
 
 object SimpleOriginatedNoneData {

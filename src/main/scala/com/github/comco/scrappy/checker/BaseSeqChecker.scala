@@ -6,13 +6,13 @@ import com.github.comco.scrappy.originated_data.OriginatedData
 import com.github.comco.scrappy.originated_data.OriginatedSeqData
 
 abstract class BaseSeqChecker extends BaseChecker {
-  def doCheckData(source: Data): CheckResult = {
+  def doCheckData(source: Data.Any): CheckResult = {
     doCheckData(source.asInstanceOf[SeqData])
   }
   
   def doCheckData(source: SeqData): CheckResult
   
-  def doCheckOriginatedData(source: OriginatedData): OriginatedCheckResult = {
+  def doCheckOriginatedData(source: OriginatedData.Any): OriginatedCheckResult = {
     doCheckOriginatedData(source.asInstanceOf[OriginatedSeqData])
   }
   

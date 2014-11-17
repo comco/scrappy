@@ -7,16 +7,18 @@ import com.github.comco.scrappy.Type
 /**
  * Base class for general pickers.
  */
-abstract class BasePicker[SourceType <: Type[Any], TargetType <: Type[Any]] extends Picker[SourceType, TargetType] {
+abstract class BasePicker[SourceType >: Type.Nil <: Type.Any, TargetType >: Type.Nil <: Type.Any]
+    extends Picker[SourceType, TargetType] {
+
   override def pickData(source: Data[SourceType]): Data[TargetType] = {
-    require(source.datatype.isSubtypeOf(sourceType))
+    require(source.datatype <:< sourceType)
     doPickData(source)
-  } ensuring (_.datatype.isSubtypeOf(targetType))
+  } ensuring (_.datatype <:< targetType)
 
   override def pickOriginatedData(source: OriginatedData[SourceType]): OriginatedData[TargetType] = {
-    require(source.datatype.isSubtypeOf(sourceType))
+    require(source.datatype <:< sourceType)
     doPickOriginatedData(source)
-  } ensuring (_.datatype.isSubtypeOf(targetType))
+  } ensuring (_.datatype <:< targetType)
 
   def doPickData(source: Data[SourceType]): Data[TargetType]
 

@@ -1,7 +1,6 @@
 package com.github.comco.scrappy.originated_data
 
 import scala.language.implicitConversions
-
 import com.github.comco.scrappy.OptionType
 import com.github.comco.scrappy.PrimitiveType
 import com.github.comco.scrappy.SeqType
@@ -34,11 +33,12 @@ import com.github.comco.scrappy.origin.OriginalOrigin
 import com.github.comco.scrappy.pointer.SelfPointer
 import com.github.comco.scrappy.origin.ComputedOrigin
 import com.github.comco.scrappy.OptionType
+import com.github.comco.scrappy.originated_data.simple.SimpleOriginalSomeData
 
 /**
  * Base class for scrappy originated data - a piece of data with an origin.
  */
-sealed abstract class OriginatedData[+Datatype <: Type[Any]] {
+sealed abstract class OriginatedData[+Datatype >: Type.Nil <: Type.Any] {
   require(data.datatype == origin.targetType,
     s"Datatype of data: $data and targetType of origin: $origin does not match.")
 
@@ -52,27 +52,36 @@ sealed abstract class OriginatedData[+Datatype <: Type[Any]] {
 }
 
 object OriginatedData {
+  type Any = OriginatedData[Type.Any]
+  type Nil = OriginatedData[Type.Nil]
+  
+  type Primitive[T] = OriginatedData[Type.Primitive[T]]
+  type Struct = OriginatedData[Type.Struct]
+  type Tuple = OriginatedData[Type.Tuple]
+  type Seq = OriginatedData[Type.Seq]
+  type Option = OriginatedData[Type.Option]
+  
   // conversions are safe by construction
-  implicit def OriginatedData_To_OriginatedPrimitiveData[T](data: OriginatedData[PrimitiveType[T]]) =
+  implicit def OriginatedData_To_OriginatedPrimitiveData[T](data: PrimitiveType[T]) =
     data.asInstanceOf[OriginatedPrimitiveData[T]]
 
-  implicit def OriginatedData_To_OriginatedStructData(data: OriginatedData[StructType]) =
+  implicit def OriginatedData_To_OriginatedStructData(data: Struct) =
     data.asInstanceOf[OriginatedStructData]
 
-  implicit def OriginatedData_To_OriginatedSeqData(data: OriginatedData[SeqType]) =
+  implicit def OriginatedData_To_OriginatedSeqData(data: Seq) =
     data.asInstanceOf[OriginatedSeqData]
 
-  implicit def OriginatedData_To_OriginatedTupleData(data: OriginatedData[TupleType]) =
+  implicit def OriginatedData_To_OriginatedTupleData(data: Tuple) =
     data.asInstanceOf[OriginatedTupleData]
 
-  implicit def OriginatedData_To_OriginatedOptionData(data: OriginatedData[OptionType]) =
+  implicit def OriginatedData_To_OriginatedOptionData(data: Option) =
     data.asInstanceOf[OriginatedOptionData]
 
   /**
    * Checks if data contains a value.
    * OptionData in case of none data doesn't contain a value.
    */
-  def isFilled(data: OriginatedData[Type[Any]]): Boolean = data match {
+  def isFilled(data: OriginatedData.Any): Boolean = data match {
     case data: OriginatedOptionData => data.isSome
     case _ => true
   }
@@ -92,7 +101,7 @@ object OriginatedData {
     case data: NoneData => from(data, origin)
   }
 
-  def from(data: Data[Type[Any]], origin: Origin): OriginatedData[Type[Any]] = data match {
+  def from(data: Data.Any, origin: Origin): OriginatedData.Any = data match {
     case data: PrimitiveData[t] => from(data, origin)
     case data: TupleData => from(data, origin)
     case data: StructData => from(data, origin)
@@ -103,23 +112,23 @@ object OriginatedData {
   /**
    * Methods for constructing originated data by computing the target type.
    */
-  private def mkComputedOrigin(data: Data[Type[Any]], source: OriginatedData[Type[Any]]): ComputedOrigin = {
+  private def mkComputedOrigin(data: Data.Any, source: OriginatedData.Any): ComputedOrigin = {
     source.origin.computedWithTargetType(data.datatype)
   }
 
-  def from[T](data: PrimitiveData[T], source: OriginatedData[Type[Any]]): OriginatedPrimitiveData[T] = from(data, mkComputedOrigin(data, source))
-  def from(data: TupleData, source: OriginatedData[Type[Any]]): OriginatedTupleData = from(data, mkComputedOrigin(data, source))
-  def from(data: StructData, source: OriginatedData[Type[Any]]): OriginatedStructData = from(data, mkComputedOrigin(data, source))
-  def from(data: SeqData, source: OriginatedData[Type[Any]]): OriginatedSeqData = from(data, mkComputedOrigin(data, source))
-  def from(data: SomeData, source: OriginatedData[Type[Any]]): OriginatedSomeData = from(data, mkComputedOrigin(data, source))
-  def from(data: NoneData, source: OriginatedData[Type[Any]]): OriginatedNoneData = from(data, mkComputedOrigin(data, source))
+  def from[T](data: PrimitiveData[T], source: OriginatedData.Any): OriginatedPrimitiveData[T] = from(data, mkComputedOrigin(data, source))
+  def from(data: TupleData, source: OriginatedData.Any): OriginatedTupleData = from(data, mkComputedOrigin(data, source))
+  def from(data: StructData, source: OriginatedData.Any): OriginatedStructData = from(data, mkComputedOrigin(data, source))
+  def from(data: SeqData, source: OriginatedData.Any): OriginatedSeqData = from(data, mkComputedOrigin(data, source))
+  def from(data: SomeData, source: OriginatedData.Any): OriginatedSomeData = from(data, mkComputedOrigin(data, source))
+  def from(data: NoneData, source: OriginatedData.Any): OriginatedNoneData = from(data, mkComputedOrigin(data, source))
 
   def from(data: OptionData, source: OriginatedData[Type[Any]]): OriginatedOptionData = data match {
     case data: SomeData => from(data, source)
     case data: NoneData => from(data, source)
   }
 
-  def from(data: Data[Type[Any]], source: OriginatedData[Type[Any]]): OriginatedData[Type[Any]] = data match {
+  def from(data: Data.Any, source: OriginatedData.Any): OriginatedData.Any = data match {
     case data: PrimitiveData[t] => from(data, source)
     case data: TupleData => from(data, source)
     case data: StructData => from(data, source)
@@ -130,7 +139,7 @@ object OriginatedData {
   /**
    * Methods for constructing originated data with self origin.
    */
-  private def mkOriginalOrigin(data: Data[Type[Any]]) = OriginalOrigin(SelfPointer(data.datatype))
+  private def mkOriginalOrigin(data: Data.Any) = OriginalOrigin(SelfPointer(data.datatype))
 
   def fromSelf[T](data: PrimitiveData[T]): OriginatedPrimitiveData[T] = from(data, mkOriginalOrigin(data))
   def fromSelf(data: TupleData): OriginatedTupleData = from(data, mkOriginalOrigin(data))
@@ -144,7 +153,7 @@ object OriginatedData {
     case data: NoneData => fromSelf(data)
   }
 
-  def fromSelf(data: Data[Type[Any]]): OriginatedData[Type[Any]] = data match {
+  def fromSelf(data: Data.Any): OriginatedData.Any = data match {
     case data: PrimitiveData[t] => fromSelf(data)
     case data: TupleData => fromSelf(data)
     case data: StructData => fromSelf(data)
@@ -153,8 +162,8 @@ object OriginatedData {
   }
 }
 
-abstract class OriginatedPrimitiveData[T] extends OriginatedData[PrimitiveType[T]] {
-  def value: T = data.value
+abstract class OriginatedPrimitiveData[T] extends OriginatedData.Primitive[T] {
+  def value = data.value
 
   private def state = (datatype, data)
 
@@ -213,7 +222,7 @@ object OriginatedSomeData {
     SimpleOriginalSomeData(data, origin)
   }
 
-  def computed(data: SomeData, origin: Origin, value: OriginatedData[Type[Any]]): OriginatedSomeData = {
+  def computed(data: SomeData, origin: Origin, value: OriginatedData.Any): OriginatedSomeData = {
     SimpleComputedSomeData(data, origin, value)
   }
 
@@ -223,13 +232,13 @@ object OriginatedSomeData {
 
   def apply(data: SomeData,
     origin: Origin,
-    value: OriginatedData[Type[Any]]): OriginatedSomeData = {
+    value: OriginatedData.Any): OriginatedSomeData = {
     computed(data, origin, value)
   }
 
   def apply(datatype: OptionType,
     origin: Origin,
-    value: OriginatedData[Type[Any]]): OriginatedSomeData = {
+    value: OriginatedData.Any): OriginatedSomeData = {
     val data = SomeData(datatype, value.data)
     computed(data, origin, value)
   }
@@ -239,7 +248,7 @@ abstract class OriginatedTupleData extends OriginatedData[TupleType] {
   /**
    * The coordinates of this tuple data.
    */
-  def coordinates: IndexedSeq[OriginatedData[Type[Any]]]
+  def coordinates: IndexedSeq[OriginatedData.Any]
 
   /**
    * The length (arity) of this tuple data.
@@ -303,11 +312,11 @@ object OriginatedTupleData {
     Some((that.data, that.origin, that.coordinates))
 }
 
-abstract class OriginatedStructData extends OriginatedData[StructType] {
+abstract class OriginatedStructData extends OriginatedData.Struct {
   /**
    * The features of this originated struct data.
    */
-  def features: Map[String, OriginatedData[Type[Any]]]
+  def features: Map[String, OriginatedData.Any]
 
   /**
    * Checks if this struct data has a feature with some name.
@@ -321,13 +330,14 @@ abstract class OriginatedStructData extends OriginatedData[StructType] {
   /**
    * Retrieves the feature of this struct data with some name.
    */
-  def feature(name: String): OriginatedData[Type[Any]] = {
+  def feature(name: String): OriginatedData.Any = {
     require(datatype.hasFeature(name),
       s"StructData doesn't contain a feature named: $name")
 
     features(name)
   }
 
+  
   private def state = (datatype, features)
 
   final override def equals(that: Any) = that match {
@@ -344,7 +354,7 @@ object OriginatedStructData {
 
   def computed(data: StructData,
     origin: Origin,
-    features: Map[String, OriginatedData[Type[Any]]]): OriginatedStructData =
+    features: Map[String, OriginatedData.Any]): OriginatedStructData =
     SimpleComputedStructData(data, origin, features)
 
   def apply(data: StructData, origin: Origin): OriginatedStructData =
@@ -352,12 +362,12 @@ object OriginatedStructData {
 
   def apply(data: StructData,
     origin: Origin,
-    features: Map[String, OriginatedData[Type[Any]]]): OriginatedStructData =
+    features: Map[String, OriginatedData.Any]): OriginatedStructData =
     computed(data, origin, features)
 
   def apply(datatype: StructType,
     origin: Origin,
-    features: Map[String, OriginatedData[Type[Any]]]): OriginatedStructData = {
+    features: Map[String, OriginatedData.Any]): OriginatedStructData = {
     val data = StructData(datatype, features map {
       case (name, originatedData) => (name, originatedData.data)
     })
@@ -369,7 +379,7 @@ abstract class OriginatedSeqData extends OriginatedData[SeqType] {
   /**
    * The elements of this originated seq data.
    */
-  def elements: Seq[OriginatedData[Type[Any]]]
+  def elements: Seq[OriginatedData[Type.Any]]
 
   /**
    * Checks if this struct data has a feature with some name.
@@ -411,7 +421,7 @@ object OriginatedSeqData {
 
   def computed(data: SeqData,
     origin: Origin,
-    elements: Seq[OriginatedData[Type[Any]]]): OriginatedSeqData =
+    elements: Seq[OriginatedData.Any]): OriginatedSeqData =
     SimpleComputedSeqData(data, origin, elements)
 
   def apply(data: SeqData, origin: Origin): OriginatedSeqData =
@@ -419,12 +429,12 @@ object OriginatedSeqData {
 
   def apply(data: SeqData,
     origin: Origin,
-    elements: Seq[OriginatedData[Type[Any]]]): OriginatedSeqData =
+    elements: Seq[OriginatedData.Any]): OriginatedSeqData =
     computed(data, origin, elements)
 
   def apply(datatype: SeqType,
     origin: Origin,
-    elements: Seq[OriginatedData[Type[Any]]]): OriginatedSeqData = {
+    elements: Seq[OriginatedData.Any]): OriginatedSeqData = {
     val data = SeqData(datatype, elements.map(_.data))
     computed(data, origin, elements)
   }

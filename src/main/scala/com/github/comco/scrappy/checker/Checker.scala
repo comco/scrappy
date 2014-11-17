@@ -9,8 +9,8 @@ import com.github.comco.scrappy.originated_data.OriginatedData
  * originated data.
  */
 abstract class Checker {
-  def sourceType: Type
+  def sourceType: Type.Any
   
-  def checkData(source: Data): CheckResult
-  def checkOriginatedData(source: OriginatedData): OriginatedCheckResult
+  def checkData(source: Data.Any): CheckResult
+  def checkOriginatedData(source: OriginatedData.Any): OriginatedCheckResult
 }
