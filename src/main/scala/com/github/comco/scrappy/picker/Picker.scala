@@ -20,11 +20,3 @@ abstract class Picker {
 
   def compatibleWith(that: Picker) = this.sourceType compatibleWith that.sourceType
 }
-
-object Picker {
-  type ReturningSeq = Picker {
-    def targetType: SeqType
-    def pickData(source: Data): SeqData
-    def pickOriginatedData(source: OriginatedData): OriginatedSeqData
-  }
-}

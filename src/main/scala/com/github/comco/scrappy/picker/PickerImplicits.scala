@@ -50,9 +50,7 @@ trait PickerImplicits {
     }
 
     def zip(first: Picker, second: Picker): RichPicker = {
-      picker andThen ZipPicker(
-        first.asInstanceOf[Picker with Picker.ReturningSeq],
-        second.asInstanceOf[Picker with Picker.ReturningSeq])
+      picker andThen ZipPicker(first, second)
     }
 
     def struct(symbol: Symbol)(features: (Symbol, Picker)*)(implicit repo: TypeRepository): RichPicker = {

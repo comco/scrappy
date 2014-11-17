@@ -12,8 +12,8 @@ import com.github.comco.scrappy.origin.OriginalOrigin
 
 final class ZipPickerSpec extends FlatSpec with CustomMatchers {
   import Implicits._
-  val intPicker = int.andThen(const(seq(1, 2, 3))).asInstanceOf[Picker.ReturningSeq]
-  val stringPicker = string.andThen(const(seq(4, 5, 6))).asInstanceOf[Picker.ReturningSeq]
+  val intPicker = int.andThen(const(seq(1, 2, 3)))
+  val stringPicker = string.andThen(const(seq(4, 5, 6)))
 
   "A ZipPicker" should "check the compatibility of its arguments" in {
     intPicker.sourceType shouldEqual int
@@ -24,6 +24,7 @@ final class ZipPickerSpec extends FlatSpec with CustomMatchers {
 
   it should "check that its arguments return sequences" in {
     itShouldBeDisallowed calling ZipPicker(intPicker, int.andThen(const(1)))
+    itShouldBeDisallowed calling ZipPicker(int.andThen(const(1)), intPicker)
   }
 
   it should "be constructible with compatible pickers" in {
