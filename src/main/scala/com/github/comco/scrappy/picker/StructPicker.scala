@@ -9,8 +9,9 @@ import com.github.comco.scrappy.originated_data.OriginatedStructData
 import com.github.comco.scrappy.originated_data.OriginatedStructData
 import com.github.comco.scrappy.BotType
 
-case class StructPicker(val targetType: StructType, val featurePickers: Map[String, Picker])
-    extends BasePicker {
+case class StructPicker[ST](val targetType: StructType,
+  val featurePickers: Map[String, Picker[Type[ST], Type[Nothing]]])
+    extends BasePicker[Type[ST], StructType] {
   require(featurePickers.forall {
     case (name, picker) => sourceType.isSubtypeOf(picker.sourceType)
   }, s"All featurePickers: $featurePickers should have the same sourceType.")
@@ -22,19 +23,19 @@ case class StructPicker(val targetType: StructType, val featurePickers: Map[Stri
     case (name, _) => featurePickers.contains(name)
   }, "Missing feature name")
 
-  lazy val sourceType: Type = {
+  lazy val sourceType: Type[ST] = {
     val t = Type.meet(featurePickers.values.map(_.sourceType).toSeq)
     require(t != BotType, "Feature types are incompatible")
-    t
+    t.asInstanceOf[Type[ST]]
   }
 
-  def doPickData(source: Data): StructData = {
+  def doPickData(source: Data[Type[ST]]): StructData = {
     StructData(targetType, featurePickers.map {
       case (name, picker) => (name, picker.pickData(source))
     })
   }
 
-  def doPickOriginatedData(source: OriginatedData): OriginatedStructData = {
+  def doPickOriginatedData(source: OriginatedData[Type[ST]]): OriginatedStructData = {
     val data = doPickData(source.data)
     val origin = source.origin.computedWithTargetType(targetType)
     val features = featurePickers.map {
@@ -45,6 +46,6 @@ case class StructPicker(val targetType: StructType, val featurePickers: Map[Stri
 }
 
 object StructPicker {
-  def apply(targetType: StructType)(featurePickers: (String, Picker)*): StructPicker =
+  def apply[ST](targetType: StructType)(featurePickers: (String, Picker[Type[ST], Type[Nothing]])*): StructPicker[ST] =
     StructPicker(targetType, featurePickers.toMap)
 }

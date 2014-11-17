@@ -1,7 +1,6 @@
 package com.github.comco.scrappy.data
 
 import scala.language.implicitConversions
-
 import com.github.comco.scrappy.OptionType
 import com.github.comco.scrappy.PrimitiveType
 import com.github.comco.scrappy.SeqType
@@ -14,6 +13,8 @@ import com.github.comco.scrappy.data.simple.SimpleSeqData
 import com.github.comco.scrappy.data.simple.SimpleSomeData
 import com.github.comco.scrappy.data.simple.SimpleStructData
 import com.github.comco.scrappy.data.simple.SimpleTupleData
+import com.github.comco.scrappy.OptionType
+import com.github.comco.scrappy.data.simple.SimplePrimitiveData
 
 /**
  * Base class for scrappy Data.
@@ -21,19 +22,25 @@ import com.github.comco.scrappy.data.simple.SimpleTupleData
  * This data is intended to be independent of the specific representation,
  * so the equals methods of the derivable subclasses are final.
  */
-sealed abstract class Data {
+sealed abstract class Data[+Datatype <: Type[Any]] {
   /**
    * The type of this data.
    */
-  def datatype: Type
+  def datatype: Datatype
 }
 
 object Data {
+  implicit def Data_To_PrimitiveData[T](data: Data[PrimitiveType[T]]) = data.asInstanceOf[PrimitiveData[T]]
+  implicit def Data_To_TupleData(data: Data[TupleType]) = data.asInstanceOf[TupleData]
+  implicit def Data_To_StructData(data: Data[StructType]) = data.asInstanceOf[StructData]
+  implicit def Data_To_SeqData(data: Data[SeqType]) = data.asInstanceOf[SeqData]
+  implicit def Data_To_OptionData(data: Data[OptionType]) = data.asInstanceOf[OptionData]
+
   /**
    * Checks if data contains a value.
    * OptionData in case of none data doesn't contain a value.
    */
-  def isFilled(data: Data): Boolean = data match {
+  def isFilled(data: Data[Type[Any]]): Boolean = data match {
     case data: OptionData => data.isSome
     case _ => true
   }
@@ -42,7 +49,7 @@ object Data {
    * Checks if data can be assigned to a field of type datatype.
    * An option data field can be assigned by its corresponding value type.
    */
-  def canAssign(datatype: Type, data: Data): Boolean = {
+  def canAssign(datatype: Type[Any], data: Data[Type[Any]]): Boolean = {
     data.datatype == datatype ||
       (datatype.isInstanceOf[OptionType] &&
         datatype.asInstanceOf[OptionType].someType == data.datatype)
@@ -51,7 +58,7 @@ object Data {
   /**
    * Converts data to a directly assignable to datatype value.
    */
-  def convert(datatype: Type, data: Data): Data = {
+  def convert(datatype: Type[Any], data: Data[Type[Any]]): Data[Type[Any]] = {
     assert(canAssign(datatype, data))
     if (data.datatype == datatype) {
       data
@@ -61,9 +68,7 @@ object Data {
   }
 }
 
-abstract class PrimitiveData[T] extends Data {
-  def datatype: PrimitiveType[T]
-
+abstract class PrimitiveData[T] extends Data[PrimitiveType[T]] {
   /**
    * The raw value of this primitive data.
    */
@@ -85,9 +90,7 @@ object PrimitiveData {
     SimplePrimitiveData(value)
 }
 
-sealed abstract class OptionData extends Data {
-  def datatype: OptionType
-
+sealed abstract class OptionData extends Data[OptionType] {
   /**
    * True if this option data has some value.
    */
@@ -118,7 +121,7 @@ abstract class SomeData extends OptionData {
   /**
    * The value of this option data.
    */
-  def value: Data
+  def value: Data[Type[Any]]
 
   private def state = (datatype, value)
 
@@ -131,10 +134,10 @@ abstract class SomeData extends OptionData {
 }
 
 object SomeData {
-  def doApply(datatype: OptionType, value: Data): SomeData =
+  def doApply(datatype: OptionType, value: Data[Type[Any]]): SomeData =
     SimpleSomeData(datatype, value)
 
-  def apply(datatype: OptionType, value: Data): SomeData = {
+  def apply(datatype: OptionType, value: Data[Type[Any]]): SomeData = {
     require(value.datatype == datatype.someType,
       s"SomeData of datatype: $datatype cannot be created with value of type: ${value.datatype}")
     doApply(datatype, value)
@@ -146,7 +149,7 @@ object SomeData {
   }
 }
 
-abstract class TupleData extends Data {
+abstract class TupleData extends Data[TupleType] {
   require(datatype.length == coordinates.length,
     s"Invalid size of coordinates to construct a TupleData;" +
       " expected: ${datatype.length}, actual: ${coordinates.length}.")
@@ -154,12 +157,10 @@ abstract class TupleData extends Data {
     case (datatype, data) => data.datatype == datatype
   }, "Data coordinates types don't match tuple datatypes for TupleData construction.")
 
-  def datatype: TupleType
-
   /**
    * The coordinates of this tuple data.
    */
-  def coordinates: IndexedSeq[Data]
+  def coordinates: IndexedSeq[Data[Type[Any]]]
 
   /**
    * The length (arity) of this tuple data.
@@ -178,7 +179,7 @@ abstract class TupleData extends Data {
   /**
    * Retrieves the coordinate of this data at some position.
    */
-  def coordinate(position: Int): Data = {
+  def coordinate(position: Int): Data[Type[Any]] = {
     require(datatype.hasCoordinate(position),
       s"Coordinate position: $position is out of bounds for TupleType: $datatype")
 
@@ -196,27 +197,25 @@ abstract class TupleData extends Data {
 }
 
 object TupleData {
-  def apply(datatype: TupleType, coordinates: IndexedSeq[Data]): TupleData = {
+  def apply(datatype: TupleType, coordinates: IndexedSeq[Data[Type[Any]]]): TupleData = {
     SimpleTupleData(datatype, coordinates)
   }
 
-  def apply(datatype: TupleType)(coordinates: Data*): TupleData = {
+  def apply(datatype: TupleType)(coordinates: Data[Type[Any]]*): TupleData = {
     TupleData(datatype, coordinates.toIndexedSeq)
   }
 
-  def apply(coordinates: Data*): TupleData = {
+  def apply(coordinates: Data[Type[Any]]*): TupleData = {
     val datatype = TupleType(coordinates.map(_.datatype).toIndexedSeq)
     TupleData(datatype, coordinates.toIndexedSeq)
   }
 }
 
-abstract class SeqData extends Data {
-  def datatype: SeqType
-
+abstract class SeqData extends Data[SeqType] {
   /**
    * The elements of this seq data.
    */
-  def elements: Seq[Data]
+  def elements: Seq[Data[Type[Any]]]
 
   /**
    * Checks if this struct data has a feature with some name.
@@ -230,7 +229,7 @@ abstract class SeqData extends Data {
   /**
    * Retrieves the element of this seq data at some index.
    */
-  def element(index: Int): Data = {
+  def element(index: Int): Data[Type[Any]] = {
     require(0 <= index && index < length,
       s"Index: $index is out of bounds for SeqData with length: $length.")
 
@@ -253,19 +252,19 @@ abstract class SeqData extends Data {
 }
 
 object SeqData {
-  def doApply(datatype: SeqType, elements: Seq[Data]): SeqData =
+  def doApply(datatype: SeqType, elements: Seq[Data[Type[Any]]]): SeqData =
     SimpleSeqData(datatype, elements)
 
-  def apply(datatype: SeqType)(elements: Data*)(
+  def apply(datatype: SeqType)(elements: Data[Type[Any]]*)(
     implicit dummy: DummyImplicit): SeqData = {
     SeqData(datatype, elements)
   }
 
-  def apply(firstElement: Data, nextElements: Data*): SeqData = {
+  def apply(firstElement: Data[Type[Any]], nextElements: Data[Type[Any]]*): SeqData = {
     SeqData(SeqType(firstElement.datatype), firstElement +: nextElements.toSeq)
   }
 
-  def apply(datatype: SeqType, rawElements: Seq[Data]): SeqData = {
+  def apply(datatype: SeqType, rawElements: Seq[Data[Type[Any]]]): SeqData = {
     require(rawElements.forall(Data.canAssign(datatype.elementType, _)),
       "An element has invalid datatype")
     val elements = rawElements.map(Data.convert(datatype.elementType, _))
@@ -273,13 +272,11 @@ object SeqData {
   }
 }
 
-abstract class StructData extends Data {
-  def datatype: StructType
-
+abstract class StructData extends Data[StructType] {
   /**
    * The features of this struct data.
    */
-  def features: Map[String, Data]
+  def features: Map[String, Data[Type[Any]]]
 
   /**
    * Checks if this struct data has a feature with some name.
@@ -293,7 +290,7 @@ abstract class StructData extends Data {
   /**
    * Retrieves the feature of this struct data with some name.
    */
-  def feature(name: String): Data = {
+  def feature(name: String): Data[Type[Any]] = {
     require(datatype.hasFeature(name),
       s"StructData: $this doesn't contain a feature named: $name")
 
@@ -311,10 +308,10 @@ abstract class StructData extends Data {
 }
 
 object StructData {
-  def doApply(datatype: StructType, features: Map[String, Data]): StructData =
+  def doApply(datatype: StructType, features: Map[String, Data[Type[Any]]]): StructData =
     SimpleStructData(datatype, features)
 
-  def apply(datatype: StructType, rawFeatures: Map[String, Data]): StructData = {
+  def apply(datatype: StructType, rawFeatures: Map[String, Data[Type[Any]]]): StructData = {
     require(rawFeatures.keys.forall(datatype.hasFeature(_)), "Invalid feature name")
     require(rawFeatures.forall {
       case (name, data) => {
@@ -325,11 +322,11 @@ object StructData {
       case (name, datatype) => rawFeatures.contains(name) || datatype.isInstanceOf[OptionType]
     }, "A non-optional feature is not given")
 
-    val features: Map[String, Data] = {
-      val convertedFeatures: Map[String, Data] = rawFeatures.transform({
+    val features: Map[String, Data[Type[Any]]] = {
+      val convertedFeatures: Map[String, Data[Type[Any]]] = rawFeatures.transform({
         case (name, data) => Data.convert(datatype.featureType(name), data)
       })
-      val missingFeatures: Map[String, Type] = datatype.featureTypes.filter({
+      val missingFeatures: Map[String, Type[Any]] = datatype.featureTypes.filter({
         case (name, _) => !rawFeatures.contains(name)
       })
       // all missing features should have option types
@@ -340,8 +337,7 @@ object StructData {
     doApply(datatype, features)
   }
 
-  def apply(datatype: StructType)(features: (String, Data)*): StructData = {
+  def apply(datatype: StructType)(features: (String, Data[Type[Any]])*): StructData = {
     StructData(datatype, features.toMap)
   }
 }
-

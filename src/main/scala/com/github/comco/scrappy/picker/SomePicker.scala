@@ -1,22 +1,25 @@
 package com.github.comco.scrappy.picker
 
+import com.github.comco.scrappy.Type
 import com.github.comco.scrappy.OptionType
 import com.github.comco.scrappy.data.OptionData
 import com.github.comco.scrappy.originated_data.OriginatedOptionData
 import com.github.comco.scrappy.data.SomeData
 import com.github.comco.scrappy.originated_data.OriginatedSomeData
+import com.github.comco.scrappy.data.Data
+import com.github.comco.scrappy.originated_data.OriginatedData
 
 case class SomePicker(val sourceType: OptionType)
-    extends BaseOptionPicker {
+    extends BasePicker[OptionType, Type[Nothing]] {
 
   def targetType = sourceType.someType
 
-  def doPickData(source: OptionData) = source match {
+  def doPickData(source: Data[OptionType]) = source match {
     case source: SomeData => source.value
     case _ => throw new IllegalArgumentException("SomePicker cannot pick NoneData")
   }
 
-  def doPickOriginatedData(source: OriginatedOptionData) = source match {
+  def doPickOriginatedData(source: OriginatedData[OptionType]) = source match {
     case source: OriginatedSomeData => source.value
     case _ => throw new IllegalArgumentException("SomePicker cannot pick NoneData")
   }

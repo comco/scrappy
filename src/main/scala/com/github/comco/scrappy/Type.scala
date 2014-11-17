@@ -5,8 +5,8 @@ package com.github.comco.scrappy
  *
  * Types have a lattice structure.
  */
-sealed abstract class Type {
-  def isSubtypeOf(that: Type) = that match {
+sealed abstract class Type[+T] {
+  def isSubtypeOf(that: Type[Any]) = that match {
     // Top type is a supertype of anything
     case TopType => true
     case _ => this match {
@@ -16,31 +16,31 @@ sealed abstract class Type {
     }
   }
 
-  def join(that: Type): Type = {
+  def join(that: Type[Any]): Type[Any] = {
     if (this == BotType) that
     else if (that == BotType) this
     else if (this == that) this
     else TopType
   }
 
-  def meet(that: Type): Type = {
+  def meet(that: Type[Any]): Type[Any] = {
     if (this == TopType) that
     else if (that == TopType) this
     else if (this == that) this
     else BotType
   }
 
-  def compatibleWith(that: Type) =
+  def compatibleWith(that: Type[Any]) =
     (this meet that) != BotType
 }
 
 object Type {
-  def join(types: Seq[Type]) = ((BotType: Type) /: types)(_.join(_))
-  def meet(types: Seq[Type]) = ((TopType: Type) /: types)(_.meet(_))
+  def join(types: Seq[Type[Any]]) = ((BotType: Type[Any]) /: types)(_.join(_))
+  def meet(types: Seq[Type[Any]]) = ((TopType: Type[Any]) /: types)(_.meet(_))
 }
 
-object TopType extends Type
-object BotType extends Type
+object TopType extends Type[Any]
+object BotType extends Type[Nothing]
 
 /**
  * Base (type)class for primitive scrappy types.
@@ -54,7 +54,7 @@ sealed abstract class PrimitiveType[T] extends Type {
  * Tuple type is for data having coordinates. The coordinates can be indexed by
  * position. The position is zero-based.
  */
-case class TupleType(val coordinateTypes: IndexedSeq[Type])
+case class TupleType(val coordinateTypes: IndexedSeq[Type[Any]])
     extends Type {
 
   /**
@@ -71,7 +71,7 @@ case class TupleType(val coordinateTypes: IndexedSeq[Type])
   /**
    * Retrieves the type of the coordinate of this tuple type at some position.
    */
-  def coordinateType(position: Int): Type = {
+  def coordinateType(position: Int): Type[Any] = {
     require(hasCoordinate(position),
       s"Invalid coordinate position: $position for a TupleType: $this.")
 
@@ -84,7 +84,7 @@ object TupleType {
    * Constructs a tuple type from a series of types representing the coordinate
    * types.
    */
-  def apply(coordinatesTypes: Type*): TupleType =
+  def apply(coordinatesTypes: Type[Any]*): TupleType =
     TupleType(coordinatesTypes.toIndexedSeq)
 }
 
@@ -92,7 +92,7 @@ object TupleType {
  * A struct type has a name named features. The name of the feature is used as
  * a key for identifying that feature in the struct.
  */
-case class StructType(val name: String, val featureTypes: Map[String, Type])
+case class StructType(val name: String, val featureTypes: Map[String, Type[Any]])
     extends Type {
 
   /**
@@ -109,7 +109,7 @@ case class StructType(val name: String, val featureTypes: Map[String, Type])
    * Retrieves the feature type of a feature with some name from this struct
    * type.
    */
-  def featureType(name: String): Type = {
+  def featureType(name: String): Type[Any] = {
     require(hasFeature(name),
       s"Invalid feature name: $name for a StructType: $this.")
 
@@ -122,7 +122,7 @@ object StructType {
    * Constructs a struct type with some name and a sequence of named feature
    * types.
    */
-  def apply(name: String, featureTypes: (String, Type)*): StructType = {
+  def apply(name: String, featureTypes: (String, Type[Any])*): StructType = {
     StructType(name, featureTypes.toMap)
   }
 }
@@ -130,13 +130,13 @@ object StructType {
 /**
  * A type for representing a sequence of elements of the same type.
  */
-case class SeqType(val elementType: Type) extends Type
+case class SeqType(val elementType: Type[Any]) extends Type
 
 /**
  * A type for optional values. An optional value could either be none or some,
  * and the type of the value must be non-optional type.
  */
-case class OptionType(val someType: Type) extends Type {
+case class OptionType(val someType: Type[Any]) extends Type {
   require(!someType.isInstanceOf[OptionType],
     s"OptionType should have a non-optional someType instead of: $someType")
 }
