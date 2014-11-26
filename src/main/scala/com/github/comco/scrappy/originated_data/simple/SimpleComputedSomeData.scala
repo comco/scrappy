@@ -5,9 +5,10 @@ import com.github.comco.scrappy.data.SomeData
 import com.github.comco.scrappy.originated_data.OriginatedData
 import com.github.comco.scrappy.originated_data.OriginatedSomeData
 import com.github.comco.scrappy.Type
+import com.github.comco.scrappy.Shape
 
-case class SimpleComputedSomeData(
-  val data: SomeData,
+case class SimpleComputedSomeData[+ValueShape <: Shape.Any](
+  val data: SomeData[ValueShape],
   val origin: Origin,
-  val value: OriginatedData[Type[Any]])
+  val value: OriginatedData[ValueShape])
     extends OriginatedSomeData

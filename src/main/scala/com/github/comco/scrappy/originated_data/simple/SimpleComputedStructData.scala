@@ -9,5 +9,5 @@ import com.github.comco.scrappy.Type
 case class SimpleComputedStructData(
   val data: StructData,
   val origin: Origin,
-  val features: Map[String, OriginatedData[Type[Any]]])
+  val features: Map[String, OriginatedData.Any])
     extends OriginatedStructData

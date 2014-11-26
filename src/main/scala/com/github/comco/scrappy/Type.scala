@@ -3,26 +3,14 @@ package com.github.comco.scrappy
 import scala.reflect.runtime.universe._
 import scala.language.implicitConversions
 
-sealed abstract class Shape
-
-object Shape {
-  final type Any = Shape
-  final abstract class Primitive[+T : TypeTag] extends Any
-  final abstract class Struct extends Any
-  final abstract class Tuple extends Any
-  final abstract class Seq extends Any
-  final abstract class Option extends Any
-  final type Nil = Nothing
-}
-
 /**
  * Base class for scrappy types.
  *
  * Types have a lattice structure.
  */
-sealed abstract class Type[+Shape >: Shape.Nil <: Shape.Any : TypeTag] {
+sealed abstract class Type[+Shape <: Shape.Any: TypeTag] {
   val shape = typeOf[Shape]
-  
+
   /**
    * Defines a subtype relation.
    */
@@ -33,33 +21,35 @@ sealed abstract class Type[+Shape >: Shape.Nil <: Shape.Any : TypeTag] {
 
 object Type {
   type Any = Type[Shape.Any]
-  final object Any extends Any
-  
-	type Nil = Type[Shape.Nil]
-  final object Nil extends Nil
-  
-  type Primitive[T] = Type[Shape.Primitive[T]]
+  implicit final object Any extends Any
+
+  type Nil = Type[Shape.Nil]
+  implicit final object Nil extends Nil
+
+  type Primitive[+RawType] = Type[Shape.Primitive[RawType]]
+  implicit def toPrimitiveType[RawType](tpe: Primitive[RawType]) =
+    tpe.asInstanceOf[PrimitiveType[RawType]]
+
   type Tuple = Type[Shape.Tuple]
+  implicit def toTupleType(tpe: Tuple) = tpe.asInstanceOf[TupleType]
+
   type Struct = Type[Shape.Struct]
-  type Seq = Type[Shape.Seq]
-  type Option = Type[Shape.Option]
-  
-  implicit def Type_To_Primitive[T](tpe: Primitive[T]) = tpe.asInstanceOf[PrimitiveType[T]]
-  implicit def Type_To_Tuple(tpe: Tuple) = tpe.asInstanceOf[TupleType]
-  implicit def Type_To_Struct(tpe: Struct) = tpe.asInstanceOf[StructType]
-  implicit def Type_To_Seq(tpe: Seq) = tpe.asInstanceOf[SeqType]
-  implicit def Type_To_Option(tpe: Option) = tpe.asInstanceOf[OptionType]
-  
-  implicit object PrimitiveNil extends Primitive[Nothing]
+  implicit def toStructType(tpe: Struct) = tpe.asInstanceOf[StructType]
+
+  type Seq[+ElementShape <: Shape.Any] = Type[Shape.Seq[ElementShape]]
+  implicit def toSeqType[ElementShape <: Shape.Any](tpe: Seq[ElementShape]) =
+    tpe.asInstanceOf[SeqType[ElementShape]]
+
+  type Optional[+ValueShape <: Shape.Concrete] = Type[Shape.Optional[ValueShape]]
+  implicit def toOptionalType[ValueShape <: Shape.Concrete](tpe: Optional[ValueShape]) =
+    tpe.asInstanceOf[OptionalType[ValueShape]]
 }
 
 /**
- * Base (type)class for primitive scrappy types.
+ * Base class for primitive scrappy types.
  * These are predefined - user-defined types cannot be primitive.
  */
-sealed abstract class PrimitiveType[+T : TypeTag] extends Type.Primitive[T] {
-  def typeName: String
-}
+sealed abstract class PrimitiveType[+T: TypeTag] extends Type.Primitive[T]
 
 /**
  * Tuple type is for data having coordinates. The coordinates can be indexed by
@@ -141,13 +131,14 @@ object StructType {
 /**
  * A type for representing a sequence of elements of the same type.
  */
-case class SeqType(val elementType: Type.Any) extends Type
+case class SeqType[+ElementShape <: Shape.Any: TypeTag](val elementType: Type[ElementShape])
+  extends Type.Seq[ElementShape]
 
 /**
  * A type for optional values. An optional value could either be none or some,
- * and the type of the value must be non-optional type.
+ * and the type of the value must be a concrete (non-optional) type.
+ * Thus optional values are flat - you cannot have an optional value inside
+ * an optional value.
  */
-case class OptionType(val someType: Type.Any) extends Type {
-  require(!someType.isInstanceOf[OptionType],
-    s"OptionType should have a non-optional someType instead of: $someType")
-}
+case class OptionalType[+ValueShape <: Shape.Concrete: TypeTag](val valueType: Type[ValueShape])
+  extends Type.Optional[ValueShape]

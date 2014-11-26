@@ -9,5 +9,5 @@ import com.github.comco.scrappy.Type
 case class SimpleComputedTupleData(
   val data: TupleData,
   val origin: Origin,
-  val coordinates: IndexedSeq[OriginatedData[Type[Any]]])
+  val coordinates: IndexedSeq[OriginatedData.Any])
     extends OriginatedTupleData

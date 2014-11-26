@@ -7,5 +7,5 @@ import com.github.comco.scrappy.Type
 
 case class SimpleStructData(
   val datatype: StructType,
-  val features: Map[String, Data[Type[Any]]])
+  val features: Map[String, Data.Any])
     extends StructData

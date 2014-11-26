@@ -3,24 +3,25 @@ package com.github.comco.scrappy.picker
 import com.github.comco.scrappy.data.Data
 import com.github.comco.scrappy.originated_data.OriginatedData
 import com.github.comco.scrappy.Type
+import com.github.comco.scrappy.Shape
 
 /**
  * Base class for general pickers.
  */
-abstract class BasePicker[SourceType >: Type.Nil <: Type.Any, TargetType >: Type.Nil <: Type.Any]
-    extends Picker[SourceType, TargetType] {
+abstract class BasePicker[-SourceShape <: Shape.Any, +TargetShape <: Shape.Any]
+    extends Picker[SourceShape, TargetShape] {
 
-  override def pickData(source: Data[SourceType]): Data[TargetType] = {
+  def pickData(source: Data[SourceShape]): Data[TargetShape] = {
     require(source.datatype <:< sourceType)
     doPickData(source)
   } ensuring (_.datatype <:< targetType)
 
-  override def pickOriginatedData(source: OriginatedData[SourceType]): OriginatedData[TargetType] = {
+  def pickOriginatedData(source: OriginatedData[SourceShape]): OriginatedData[TargetShape] = {
     require(source.datatype <:< sourceType)
     doPickOriginatedData(source)
   } ensuring (_.datatype <:< targetType)
 
-  def doPickData(source: Data[SourceType]): Data[TargetType]
+  def doPickData(source: Data[SourceShape]): Data[TargetShape]
 
-  def doPickOriginatedData(source: OriginatedData[SourceType]): OriginatedData[TargetType]
+  def doPickOriginatedData(source: OriginatedData[SourceShape]): OriginatedData[TargetShape]
 }

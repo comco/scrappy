@@ -10,7 +10,7 @@ import com.github.comco.scrappy.Type
 case class SimpleOriginalStructData(val data: StructData, val origin: Origin)
     extends OriginatedStructData {
 
-  lazy val features: Map[String, OriginatedData[Type[Any]]] = data.features.map {
+  lazy val features: Map[String, OriginatedData.Any] = data.features.map {
     case (name, feature) =>
       val featureOrigin = origin.append(FeatureStep(datatype, name))
       (name, OriginatedData.from(feature, featureOrigin))
