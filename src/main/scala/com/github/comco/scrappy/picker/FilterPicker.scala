@@ -1,5 +1,7 @@
 package com.github.comco.scrappy.picker
 
+import scala.reflect.runtime.universe._
+
 import com.github.comco.scrappy.PrimitiveType
 import com.github.comco.scrappy.SeqType
 import com.github.comco.scrappy.data.Data
@@ -8,25 +10,19 @@ import com.github.comco.scrappy.data.SeqData
 import com.github.comco.scrappy.originated_data.OriginatedSeqData
 import com.github.comco.scrappy.Type
 import com.github.comco.scrappy.originated_data.OriginatedData
+import com.github.comco.scrappy.Shape
 
-case class FilterPicker[SourceType >: Type.Nil <: Type.Any](val cond: Picker[SourceType, Type.Primitive[Boolean]])
-    extends Picker[Type.Seq, Type.Seq] {
-  
+case class FilterPicker[SourceShape <: Shape.Any: TypeTag](val cond: Picker[SourceShape, Shape.Primitive[Boolean]])
+    extends Picker[Shape.Seq[SourceShape], Shape.Seq[SourceShape]] {
+
   def sourceType = SeqType(cond.sourceType)
-  def targetType = sourceType
+  def targetType = SeqType(cond.sourceType.asInstanceOf[Type[SourceShape]])
 
-  def check(data: Data.Any): Boolean =
-    cond.pickData(data.asInstanceOf[Data[SourceType]]).value
+  def doPickData(source: Data.Seq[SourceShape]) =
+    SeqData(sourceType, source.elements.filter(cond.pickData(_).raw))
 
-  def doPickData(source: Data[SeqType]) =
-    SeqData(sourceType, source.elements.filter(check))
-
-  def doPickOriginatedData(source: OriginatedData[SeqType]) = {
-    OriginatedSeqData(
-      doPickData(source.data),
+  def doPickOriginatedData(source: OriginatedData.Seq[SourceShape]) =
+    OriginatedSeqData.computed(doPickData(source.data),
       source.origin.computed,
-      source.elements.filter {
-        d => check(d.data)
-      })
-  }
+      source.elements.filter(cond.pickOriginatedData(_).data.raw))
 }

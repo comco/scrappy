@@ -24,7 +24,7 @@ case class MapPicker[-SourceShape <: Shape.Any: TypeTag, +TargetShape <: Shape.A
 
   override def doPickOriginatedData(source: OriginatedData.Seq[SourceShape]) = {
     val pickedData = doPickData(source.data)
-    OriginatedSeqData(
+    OriginatedSeqData.computed(
       pickedData,
       source.origin.computedWithTargetType(pickedData.datatype),
       source.elements.map(f.pickOriginatedData(_)))

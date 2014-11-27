@@ -1,29 +1,27 @@
 package com.github.comco.scrappy.picker
 
+import scala.reflect.runtime.universe._
+
 import com.github.comco.scrappy.SeqType
 import com.github.comco.scrappy.data.SeqData
 import com.github.comco.scrappy.originated_data.OriginatedSeqData
+import com.github.comco.scrappy.Shape
+import com.github.comco.scrappy.data.Data
+import com.github.comco.scrappy.originated_data.OriginatedData
 
 /**
- * A FlatMapPicker; f : a -> [b]; flatMap(f) : [a] -> [b] = [a].map(f).flatten
+ * A FlatMapPicker: (a -> [b]) -> [a] -> [b]
  */
-case class FlatMapPicker(val f: Picker) extends BaseSeqPicker {
-  require(f.targetType.isInstanceOf[SeqType], s"FlatMapPicker needs f to have a sequence type, not: $f")
-
+case class FlatMapPicker[-A <: Shape.Any: TypeTag, +B <: Shape.Any: TypeTag](val f: Picker[A, Shape.Seq[B]])
+    extends BasePicker[Shape.Seq[A], Shape.Seq[B]] {
   def sourceType = SeqType(f.sourceType)
-  def targetType = f.targetType.asInstanceOf[SeqType]
+  def targetType = f.targetType
 
-  def doPickData(source: SeqData): SeqData = {
-    SeqData(targetType, source.elements.flatMap(f.pickData(_).asInstanceOf[SeqData].elements))
+  def doPickData(source: Data.Seq[A]): Data.Seq[B] = {
+    ???
   }
 
-  def doPickOriginatedData(source: OriginatedSeqData): OriginatedSeqData = {
-    val pickedData = doPickData(source.data)
-    val origin = source.origin.computedWithTargetType(targetType)
-    val elements = source.elements.flatMap(f.pickOriginatedData(_).asInstanceOf[OriginatedSeqData].elements)
-    OriginatedSeqData(
-      pickedData.datatype,
-      origin,
-      elements)
+  def doPickOriginatedData(source: OriginatedData.Seq[A]): OriginatedData.Seq[B] = {
+    ???
   }
 }
