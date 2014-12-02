@@ -22,12 +22,12 @@ trait Domain {
   type RichPrimitive[+RawType] <: Primitive[RawType]
   type RichStruct <: Struct
   type RichTuple <: Tuple
-  type RichTuple1[+Coordinate1 <: Shape.Any] <: Tuple1[Coordinate1]
-  type RichTuple2[+Coordinate1 <: Shape.Any, Coordinate2 <: Shape.Any] <: Tuple2[Coordinate1, Coordinate2]
+  type RichTuple1[+Coordinate1 <: Shape.Any] <: RichTuple with Tuple1[Coordinate1]
+  type RichTuple2[+Coordinate1 <: Shape.Any, Coordinate2 <: Shape.Any] <: RichTuple with Tuple2[Coordinate1, Coordinate2]
   type RichSequence[+Element <: Shape.Any] <: Sequence[Element]
   type RichOptional[+Value <: Shape.Concrete] <: Optional[Value]
-  type RichSome[+Value <: Shape.Concrete] <: Some[Value]
-  type RichNone <: None
+  type RichSome[+Value <: Shape.Concrete] <: RichOptional[Value] with Some[Value]
+  type RichNone <: RichOptional[Shape.Nil] with None
 
   implicit def toPrimitive[RawType: TypeTag](d: Primitive[RawType]) = d.asInstanceOf[Primitive[RawType]]
   implicit def toRichStruct(d: Struct) = d.asInstanceOf[RichStruct]

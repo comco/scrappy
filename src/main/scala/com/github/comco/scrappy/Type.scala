@@ -77,4 +77,12 @@ object Type extends Domain {
   object Nil extends Nil {
     val shapeType = typeOf[Shape.Nil]
   }
+
+  object Primitive {
+    def apply[RawType: TypeTag] = RichPrimitive[RawType]()
+  }
+
+  object Struct {
+    def apply(name: String, featureTypes: Map[String, Any]) = RichStruct(name, featureTypes)
+  }
 }
