@@ -1,88 +1,161 @@
 package com.github.comco.scrappy
 
-import scala.reflect.runtime.universe.{ _ => u }
-import scala.language.implicitConversions
-
 /**
  * Base class for scrappy types.
+ *
+ * Types have a lattice structure.
  */
-sealed trait Type[+Shape <: Shape.Any] {
-  def shapeType: scala.reflect.runtime.universe.Type
+sealed abstract class Type {
+  def isSubtypeOf(that: Type) = that match {
+    // Top type is a supertype of anything
+    case Type.TopType => true
+    case _ => this match {
+      // Bottom type is a subtype of anything
+      case Type.BotType => true
+      case _ => (this == that)
+    }
+  }
+
+  def join(that: Type): Type = {
+    if (this == Type.BotType) that
+    else if (that == Type.BotType) this
+    else if (this == that) this
+    else Type.TopType
+  }
+
+  def meet(that: Type): Type = {
+    if (this == Type.TopType) that
+    else if (that == Type.TopType) this
+    else if (this == that) this
+    else Type.BotType
+  }
+
+  def compatibleWith(that: Type) =
+    (this meet that) != Type.BotType
+}
+
+object Type {
+  def join(types: Seq[Type]) = ((BotType: Type) /: types)(_.join(_))
+  def meet(types: Seq[Type]) = ((TopType: Type) /: types)(_.meet(_))
+
+  object TopType extends Type
+  object BotType extends Type
+}
+
+/**
+ * Base (type)class for primitive scrappy types.
+ * These are predefined - user-defined types cannot be primitive.
+ */
+sealed abstract class PrimitiveType[T] extends Type {
+  def typeName: String
+}
+
+/**
+ * Tuple type is for data having coordinates. The coordinates can be indexed by
+ * position. The position is zero-based.
+ */
+case class TupleType(val coordinateTypes: IndexedSeq[Type])
+    extends Type {
 
   /**
-   * Defines a subtype relation.
+   * The number of coordinates of this tuple type.
    */
-  def <:<(that: Type.Any): Boolean = {
-    val shapesCompatible = (this.shapeType <:< that.shapeType)
-    val shapesDifferent = !(this.shapeType =:= that.shapeType)
-    val instancesEqual = (this == that)
-    return shapesCompatible && (shapesDifferent || instancesEqual)
+  def length: Int = coordinateTypes.length
+
+  /**
+   * Checks if this tuple type contains a coordinate at some position.
+   */
+  def hasCoordinate(position: Int): Boolean =
+    (0 <= position && position < coordinateTypes.length)
+
+  /**
+   * Retrieves the type of the coordinate of this tuple type at some position.
+   */
+  def coordinateType(position: Int): Type = {
+    require(hasCoordinate(position),
+      s"Invalid coordinate position: $position for a TupleType: $this.")
+
+    coordinateTypes(position)
   }
 }
 
-object Type extends Domain {
-  type Abstract[+Shape <: Shape.Any] = Type[Shape]
+object TupleType {
+  /**
+   * Constructs a tuple type from a series of types representing the coordinate
+   * types.
+   */
+  def apply(coordinatesTypes: Type*): TupleType =
+    TupleType(coordinatesTypes.toIndexedSeq)
+}
 
-  case class RichPrimitive[+RawType: TypeTag]()
-      extends Primitive[RawType] {
-    def shapeType = typeOf[Shape.Primitive[RawType]]
+/**
+ * A struct type has a name named features. The name of the feature is used as
+ * a key for identifying that feature in the struct.
+ */
+case class StructType(val name: String, val featureTypes: Map[String, Type])
+    extends Type {
+
+  /**
+   * The size (number of features) of this struct type.
+   */
+  def size: Int = featureTypes.size
+
+  /**
+   * Checks if this struct type has a feature with some name.
+   */
+  def hasFeature(name: String): Boolean = featureTypes.contains(name)
+
+  /**
+   * Retrieves the feature type of a feature with some name from this struct
+   * type.
+   */
+  def featureType(name: String): Type = {
+    require(hasFeature(name),
+      s"Invalid feature name: $name for a StructType: $this.")
+
+    featureTypes(name)
+  }
+}
+
+object StructType {
+  /**
+   * Constructs a struct type with some name and a sequence of named feature
+   * types.
+   */
+  def apply(name: String, featureTypes: (String, Type)*): StructType = {
+    StructType(name, featureTypes.toMap)
+  }
+}
+
+/**
+ * A type for representing a sequence of elements of the same type.
+ */
+case class SeqType(val elementType: Type) extends Type
+
+/**
+ * A type for optional values. An optional value could either be none or some,
+ * and the type of the value must be non-optional type.
+ */
+case class OptionType(val someType: Type) extends Type {
+  require(!someType.isInstanceOf[OptionType],
+    s"OptionType should have a non-optional someType instead of: $someType")
+}
+
+object PrimitiveType {
+  implicit case object IntPrimitiveType extends PrimitiveType[Int] {
+    final val typeName = "int"
   }
 
-  case class RichStruct(val name: String, val featureTypes: Map[String, Any])
-      extends Struct {
-    def shapeType = typeOf[Shape.Struct]
+  implicit case object StringPrimitiveType extends PrimitiveType[String] {
+    final val typeName = "string"
   }
 
-  sealed abstract class RichTuple extends Tuple {
-    def shapeType = typeOf[Shape.Tuple]
-    def coordinateTypes: IndexedSeq[Any]
+  implicit case object BooleanPrimitiveType extends PrimitiveType[Boolean] {
+    final val typeName = "boolean"
   }
 
-  case class RichTuple1[+Coordinate1 <: Shape: TypeTag](val coordinate1Type: Type[Coordinate1])
-      extends RichTuple with Tuple1[Coordinate1] {
-    def coordinateTypes = IndexedSeq(coordinate1Type)
-  }
-
-  case class RichTuple2[+Coordinate1 <: Shape: TypeTag, +Coordinate2 <: Shape: TypeTag](
-    val coordinate1Type: Type[Coordinate1],
-    val coordinate2Type: Type[Coordinate2])
-      extends RichTuple with Tuple2[Coordinate1, Coordinate2] {
-    def coordinateTypes = IndexedSeq(coordinate1Type, coordinate2Type)
-  }
-
-  case class RichSequence[+Element <: Shape: TypeTag](val elementType: Type[Element])
-      extends Sequence[Element] {
-    def shapeType = typeOf[Shape.Sequence[Element]]
-  }
-
-  sealed abstract class RichOptional[+Value <: Shape.Concrete: TypeTag]
-      extends Optional[Value] {
-    def shapeType = typeOf[Shape.Optional[Value]]
-    def valueType: Type[Value]
-  }
-
-  sealed abstract class RichSome[+Value <: Shape.Concrete: TypeTag](val valueType: Abstract[Value])
-    extends RichOptional[Value] with Some[Value]
-
-  sealed abstract class RichNone extends RichOptional[Nothing] with None {
-    val valueType = Nil
-  }
-
-  object RichNone extends RichNone
-
-  object Any extends Any {
-    val shapeType = typeOf[Shape.Any]
-  }
-
-  object Nil extends Nil {
-    val shapeType = typeOf[Shape.Nil]
-  }
-
-  object Primitive {
-    def apply[RawType: TypeTag] = RichPrimitive[RawType]()
-  }
-
-  object Struct {
-    def apply(name: String, featureTypes: Map[String, Any]) = RichStruct(name, featureTypes)
-  }
+  val typeNames = Map[String, PrimitiveType[_]](
+    "int" -> IntPrimitiveType,
+    "string" -> StringPrimitiveType,
+    "boolean" -> BooleanPrimitiveType)
 }

@@ -5,6 +5,9 @@ import scala.reflect.runtime.universe.TypeTag
 import scala.language.implicitConversions
 import scala.language.higherKinds
 
+/**
+ * Defines the relationships between Scrappy concepts.
+ */
 trait Domain {
   type Abstract[+Shape <: Shape.Any]
   type Any = Abstract[Shape.Any]
@@ -40,7 +43,4 @@ trait Domain {
   implicit def toRichOptional[Value <: Shape.Concrete: TypeTag](d: Optional[Value]) = d.asInstanceOf[RichOptional[Value]]
   implicit def toRichSome[Value <: Shape.Concrete: TypeTag](d: Some[Value]) = d.asInstanceOf[RichSome[Value]]
   implicit def toRichNone(d: None) = d.asInstanceOf[RichNone]
-
-  def Any: Any
-  def Nil: Nil
 }
