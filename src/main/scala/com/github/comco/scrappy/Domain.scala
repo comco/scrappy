@@ -10,6 +10,7 @@ import scala.language.higherKinds
  */
 trait Domain {
   type Abstract[+Shape <: Shape.Any]
+
   type Any = Abstract[Shape.Any]
   type Primitive[+RawType] = Abstract[Shape.Primitive[RawType]]
   type Struct = Abstract[Shape.Struct]
