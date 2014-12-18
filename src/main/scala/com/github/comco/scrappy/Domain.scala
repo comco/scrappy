@@ -33,7 +33,7 @@ trait Domain {
   type RichSome[+Value <: Shape.Concrete] <: RichOptional[Value] with Some[Value]
   type RichNone <: RichOptional[Shape.Nil] with None
 
-  implicit def toPrimitive[RawType: TypeTag](d: Primitive[RawType]) = d.asInstanceOf[Primitive[RawType]]
+  implicit def toRichPrimitive[RawType: TypeTag](d: Primitive[RawType]) = d.asInstanceOf[RichPrimitive[RawType]]
   implicit def toRichStruct(d: Struct) = d.asInstanceOf[RichStruct]
   implicit def toRichTuple(d: Tuple) = d.asInstanceOf[RichTuple]
   implicit def toRichTuple1[Coordinate1 <: Shape.Any: TypeTag](d: Tuple1[Coordinate1]) =

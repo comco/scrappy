@@ -3,12 +3,7 @@ package com.github.comco.scrappy
 import scala.language.implicitConversions
 import scala.reflect.runtime.universe._
 
-import com.github.comco.scrappy.data.simple.SimpleNoneData
-import com.github.comco.scrappy.data.simple.SimplePrimitiveData
-import com.github.comco.scrappy.data.simple.SimpleSeqData
-import com.github.comco.scrappy.data.simple.SimpleSomeData
-import com.github.comco.scrappy.data.simple.SimpleStructData
-import com.github.comco.scrappy.data.simple.SimpleTupleData
+import com.github.comco.scrappy.data._
 
 /**
  * Base class for scrappy Data.
@@ -53,7 +48,7 @@ object Data extends Domain {
     if (data.datatype == datatype) {
       data
     } else {
-      // TODO: RichSome(datatype.asInstanceOf[Type.RichSome[_]], data)
+      // TODO: BaseSome(datatype.asInstanceOf[Type.BaseSome[_]], data)
       ???
     }
   }
@@ -120,7 +115,7 @@ object Data extends Domain {
   }
 
   object Some {
-    def apply[Value <: Shape.Concrete: TypeTag](value: Data[Value]) = SimpleSomeData(value)
+    def apply[Value <: Shape.Concrete: TypeTag](value: Data[Value]) = DefaultSomeData(value)
   }
 
   abstract class RichTuple extends Tuple {
@@ -178,7 +173,7 @@ object Data extends Domain {
     def apply[Coordinate1 <: Shape.Any: TypeTag, Coordinate2 <: Shape.Any: TypeTag](coordinate1: Data[Coordinate1], coordinate2: Data[Coordinate2]): Tuple2[Coordinate1, Coordinate2] = ???
   }
 
-  abstract class RichSequence[+Element <: Shape.Any: TypeTag] extends Sequence[Element] {
+  abstract class BaseSequence[+Element <: Shape.Any: TypeTag] extends Sequence[Element] {
     def elements: Seq[Data[Element]]
 
     /**
@@ -208,7 +203,7 @@ object Data extends Domain {
     private def state = (datatype, elements)
 
     final override def equals(that: scala.Any) = that match {
-      case that: RichSequence[Element] => this.state == that.state
+      case that: BaseSequence[Element] => this.state == that.state
       case _ => false
     }
 

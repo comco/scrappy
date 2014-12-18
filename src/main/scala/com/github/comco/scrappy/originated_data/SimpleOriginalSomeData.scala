@@ -1,4 +1,4 @@
-package com.github.comco.scrappy.originated_data.simple
+package com.github.comco.scrappy.originated_data
 
 import com.github.comco.scrappy.data.SomeData
 import com.github.comco.scrappy.origin.Origin
