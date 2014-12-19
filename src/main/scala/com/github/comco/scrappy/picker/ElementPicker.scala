@@ -1,18 +1,18 @@
 package com.github.comco.scrappy.picker
 
-import com.github.comco.scrappy.SeqType
-import com.github.comco.scrappy.originated_data.OriginatedSeqData
-import com.github.comco.scrappy.data.SeqData
+import scala.reflect.runtime.universe._
+
+import com.github.comco.scrappy._
 
 /**
  * Picker for an element of a seq.
  */
-case class ElementPicker(val sourceType: SeqType, val index: Int)
-    extends BaseSeqPicker {
+case class ElementPicker[+Element <: Shape.Any: TypeTag](val sourceType: Type.Sequence[Element], val index: Int)
+    extends Picker[Shape.Sequence[Element], Element] {
   require(0 <= index)
-  
+
   def targetType = sourceType.elementType
-  
-  def doPickData(source: SeqData) = source.elements(index)
-  def doPickOriginatedData(source: OriginatedSeqData) = source.elements(index)
+
+  def pickData(source: Data.Sequence[Element]) = source.elements(index)
+  def pickOriginatedData(source: OriginatedData.Sequence[Element]) = source.elements(index)
 }

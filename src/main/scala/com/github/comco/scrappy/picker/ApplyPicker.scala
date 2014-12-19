@@ -1,20 +1,21 @@
 package com.github.comco.scrappy.picker
 
-import com.github.comco.scrappy.PrimitiveType
-import com.github.comco.scrappy.data.PrimitiveData
-import com.github.comco.scrappy.originated_data.OriginatedPrimitiveData
+import scala.reflect.runtime.universe._
+
+import com.github.comco.scrappy._
 
 /**
  * Picker for applying a raw scala function to an element
  */
-case class ApplyPicker[A, R](f: A => R)(
-    implicit val sourceType: PrimitiveType[A], val targetType: PrimitiveType[R]) 
-    extends BasePrimitivePicker[A] {
-  def doPickData(source: PrimitiveData[A]): PrimitiveData[R] = {
-    PrimitiveData(f(source.value))
+case class ApplyPicker[A: TypeTag, R: TypeTag](f: A => R)(
+  implicit val sourceType: Type.Primitive[A], val targetType: Type.Primitive[R])
+    extends Picker[Shape.Primitive[A], Shape.Primitive[R]] {
+
+  def pickData(source: Data.Primitive[A]): Data.Primitive[R] = {
+    Data.Primitive(f(source.value))
   }
-  
-  def doPickOriginatedData(source: OriginatedPrimitiveData[A]): OriginatedPrimitiveData[R] = {
-    OriginatedPrimitiveData(doPickData(source.data), source.origin.computedWithTargetType(targetType))
+
+  def pickOriginatedData(source: OriginatedData.Primitive[A]): OriginatedData.Primitive[R] = {
+    OriginatedData(pickData(source.data), source.origin.computed)
   }
 }

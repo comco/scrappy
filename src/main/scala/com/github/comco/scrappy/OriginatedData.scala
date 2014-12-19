@@ -10,6 +10,8 @@ sealed trait OriginatedData[+Shape <: Shape.Any] {
 }
 
 object OriginatedData extends Domain {
+  def apply[Shape <: Shape.Any](data: Data[Shape], origin: Origin[Shape]): OriginatedData[Shape] = ???
+
   type Abstract[+Shape <: Shape.Any] = OriginatedData[Shape]
 
   abstract class RichPrimitive[+RawType: TypeTag] extends Primitive[RawType]

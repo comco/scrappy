@@ -173,7 +173,7 @@ object Data extends Domain {
     def apply[Coordinate1 <: Shape.Any: TypeTag, Coordinate2 <: Shape.Any: TypeTag](coordinate1: Data[Coordinate1], coordinate2: Data[Coordinate2]): Tuple2[Coordinate1, Coordinate2] = ???
   }
 
-  abstract class BaseSequence[+Element <: Shape.Any: TypeTag] extends Sequence[Element] {
+  abstract class RichSequence[+Element <: Shape.Any: TypeTag] extends Sequence[Element] {
     def elements: Seq[Data[Element]]
 
     /**
@@ -203,7 +203,7 @@ object Data extends Domain {
     private def state = (datatype, elements)
 
     final override def equals(that: scala.Any) = that match {
-      case that: BaseSequence[Element] => this.state == that.state
+      case that: RichSequence[Element] => this.state == that.state
       case _ => false
     }
 

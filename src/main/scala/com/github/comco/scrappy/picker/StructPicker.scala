@@ -1,16 +1,9 @@
 package com.github.comco.scrappy.picker
 
-import com.github.comco.scrappy.StructType
-import com.github.comco.scrappy.Type
-import com.github.comco.scrappy.data.StructData
-import com.github.comco.scrappy.data.Data
-import com.github.comco.scrappy.originated_data.OriginatedData
-import com.github.comco.scrappy.originated_data.OriginatedStructData
-import com.github.comco.scrappy.originated_data.OriginatedStructData
-import com.github.comco.scrappy.Type.BotType
+import com.github.comco.scrappy._
 
-case class StructPicker(val targetType: StructType, val featurePickers: Map[String, Picker])
-    extends BasePicker {
+case class StructPicker(val targetType: Type.Struct, val featurePickers: Map[String, Picker])
+    extends Picker[Shape.Struct, Shape.Any] {
   require(featurePickers.forall {
     case (name, picker) => sourceType.isSubtypeOf(picker.sourceType)
   }, s"All featurePickers: $featurePickers should have the same sourceType.")

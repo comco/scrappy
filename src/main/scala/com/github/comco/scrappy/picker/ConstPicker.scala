@@ -1,24 +1,16 @@
 package com.github.comco.scrappy.picker
 
-import com.github.comco.scrappy.Type
-import com.github.comco.scrappy.data.Data
-import com.github.comco.scrappy.originated_data.OriginatedData
-import com.github.comco.scrappy.Type.TopType
+import com.github.comco.scrappy._
 
 /**
  * Discards its source (leaving only the origin) and returns a constant.
  */
-case class ConstPicker(val sourceType: Type, val data: Data)
-    extends BasePicker {
+case class ConstPicker[+Shape <: Shape.Any](val data: Data[Shape])
+    extends Picker[Shape.Any, Shape] {
   val targetType = data.datatype
 
-  def doPickData(source: Data) = data
+  def pickData(source: Data.Any) = data
 
-  def doPickOriginatedData(source: OriginatedData) =
-    OriginatedData.from(data,
-      source.origin.computedWithTargetType(targetType))
-}
-
-object ConstPicker {
-  def apply(data: Data): ConstPicker = ConstPicker(TopType, data)
+  def pickOriginatedData(source: OriginatedData.Any) =
+    OriginatedData(data, source.origin)
 }
