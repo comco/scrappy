@@ -4,13 +4,13 @@ import scala.reflect.runtime.universe._
 
 sealed trait OriginatedData[+Shape <: Shape.Any] {
   def data: Data[Shape]
-  def origin: Origin[Shape]
+  def origin: Origin[Shape.Nil, Shape]
 
   def datatype: Type[Shape] = data.datatype
 }
 
 object OriginatedData extends Domain {
-  def apply[Shape <: Shape.Any](data: Data[Shape], origin: Origin[Shape]): OriginatedData[Shape] = ???
+  def apply[Shape <: Shape.Any](data: Data[Shape], origin: Origin[Shape.Nil, Shape]): OriginatedData[Shape] = ???
 
   type Abstract[+Shape <: Shape.Any] = OriginatedData[Shape]
 

@@ -16,6 +16,8 @@ sealed trait Data[+Shape <: Shape.Any] {
    * The type of this data.
    */
   def datatype: Type[Shape]
+
+  def dynamic: Data[Shape.Nil] = this.asInstanceOf[Data[Shape.Nil]]
 }
 
 object Data extends Domain {

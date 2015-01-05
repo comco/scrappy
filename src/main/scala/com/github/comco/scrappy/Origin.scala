@@ -1,56 +1,42 @@
 package com.github.comco.scrappy
 
-import com.github.comco.scrappy.pointer.Step
-import com.github.comco.scrappy.Type
-
 /**
  * Representation of the origin of a value - either it is original or computed.
  */
-sealed abstract class Origin[+Target <: Shape.Any] {
-
+sealed abstract class Origin[-Source <: Shape.Any, +Target <: Shape.Any] {
   /**
    * The source type of this origin.
    */
-  def sourceType: Type
+  def sourceType: Type[Source]
 
   /**
    * The target type of this origin.
    */
-  def targetType: Type
+  def targetType: Type[Target]
 
   /**
    * Constructs an origin by appending a step to this origin.
    */
-  def append(step: Step): Origin
+  def append[NewTarget <: Shape.Any](step: Step[Target, NewTarget]): Origin[Source, NewTarget]
 
   /**
    * Constructs a computed origin from this origin.
    */
-  def computed: ComputedOrigin
+  def computed: ComputedOrigin[Source, Target]
 
   /**
    * Constructs a computed origin with a some target type from this origin.
    */
-  def computedWithTargetType(targetType: Type): ComputedOrigin
+  def computedWithTargetType[NewTarget <: Shape.Any](targetType: Type[NewTarget]): ComputedOrigin[Source, NewTarget]
 
-  /**
-   * Merges two compatible origins.
-   */
-  def merge(that: Origin): Origin = {
-    require(sourceType == that.sourceType && targetType == that.targetType,
-      s"Origins $this and $that have incompatible types.")
-    ComputedOrigin(sourceType, targetType, pointers ++ that.pointers)
-  }
-
-  def pointers: Set[Pointer]
+  def pointers: Set[Pointer.Any]
 }
 
-case class OriginalOrigin(val pointer: Pointer) extends Origin {
-
+case class OriginalOrigin[-Source <: Shape.Any, +Target <: Shape.Any](val pointer: Pointer[Source, Target]) extends Origin[Source, Target] {
   def sourceType = pointer.sourceType
   def targetType = pointer.targetType
 
-  def append(step: Step): OriginalOrigin = {
+  def append[NewTarget <: Shape.Any](step: Step[Target, NewTarget]) = {
     require(step.sourceType == targetType,
       s"Cannot append step: $step to an origin: $this")
 
@@ -59,26 +45,25 @@ case class OriginalOrigin(val pointer: Pointer) extends Origin {
 
   def computed = ComputedOrigin(sourceType, targetType, Set(pointer))
 
-  def computedWithTargetType(targetType: Type) =
+  def computedWithTargetType[NewTarget <: Shape.Any](targetType: Type[NewTarget]) =
     ComputedOrigin(sourceType, targetType, Set(pointer))
 
-  lazy val pointers = Set(pointer)
+  lazy val pointers: Set[Pointer[Source, Target]] = Set(pointer)
 }
 
-case class ComputedOrigin(
-  val sourceType: Type,
-  val targetType: Type,
-  val pointers: Set[Pointer])
-    extends Origin {
+case class ComputedOrigin[-Source <: Shape.Any, +Target <: Shape.Any](
+  val sourceType: Type[Source],
+  val targetType: Type[Target],
+  val pointers: Set[Pointer.Any])
+    extends Origin[Source, Target] {
 
-  def append(step: Step): ComputedOrigin = {
-    require(step.sourceType == targetType,
-      s"Cannot append step: $step to an origin: $this")
-    ComputedOrigin(sourceType, step.targetType, pointers)
+  def append[NewTarget <: Shape.Any](step: Step[Target, NewTarget]): ComputedOrigin[Source, NewTarget] = {
+    require(targetType <:< step.sourceType, s"Target type $targetType of origin is incompatible with source type ${step.sourceType} of step.")
+    computedWithTargetType(step.targetType)
   }
 
   def computed = this
 
-  def computedWithTargetType(targetType: Type) =
+  def computedWithTargetType[NewTarget <: Shape.Any](targetType: Type[NewTarget]) =
     ComputedOrigin(sourceType, targetType, pointers)
 }

@@ -44,8 +44,11 @@ sealed trait Type[+Shape <: Shape.Any] {
     else Type.Nil
   }
 
-  def compatibleWith(that: Type.Any) =
+  def compatibleWith(that: Type.Any) = {
     (this meet that) != Type.Nil
+  }
+
+  def dynamic: Type[Shape.Nil] = this.asInstanceOf[Type[Shape.Nil]]
 }
 
 object Type extends Domain {
@@ -150,17 +153,17 @@ object Type extends Domain {
     }
   }
 
-  case class RichSequence[+Element <: Shape.Any](val elementType: Type[Element]) extends Sequence[Element]
+  case class RichSequence[+Element <: Shape.Any: TypeTag](val elementType: Type[Element]) extends Sequence[Element]
 
   object Sequence {
-    def apply[Element <: Shape.Any](elementType: Type[Element]) = RichSequence(elementType)
+    def apply[Element <: Shape.Any: TypeTag](elementType: Type[Element]) = RichSequence(elementType)
   }
 
-  sealed abstract class RichOptional[+Value <: Shape.Concrete] extends Optional[Value] {
+  sealed abstract class RichOptional[+Value <: Shape.Concrete: TypeTag] extends Optional[Value] {
     def hasValue: Boolean
   }
 
-  case class RichSome[+Value <: Shape.Concrete](val valueType: Type[Value]) extends RichOptional[Value] with Some[Value] {
+  case class RichSome[+Value <: Shape.Concrete: TypeTag](val valueType: Type[Value]) extends RichOptional[Value] with Some[Value] {
     def hasValue = true
   }
 
