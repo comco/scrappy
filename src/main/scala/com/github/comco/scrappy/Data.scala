@@ -1,284 +1,161 @@
 package com.github.comco.scrappy
 
-import scala.language.implicitConversions
-import scala.reflect.runtime.universe._
+import scala.reflect.runtime.universe.TypeTag
+import com.github.comco.scrappy.utils.StateEquality
 
-import com.github.comco.scrappy.data._
-
-/**
- * Base class for scrappy Data.
- * Represents a piece of immutable, typed and interchangable data.
- * This data is intended to be independent of the specific representation,
- * so the equals methods of the derivable subclasses are final.
- */
 sealed trait Data[+Shape <: Shape.Any] {
-  /**
-   * The type of this data.
-   */
-  def datatype: Type[Shape]
+  def schema: Schema[Shape]
 
-  def dynamic: Data[Shape.Nil] = this.asInstanceOf[Data[Shape.Nil]]
+  def origin: Origin[Shape]
 }
 
 object Data extends Domain {
   type Abstract[+Shape <: Shape.Any] = Data[Shape]
 
-  /**
-   * Checks if data contains a value.
-   * OptionData in case of none data doesn't contain a value.
-   */
-  def isFilled(data: Data.Any): Boolean = data match {
-    case data: RichOptional[_] => data.hasValue
-    case _ => true
+  abstract class RichPrimitive[Raw] extends Primitive[Raw] with StateEquality[RichPrimitive[Raw]] {
+    def raw: Raw
+
+    protected override def state = (schema, origin, raw)
   }
 
-  /**
-   * Checks if data can be assigned to a field of type datatype.
-   * An option data field can be assigned by its corresponding value type.
-   */
-  def canAssign(datatype: Type.Any, data: Data.Any): Boolean = {
-    data.datatype == datatype ||
-      (datatype.isInstanceOf[Type.RichSome[_]] &&
-        datatype.asInstanceOf[Type.RichSome[_]].valueType == data.datatype)
+  abstract class RichStruct extends Struct with StateEquality[RichStruct] {
+    def features: Map[String, Data.Any]
+
+    protected override def state = (schema, origin, features)
   }
 
-  /**
-   * Converts data to a directly assignable to datatype value.
-   */
-  def convert(datatype: Type.Any, data: Data.Any): Data.Any = {
-    assert(canAssign(datatype, data))
-    if (data.datatype == datatype) {
-      data
-    } else {
-      // TODO: BaseSome(datatype.asInstanceOf[Type.BaseSome[_]], data)
-      ???
-    }
+  abstract class RichTuple extends Tuple with StateEquality[RichTuple] {
+    def coordinates: IndexedSeq[Data.Any]
+
+    protected override def state = (schema, origin, coordinates)
   }
 
-  abstract class RichPrimitive[+RawType: TypeTag] extends Primitive[RawType] {
-    def datatype: Primitive[RawType]
+  abstract class RichTuple1[+Coordinate1 <: Shape.Any] extends RichTuple with Tuple1[Coordinate1] {
+    def coordinate1: Data[Coordinate1]
 
-    /**
-     * The raw value of this primitive data.
-     */
-    def value: RawType
-
-    private def state = (datatype, value)
-
-    final override def equals(that: Any) = that match {
-      case that: RichPrimitive[RawType] => this.state == that.state
-      case _ => false
-    }
-
-    final override def hashCode() = state.hashCode()
+    override def coordinates = IndexedSeq(coordinate1)
   }
 
-  object Primitive {
-    def apply[RawType](value: RawType) =
-      // TODO: SimplePrimitiveData(value)
-      ???
+  abstract class RichTuple2[+Coordinate1 <: Shape.Any, +Coordinate2 <: Shape.Any] extends RichTuple with Tuple2[Coordinate1, Coordinate2] {
+    def coordinate1: Data[Coordinate1]
+
+    def coordinate2: Data[Coordinate2]
+
+    override def coordinates = IndexedSeq(coordinate1, coordinate2)
   }
 
-  sealed abstract class RichOptional[+Value <: Shape.Concrete: TypeTag] extends Optional[Value] {
+  abstract class RichSequence[+Element <: Shape.Any] extends Sequence[Element] with StateEquality[RichSequence[_]] {
+    def elements: Seq[Data[Element]]
+
+    protected override def state = (schema, origin, elements)
+  }
+
+  abstract class RichOptional[+Value <: Shape.Concrete] extends Optional[Value] {
     def hasValue: Boolean
   }
 
-  abstract class RichNone extends RichOptional[Shape.Nil] with None {
-    final def hasValue = false
-
-    private def state = (datatype)
-
-    final override def equals(that: scala.Any) = that match {
-      case that: RichNone => this.state == that.state
-      case _ => false
-    }
-
-    final override def hashCode() = state.hashCode()
-  }
-
-  object None extends RichNone
-
-  abstract class RichSome[+Value <: Shape.Concrete: TypeTag] extends RichOptional[Value] with Some[Value] {
-    final def hasValue = true
-
-    /**
-     * The value of this some data.
-     */
+  abstract class RichSome[+Value <: Shape.Concrete] extends RichOptional[Value] with Some[Value] with StateEquality[RichSome[_]] {
     def value: Data[Value]
 
-    private def state = (datatype, value)
+    override def hasValue = true
 
-    final override def equals(that: scala.Any) = that match {
-      case that: RichSome[Value] => this.state == that.state
-      case _ => false
-    }
-
-    final override def hashCode() = state.hashCode()
+    protected override def state = (schema, origin, value)
   }
 
-  object Some {
-    def apply[Value <: Shape.Concrete: TypeTag](value: Data[Value]) = DefaultSomeData(value)
+  abstract class RichNone extends RichOptional[Nothing] with None with StateEquality[RichNone] {
+    override def hasValue = false
+
+    protected override def state = (schema, origin)
   }
 
-  abstract class RichTuple extends Tuple {
-    def coordinates: IndexedSeq[Data.Any]
+  abstract class Factory {
+    def primitive[Raw: TypeTag](raw: Raw)(origin: Origin.Primitive[Raw], schema: Schema.Primitive[Raw]): RichPrimitive[Raw]
 
-    def length: Int = coordinates.length
+    def struct(features: Map[String, Data.Any])(origin: Origin.Struct, schema: Schema.Struct): RichStruct
 
-    /**
-     * Checks if this tuple data has a coordinate at some position.
-     * Positions of optional coordinates which are not filled-in
-     * are regarded as not occupied.
-     */
-    def isOccupied(position: Int): Boolean = {
-      datatype.hasCoordinate(position) && Data.isFilled(coordinates(position))
-    }
+    def tuple(coordinates: IndexedSeq[Data.Any])(origin: Origin.Tuple, schema: Schema.Tuple): RichTuple
 
-    /**
-     * Retrieves the coordinate of this data at some position.
-     */
-    def coordinate(position: Int): Data.Any = {
-      require(datatype.hasCoordinate(position),
-        s"Coordinate position: $position is out of bounds for TupleType: $datatype")
+    def tuple[Coordinate1 <: Shape.Any](coordinate1: Data[Coordinate1])(
+      origin: Origin.Tuple1[Coordinate1],
+      schema: Schema.Tuple1[Coordinate1]): RichTuple1[Coordinate1]
 
-      coordinates(position)
-    }
+    def tuple[Coordinate1 <: Shape.Any, Coordinate2 <: Shape.Any](
+      coordinate1: Data[Coordinate1],
+      coordinate2: Data[Coordinate2])(
+        origin: Origin[Shape.Tuple2[Coordinate1, Coordinate2]],
+        schema: Schema.Tuple2[Coordinate1, Coordinate2]): RichTuple2[Coordinate1, Coordinate2]
 
-    private def state = (datatype, coordinates)
+    def sequence[Element <: Shape.Any](
+      elements: Seq[Data[Element]])(
+        origin: Origin.Sequence[Element],
+        schema: Schema.Sequence[Element]): RichSequence[Element]
 
-    final override def equals(that: scala.Any) = that match {
-      case that: RichTuple => this.state == that.state
-      case _ => false
-    }
+    def some[Value <: Shape.Concrete](
+      value: Data[Value])(
+        origin: Origin.Some[Value],
+        schema: Schema.Some[Value]): RichSome[Value]
 
-    final override def hashCode() = state.hashCode()
+    def none(origin: Origin[Shape.None], schema: Schema.None): RichNone
   }
 
-  abstract class RichTuple1[+Coordinate1 <: Shape.Any: TypeTag] extends RichTuple with Tuple1[Coordinate1] {
-    def coordinate1: Data[Coordinate1]
-
-    override lazy val coordinates = IndexedSeq(coordinate1)
-  }
-
-  abstract class RichTuple2[+Coordinate1 <: Shape.Any: TypeTag, +Coordinate2 <: Shape.Any: TypeTag] extends RichTuple with Tuple2[Coordinate1, Coordinate2] {
-    def coordinate1: Data[Coordinate1]
-    def coordinate2: Data[Coordinate2]
-
-    override lazy val coordinates = IndexedSeq(coordinate1, coordinate2)
-  }
-
-  object Tuple {
-    def apply(coordinates: Data.Any*): Tuple = ???
-
-    def apply[Coordinate1 <: Shape.Any: TypeTag](coordinate1: Data[Coordinate1]): Tuple1[Coordinate1] = ???
-
-    def apply[Coordinate1 <: Shape.Any: TypeTag, Coordinate2 <: Shape.Any: TypeTag](coordinate1: Data[Coordinate1], coordinate2: Data[Coordinate2]): Tuple2[Coordinate1, Coordinate2] = ???
-  }
-
-  abstract class RichSequence[+Element <: Shape.Any: TypeTag] extends Sequence[Element] {
-    def elements: Seq[Data[Element]]
-
-    /**
-     * Checks if this struct data has a feature with some name.
-     * Names of optional features which are not filled-in
-     * are regarded as not occupied.
-     */
-    def isOccupied(index: Int): Boolean = {
-      0 <= index && index < length && Data.isFilled(elements(index))
-    }
-
-    /**
-     * Retrieves the element of this seq data at some index.
-     */
-    def element(index: Int): Data[Element] = {
-      require(0 <= index && index < length,
-        s"Index: $index is out of bounds for SeqData with length: $length.")
-
-      elements(index)
-    }
-
-    /**
-     * The length of this seq data.
-     */
-    def length: Int = elements.length
-
-    private def state = (datatype, elements)
-
-    final override def equals(that: scala.Any) = that match {
-      case that: RichSequence[Element] => this.state == that.state
-      case _ => false
-    }
-
-    final override def hashCode() = state.hashCode()
-  }
-
-  object Sequence {
-    def apply[Element <: Shape.Any: TypeTag](elements: Data[Element]*): Sequence[Element] = ???
-  }
-
-  abstract class RichStruct extends Struct {
-    def features: Map[String, Data.Any]
-
-    /**
-     * Checks if this struct data has a feature with some name.
-     * Names of optional features which are not filled-in
-     * are regarded as not occupied.
-     */
-    def isOccupied(name: String): Boolean = {
-      features.contains(name) && Data.isFilled(features(name))
-    }
-
-    /**
-     * Retrieves the feature of this struct data with some name.
-     */
-    def feature(name: String): Data.Any = {
-      require(datatype.hasFeature(name),
-        s"StructData: $this doesn't contain a feature named: $name")
-
-      features(name)
-    }
-
-    private def state = (datatype, features)
-
-    final override def equals(that: scala.Any) = that match {
-      case that: RichStruct => this.state == that.state
-      case _ => false
-    }
-
-    final override def hashCode() = state.hashCode()
+  object Primitive {
+    def apply[Raw: TypeTag](raw: Raw)(
+      origin: Origin.Primitive[Raw],
+      schema: Schema.Primitive[Raw])(
+        implicit factory: Factory) =
+      factory.primitive(raw)(origin, schema)
   }
 
   object Struct {
-    def doApply(datatype: Type.Struct, features: Map[String, Data.Any]): Struct = ???
+    def apply(features: Map[String, Data.Any])(
+      origin: Origin.Struct,
+      schema: Schema.Struct)(
+        implicit factory: Factory) =
+      factory.struct(features)(origin, schema)
+  }
 
-    def apply(datatype: Type.Struct, rawFeatures: Map[String, Data.Any]): Struct = {
-      require(rawFeatures.keys.forall(datatype.hasFeature(_)), "Invalid feature name")
-      require(rawFeatures.forall {
-        case (name, data) => {
-          Data.canAssign(datatype.featureType(name), data)
-        }
-      }, s"Invalid feature type for creating a StructData with datatype: $datatype from features: $rawFeatures")
-      require(datatype.featureTypes.forall {
-        case (name, datatype) => rawFeatures.contains(name) || datatype.isInstanceOf[Type.RichOptional[_]]
-      }, "A non-optional feature is not given")
+  object Tuple {
+    def apply(coordinates: IndexedSeq[Data.Any])(
+      origin: Origin.Tuple,
+      schema: Schema.Tuple)(
+        implicit factory: Factory) =
+      factory.tuple(coordinates)(origin, schema)
 
-      val features: Map[String, Data.Any] = {
-        val convertedFeatures: Map[String, Data.Any] = rawFeatures.transform({
-          case (name, data) => Data.convert(datatype.featureType(name), data)
-        })
-        val missingFeatures: Map[String, Type.Any] = datatype.featureTypes.filter({
-          case (name, _) => !rawFeatures.contains(name)
-        })
-        // all missing features should have option types
-        convertedFeatures ++ missingFeatures.map {
-          case (name, datatype) => (name, Data.None)
-        }
-      }
-      doApply(datatype, features)
-    }
+    def apply[Coordinate1 <: Shape.Any](coordinate1: Data[Coordinate1])(
+      origin: Origin.Tuple1[Coordinate1],
+      schema: Schema.Tuple1[Coordinate1])(
+        implicit factory: Factory) =
+      factory.tuple(coordinate1)(origin, schema)
 
-    def apply(datatype: Type.Struct, features: (String, Data.Any)*): Data.Struct = {
-      Struct(datatype, features.toMap)
-    }
+    def apply[Coordinate1 <: Shape.Any, Coordinate2 <: Shape.Any](
+      coordinate1: Data[Coordinate1],
+      coordinate2: Data[Coordinate2])(
+        origin: Origin.Tuple2[Coordinate1, Coordinate2],
+        schema: Schema.Tuple2[Coordinate1, Coordinate2])(
+          implicit factory: Factory) =
+      factory.tuple(coordinate1, coordinate2)(origin, schema)
+  }
+
+  object Sequence {
+    def apply[Element <: Shape.Any](elements: Seq[Data[Element]])(
+      origin: Origin.Sequence[Element],
+      schema: Schema.Sequence[Element])(
+        implicit factory: Factory) =
+      factory.sequence(elements)(origin, schema)
+  }
+
+  object Some {
+    def apply[Value <: Shape.Concrete](value: Data[Value])(
+      origin: Origin.Some[Value],
+      schema: Schema.Some[Value])(
+        implicit factory: Factory) =
+      factory.some(value)(origin, schema)
+  }
+
+  object None {
+    def apply(origin: Origin.None, schema: Schema.None)(
+      implicit factory: Factory) =
+      factory.none(origin, schema)
   }
 }
+

@@ -2,15 +2,13 @@ package com.github.comco.scrappy.picker
 
 import com.github.comco.scrappy._
 
-/**
- * Picker for a featur of a struct.
- */
-case class FeaturePicker(val sourceType: Type.Struct, val name: String)
-    extends Picker[Shape.Struct, Shape.Any] {
-  require(sourceType.hasFeature(name))
+case class FeaturePicker(val sourceSchema: Schema.Struct, val featureName: String)
+    extends BasePicker[Shape.Struct, Shape.Any] {
+  require(sourceSchema.featureSchemas.contains(featureName),
+    s"Struct schema: $sourceSchema doesn't contain a feature named: $featureName.")
 
-  def targetType = sourceType.featureType(name)
+  override def targetSchema = sourceSchema.featureSchemas(featureName)
 
-  def pickData(source: Data.Struct) = source.features(name)
-  def pickOriginatedData(source: OriginatedData.Struct) = source.features(name)
+  override def doPick(source: Data.Struct): Data.Any =
+    source.features(featureName)
 }

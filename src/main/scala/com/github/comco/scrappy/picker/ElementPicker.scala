@@ -1,18 +1,13 @@
 package com.github.comco.scrappy.picker
 
-import scala.reflect.runtime.universe._
-
 import com.github.comco.scrappy._
 
-/**
- * Picker for an element of a seq.
- */
-case class ElementPicker[+Element <: Shape.Any: TypeTag](val sourceType: Type.Sequence[Element], val index: Int)
-    extends Picker[Shape.Sequence[Element], Element] {
-  require(0 <= index)
+case class ElementPicker[Element <: Shape.Any](val sourceSchema: Schema.Sequence[Element], val index: Int)
+    extends BasePicker[Shape.Sequence[Element], Element] {
+  require(index >= 0, s"Index: $index should be non-negative.")
 
-  def targetType = sourceType.elementType
+  override def targetSchema = sourceSchema.elementSchema
 
-  def pickData(source: Data.Sequence[Element]) = source.elements(index)
-  def pickOriginatedData(source: OriginatedData.Sequence[Element]) = source.elements(index)
+  override def doPick(source: Data.Sequence[Element]): Data[Element] =
+    source.elements(index)
 }
