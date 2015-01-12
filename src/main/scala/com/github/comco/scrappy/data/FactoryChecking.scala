@@ -56,4 +56,37 @@ trait FactoryChecking extends Data.Factory {
 
     super.tuple(coordinate1)(origin, schema)
   }
+
+  abstract override def tuple[Coordinate1 <: Shape.Any, Coordinate2 <: Shape.Any](
+    coordinate1: Data[Coordinate1],
+    coordinate2: Data[Coordinate2])(
+      origin: Origin.Tuple2[Coordinate1, Coordinate2],
+      schema: Schema.Tuple2[Coordinate1, Coordinate2]) = {
+    require(coordinate1.schema.satisfies(schema.coordinate1Schema),
+      s"Coordinate1 data: $coordinate1 should satisfy schema: ${schema.coordinate1Schema}.")
+
+    super.tuple(coordinate1, coordinate2)(origin, schema)
+  }
+
+  abstract override def sequence[Element <: Shape.Any](
+    elements: Seq[Data[Element]])(
+      origin: Origin.Sequence[Element],
+      schema: Schema.Sequence[Element]) = {
+    elements.zipWithIndex.foreach {
+      case (element, index) => require(element.schema.satisfies(schema.elementSchema),
+        s"Element $element at index: $index should satisfy schema: ${schema.elementSchema}.")
+    }
+
+    super.sequence(elements)(origin, schema)
+  }
+
+  abstract override def some[Value <: Shape.Concrete](
+    value: Data[Value])(
+      origin: Origin.Some[Value],
+      schema: Schema.Some[Value]) = {
+    require(value.schema.satisfies(schema.valueSchema),
+      s"Value: $value should satisfy schema: ${schema.valueSchema}.")
+
+    super.some(value)(origin, schema)
+  }
 }

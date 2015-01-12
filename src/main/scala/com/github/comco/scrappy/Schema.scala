@@ -27,11 +27,17 @@ object Schema extends Domain {
 
     def featureSchemas: Map[String, Schema.Any]
 
+    def hasFeatureNamed(featureName: String): Boolean = featureSchemas.contains(featureName)
+
     protected override def state = (name, featureSchemas)
   }
 
   abstract class RichTuple extends Tuple with StateEquality[RichTuple] {
     def coordinateSchemas: IndexedSeq[Schema.Any]
+
+    def arity = coordinateSchemas.length
+
+    def hasCoordinateAtPosition(position: Int): Boolean = (0 <= position && position < arity)
 
     protected override def state = (coordinateSchemas)
   }
