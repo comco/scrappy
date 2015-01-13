@@ -1,15 +1,15 @@
 package com.github.comco.scrappy
 
-sealed abstract class Origin[-Source <: Shape.Any, +Target <: Shape.Any] {
+sealed abstract class Origin[+Shape <: Shape.Any] {
   def computed: Origin.Computed
 }
 
-object Origin {
-  type Dynamic = Origin[Shape.Any, Nothing]
+object Origin extends Domain {
+  type Abstract[+Shape <: Shape.Any] = Origin[Shape]
 
   abstract class Bare extends Dynamic
 
-  abstract class Original[-Source <: Shape.Any, +Target <: Shape.Any] extends Origin[Source, Target] {
+  abstract class Original[-Source <: Shape.Any, +Target <: Shape.Any] extends Origin[Target] {
     def pointer: Pointer[Source, Target]
   }
 

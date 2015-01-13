@@ -3,133 +3,185 @@ package com.github.comco.scrappy
 import scala.reflect.runtime.universe.TypeTag
 import com.github.comco.scrappy.utils.StateEquality
 
-sealed trait Data[-Source <: Shape.Any, +Target <: Shape.Any] {
-  def sourceSchema: Schema.Any
+sealed trait Data[+Shape <: Shape.Any] {
+  def schema: Schema[Shape]
 
-  def targetSchema: Schema[Shape]
-
-  def origin: Origin[Source, Target]
+  def origin: Origin[Shape]
 }
 
-object Data {
-  type Primitive[-Source <: Shape.Any, Raw] = Data[Source, Raw]
+object Data extends Domain {
+  type Abstract[+Shape <: Shape.Any] = Data[Shape]
 
-  type Struct[-Source <: Shape.Any] = Data[Source, Shape.Struct]
-
-  type Tuple[-Source <: Shape.Any] = Data[Source, Shape.Tuple]
-
-  type Tuple1[-Source <: Shape.Any, +Coordinate1 <: Shape.Any] = Data[Source, Shape.Tuple1[Coordinate1]]
-
-  type Tuple2[-Source <: Shape.Any, +Coordinate1 <: Shape.Any, +Coordinate2 <: Shape.Any] = Data[Source, Shape.Tuple2[Coordinate1, Coordinate2]]
-
-  type Sequence[-Source <: Shape.Any, +Element <: Shape.Any] = Data[Source, Shape.Sequence[Element]]
-
-  type Optional[-Source <: Shape.Any, +Value <: Shape.Concrete] = Data[Source, Shape.Optional[Value]]
-
-  type Some[-Source <: Shape.Any, +Value <: Shape.Concrete] = Data[Source, Shape.Some[Value]]
-
-  type None[-Source <: Shape.Any] = Data[Source, Shape.None]
-
-  abstract class RichPrimitive[-Source <: Shape.Any, Raw]
-      extends Primitive[Source, Raw] with StateEquality[RichPrimitive[Source, Raw]] {
+  abstract class RichPrimitive[Raw: TypeTag]
+      extends Primitive[Raw] with StateEquality[RichPrimitive[Raw]] {
     def raw: Raw
 
-    protected override def state = (sourceSchema, targetSchema, origin, raw)
+    protected override def state = (schema, origin, raw)
   }
 
-  abstract class RichStruct[-Source <: Shape.Any]
-      extends Struct[Source] with StateEquality[RichStruct[Source]] {
-    def features: Map[String, Data[Source, Shape.Any]]
+  abstract class RichStruct
+      extends Struct with StateEquality[RichStruct] {
+    def features: Map[String, Data[Shape.Any]]
 
-    protected override def state = (sourceSchema, targetSchema, origin, features)
+    protected override def state = (schema, origin, features)
   }
 
-  abstract class RichTuple[-Source <: Shape.Any]
-      extends Tuple[Source] with StateEquality[RichTuple[Source]] {
-    def coordinates: IndexedSeq[Data[Source, Shape.Any]]
+  abstract class RichTuple
+      extends Tuple with StateEquality[RichTuple] {
+    def coordinates: IndexedSeq[Data[Shape.Any]]
 
-    protected override def state = (sourceSchema, targetSchema, coordinates)
+    protected override def state = (schema, coordinates)
   }
 
-  abstract class RichTuple1[-Source <: Shape.Any, +Coordinate1 <: Shape.Any]
-      extends RichTuple[Source] with Tuple1[Source, Coordinate1] {
-    def coordinate1: Data[Source, Coordinate1]
+  abstract class RichTuple1[+Coordinate1 <: Shape.Any]
+      extends RichTuple with Tuple1[Coordinate1] {
+    def coordinate1: Data[Coordinate1]
 
     override def coordinates = IndexedSeq(coordinate1)
   }
 
-  abstract class RichTuple2[-Source <: Shape.Any, +Coordinate1 <: Shape.Any, +Coordinate2 <: Shape.Any]
-      extends RichTuple[Source] with Tuple2[Source, Coordinate1, Coordinate2] {
-    def coordinate1: Data[Source, Coordinate1]
+  abstract class RichTuple2[+Coordinate1 <: Shape.Any, +Coordinate2 <: Shape.Any]
+      extends RichTuple with Tuple2[Coordinate1, Coordinate2] {
+    def coordinate1: Data[Coordinate1]
 
-    def coordinate2: Data[Source, Coordinate2]
+    def coordinate2: Data[Coordinate2]
 
     override def coordinates = IndexedSeq(coordinate1, coordinate2)
   }
 
-  abstract class RichSequence[-Source <: Shape.Any, +Element <: Shape.Any]
-      extends Sequence[Source, Element] with StateEquality[RichSequence[Source, Element]] {
-    def elements: Seq[Data[Source, Element]]
+  abstract class RichSequence[+Element <: Shape.Any]
+      extends Sequence[Element] with StateEquality[RichSequence[Element]] {
+    def elements: Seq[Data[Element]]
 
-    protected override def state = (sourceSchema, targetSchema, origin, elements)
+    protected override def state = (schema, origin, elements)
   }
 
-  abstract class RichOptional[-Source <: Shape.Any, +Value <: Shape.Concrete] extends Optional[Source, Value] {
+  abstract class RichOptional[+Value <: Shape.Concrete] extends Optional[Value] {
     def hasValue: Boolean
   }
 
-  abstract class RichSome[-Source <: Shape.Any, +Value <: Shape.Concrete] extends RichOptional[Source, Value] with Some[Source, Value] with StateEquality[RichSome[Source, Value]] {
-    def value: Data[Source, Value]
+  abstract class RichSome[+Value <: Shape.Concrete]
+      extends RichOptional[Value] with Some[Value] with StateEquality[RichSome[Value]] {
+    def value: Data[Value]
 
     override def hasValue = true
 
-    protected override def state = (sourceSchema, targetSchema, origin, value)
+    protected override def state = (schema, origin, value)
   }
 
-  abstract class RichNone[-Source <: Shape.Any] extends RichOptional[Source, Nothing] with None[Source] with StateEquality[RichNone[Source]] {
+  abstract class RichNone
+      extends RichOptional[Nothing] with None with StateEquality[RichNone] {
     override def hasValue = false
 
-    protected override def state = (sourceSchema, targetSchema, origin)
+    protected override def state = (schema, origin)
   }
 
   abstract class Factory {
-    def primitive[Source <: Shape.Any, Raw: TypeTag](
+    def primitive[Raw: TypeTag](
       raw: Raw,
-      origin: Origin[Source, Shape.Primitive[Raw]],
-      schema: Schema.Primitive[Raw]): RichPrimitive[Source, Raw]
+      origin: Origin[Shape.Primitive[Raw]],
+      schema: Schema.Primitive[Raw]): RichPrimitive[Raw]
 
-    def struct[Source <: Shape.Any](
-      features: Map[String, Data[Shape, Shape.Any]],
-      origin: Origin[Source, Shape.Struct],
-      schema: Schema.Struct): RichStruct[Source]
+    def struct(
+      features: Map[String, Data[Shape.Any]],
+      origin: Origin[Shape.Struct],
+      schema: Schema.Struct): RichStruct
 
-    def tuple[Source <: Shape.Any](
-      coordinates: IndexedSeq[Data[Source, Shape.Any]],
-      origin: Origin[Source, Shape.Any],
-      schema: Schema.Tuple): RichTuple[Source]
+    def tuple(
+      coordinates: IndexedSeq[Data[Shape.Any]],
+      origin: Origin[Shape.Any],
+      schema: Schema.Tuple): RichTuple
 
-    def tuple[Source <: Shape.Any, Coordinate1 <: Shape.Any](
-      coordinate1: Data[Source, Coordinate1],
-      origin: Origin[Source, Shape.Tuple1[Coordinate1]],
-      schema: Schema.Tuple1[Coordinate1]): RichTuple1[Source, Coordinate1]
+    def tuple[Coordinate1 <: Shape.Any](
+      coordinate1: Data[Coordinate1],
+      origin: Origin[Shape.Tuple1[Coordinate1]],
+      schema: Schema.Tuple1[Coordinate1]): RichTuple1[Coordinate1]
 
-    def tuple[Source <: Shape.Any, Coordinate1 <: Shape.Any, Coordinate2 <: Shape.Any](
-      coordinate1: Data[Source, Coordinate1],
-      coordinate2: Data[Source, Coordinate2],
-      origin: Origin[Source, Shape.Tuple2[Coordinate1, Coordinate2]],
-      schema: Schema.Tuple2[Coordinate1, Coordinate2]): RichTuple2[Source, Coordinate1, Coordinate2]
+    def tuple[Coordinate1 <: Shape.Any, Coordinate2 <: Shape.Any](
+      coordinate1: Data[Coordinate1],
+      coordinate2: Data[Coordinate2],
+      origin: Origin[Shape.Tuple2[Coordinate1, Coordinate2]],
+      schema: Schema.Tuple2[Coordinate1, Coordinate2]): RichTuple2[Coordinate1, Coordinate2]
 
-    def sequence[Source <: Shape.Any, Element <: Shape.Any](
-      elements: Seq[Data[Source, Element]])(
-        origin: Origin[Source, Shape.Sequence[Element]],
-        schema: Schema.Sequence[Element]): RichSequence[Source, Element]
+    def sequence[Element <: Shape.Any](
+      elements: Seq[Data[Element]],
+      origin: Origin[Shape.Sequence[Element]],
+      schema: Schema.Sequence[Element]): RichSequence[Element]
 
-    def some[Source <: Shape.Any, Value <: Shape.Concrete](
-      value: Data[Source, Value],
-      origin: Origin[Source, Shape.Some[Value]],
-      schema: Schema.Some[Value]): RichSome[Source, Value]
+    def some[Value <: Shape.Concrete](
+      value: Data[Value],
+      origin: Origin[Shape.Some[Value]],
+      schema: Schema.Some[Value]): RichSome[Value]
 
-    def none[Source <: Shape.Any](origin: Origin[Source, Shape.None], schema: Schema.None): RichNone[Source]
+    def none(origin: Origin[Shape.None], schema: Schema.None): RichNone
+  }
+
+  object Primitive {
+    def apply[Raw: TypeTag](
+      raw: Raw,
+      origin: Origin.Primitive[Raw],
+      schema: Schema.Primitive[Raw])(
+        implicit factory: Factory) =
+      factory.primitive(raw, origin, schema)
+  }
+
+  object Struct {
+    def apply(
+      features: Map[String, Data.Any],
+      origin: Origin.Struct,
+      schema: Schema.Struct)(
+        implicit factory: Factory) =
+      factory.struct(features, origin, schema)
+  }
+
+  object Tuple {
+    def apply(
+      coordinates: IndexedSeq[Data.Any],
+      origin: Origin.Tuple,
+      schema: Schema.Tuple)(
+        implicit factory: Factory) =
+      factory.tuple(coordinates, origin, schema)
+
+    def apply[Coordinate1 <: Shape.Any](
+      coordinate1: Data[Coordinate1],
+      origin: Origin.Tuple1[Coordinate1],
+      schema: Schema.Tuple1[Coordinate1])(
+        implicit factory: Factory) =
+      factory.tuple(coordinate1, origin, schema)
+
+    def apply[Coordinate1 <: Shape.Any, Coordinate2 <: Shape.Any](
+      coordinate1: Data[Coordinate1],
+      coordinate2: Data[Coordinate2],
+      origin: Origin.Tuple2[Coordinate1, Coordinate2],
+      schema: Schema.Tuple2[Coordinate1, Coordinate2])(
+        implicit factory: Factory) =
+      factory.tuple(coordinate1, coordinate2, origin, schema)
+  }
+
+  object Sequence {
+    def apply[Element <: Shape.Any](
+      elements: Seq[Data[Element]],
+      origin: Origin.Sequence[Element],
+      schema: Schema.Sequence[Element])(
+        implicit factory: Factory) =
+      factory.sequence(elements, origin, schema)
+  }
+
+  object Some {
+    def apply[Value <: Shape.Concrete](
+      value: Data[Value],
+      origin: Origin.Some[Value],
+      schema: Schema.Some[Value])(
+        implicit factory: Factory) =
+      factory.some(value, origin, schema)
+  }
+
+  object None {
+    def apply(
+      origin: Origin.None,
+      schema: Schema.None)(
+        implicit factory: Factory) =
+      factory.none(origin, schema)
   }
 }
 

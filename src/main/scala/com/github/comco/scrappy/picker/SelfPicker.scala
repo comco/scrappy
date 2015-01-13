@@ -2,10 +2,10 @@ package com.github.comco.scrappy.picker
 
 import com.github.comco.scrappy._
 
-case class SelfPicker[-Source <: Shape.Any, Shape <: Shape.Any](val sourceSchema: Schema[Shape])
+case class SelfPicker[Shape <: Shape.Any](val sourceSchema: Schema[Shape])
     extends BasePicker[Shape, Shape] {
 
   override def targetSchema = sourceSchema
 
-  override def doPick(source: Data[Source, Shape]) = source
+  override def doPick(source: Data[Shape]) = source
 }

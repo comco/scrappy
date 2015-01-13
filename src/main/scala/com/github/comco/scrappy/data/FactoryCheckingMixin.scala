@@ -5,7 +5,7 @@ import com.github.comco.scrappy.Schema
 import com.github.comco.scrappy.Origin
 import com.github.comco.scrappy.Shape
 
-trait FactoryChecking extends Data.Factory {
+trait FactoryCheckingMixin extends Data.Factory {
   abstract override def struct(
     features: Map[String, Data.Any])(
       origin: Origin.Struct,
@@ -26,7 +26,7 @@ trait FactoryChecking extends Data.Factory {
         require(features.contains(name), s"Feature named: $name should be provided.")
     }
 
-    super.struct(features)(origin, schema)
+    super.struct(features, origin, schema)
   }
 
   abstract override def tuple(
@@ -44,7 +44,7 @@ trait FactoryChecking extends Data.Factory {
           s"The provided coordinate: $coordinate at position: $position should match the corresponsing schema: ${schema.coordinateSchemas(position)}.")
     }
 
-    super.tuple(coordinates)(origin, schema)
+    super.tuple(coordinates, origin, schema)
   }
 
   abstract override def tuple[Coordinate1 <: Shape.Any](
@@ -54,7 +54,7 @@ trait FactoryChecking extends Data.Factory {
     require(coordinate1.schema.satisfies(schema.coordinate1Schema),
       s"Coordinate1 data: $coordinate1 should satisfy schema: ${schema.coordinate1Schema}.")
 
-    super.tuple(coordinate1)(origin, schema)
+    super.tuple(coordinate1, origin, schema)
   }
 
   abstract override def tuple[Coordinate1 <: Shape.Any, Coordinate2 <: Shape.Any](
@@ -65,7 +65,7 @@ trait FactoryChecking extends Data.Factory {
     require(coordinate1.schema.satisfies(schema.coordinate1Schema),
       s"Coordinate1 data: $coordinate1 should satisfy schema: ${schema.coordinate1Schema}.")
 
-    super.tuple(coordinate1, coordinate2)(origin, schema)
+    super.tuple(coordinate1, coordinate2, origin, schema)
   }
 
   abstract override def sequence[Element <: Shape.Any](
@@ -77,7 +77,7 @@ trait FactoryChecking extends Data.Factory {
         s"Element $element at index: $index should satisfy schema: ${schema.elementSchema}.")
     }
 
-    super.sequence(elements)(origin, schema)
+    super.sequence(elements, origin, schema)
   }
 
   abstract override def some[Value <: Shape.Concrete](
@@ -87,6 +87,6 @@ trait FactoryChecking extends Data.Factory {
     require(value.schema.satisfies(schema.valueSchema),
       s"Value: $value should satisfy schema: ${schema.valueSchema}.")
 
-    super.some(value)(origin, schema)
+    super.some(value, origin, schema)
   }
 }

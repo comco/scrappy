@@ -12,5 +12,5 @@ case class Tuple1Picker[-Source <: Shape.Any, +Coordinate1 <: Shape.Any](
   override def targetSchema = Schema.Tuple(coordinate1Picker.targetSchema)
 
   override def doPick(source: Data[Source]) =
-    Data.Tuple(coordinate1Picker.pick(source))(source.origin.computed, targetSchema)
+    Data.Tuple(coordinate1Picker.pick(source), source.origin.computed, targetSchema)
 }
