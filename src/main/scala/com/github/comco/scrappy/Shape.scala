@@ -7,7 +7,7 @@ object Shape {
 
   sealed abstract class Concrete extends Shape
 
-  sealed abstract class Primitive[Raw] extends Shape
+  sealed abstract class Primitive[Raw] extends Concrete
 
   sealed abstract class Struct extends Concrete
 

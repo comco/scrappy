@@ -98,14 +98,32 @@ object Schema extends Domain {
     def none: RichNone
 
     def any: RichAny = Any
+
+    def struct(name: String, featureSchemas: (String, Schema.Any)*): RichStruct =
+      struct(name, featureSchemas.toMap)
+
+    def tuple(coordinateSchemas: Schema.Any*): RichTuple =
+      tuple(coordinateSchemas.toIndexedSeq)
   }
 
   object Primitive {
     def apply[Raw: TypeTag](implicit factory: Factory) = factory.primitive
   }
 
+  object Struct {
+    def apply(
+      name: String,
+      featureSchemas: Map[String, Schema.Any])(
+        implicit factory: Factory) = factory.struct(name, featureSchemas)
+
+    def apply(name: String, featureSchemas: (String, Schema.Any)*)(
+      implicit factory: Factory) = factory.struct(name, featureSchemas: _*)
+  }
+
   object Tuple {
     def apply(coordinateSchemas: IndexedSeq[Schema.Any])(implicit factory: Factory) = factory.tuple(coordinateSchemas)
+
+    def apply(coordinateSchemas: Schema.Any*)(implicit factory: Factory) = factory.tuple(coordinateSchemas: _*)
 
     def apply[Coordinate1 <: Shape.Any](coordinate1Schema: Schema[Coordinate1])(implicit factory: Factory) = factory.tuple(coordinate1Schema)
 
