@@ -7,6 +7,11 @@ sealed trait Data[+Shape <: Shape.Any] {
   def schema: Schema[Shape]
 
   def origin: Origin[Shape]
+
+  def structurallyEquals(that: Data[_]): Boolean = {
+    // TODO
+    true
+  }
 }
 
 object Data extends Domain {
