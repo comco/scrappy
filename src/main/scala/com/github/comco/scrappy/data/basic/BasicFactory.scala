@@ -3,9 +3,10 @@ package com.github.comco.scrappy.data.basic
 import scala.reflect.runtime.universe.TypeTag
 import com.github.comco.scrappy._
 import com.github.comco.scrappy.data.FactoryCheckingMixin
+import com.github.comco.scrappy.data.FactoryCheckingMixin
 
-object BasicFactory extends Data.Factory with FactoryCheckingMixin {
-  override def primitive[Source <: Shape.Any, Raw: TypeTag](
+class BasicFactory extends Data.Factory {
+  override def primitive[Raw: TypeTag](
     raw: Raw,
     origin: Origin.Primitive[Raw],
     schema: Schema.Primitive[Raw]) =
@@ -53,3 +54,5 @@ object BasicFactory extends Data.Factory with FactoryCheckingMixin {
     schema: Schema.None) =
     BasicNoneData(origin, schema)
 }
+
+object BasicFactory extends BasicFactory

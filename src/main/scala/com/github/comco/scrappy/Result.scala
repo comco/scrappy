@@ -1,15 +1,15 @@
 package com.github.comco.scrappy
 
-sealed abstract class Reason[-Source <: Shape.Any, +Target <: Shape.Any]
+sealed abstract class Reason[Shape <: Shape.Any]
 
 object Reason {
-  case class Result[-Source <: Shape.Any, +Target <: Shape.Any](
+  case class Result[Shape <: Shape.Any](
     val successful: Boolean,
-    val scope: Origin[Target],
-    val reasons: Set[Reason[Source, Target]],
-    val checker: Checker[Source])
+    val scope: Origin[Shape],
+    val reasons: Set[Reason[Shape]],
+    val checker: Checker[Shape])
       extends Reason
 
-  case class Witness[+Target <: Shape.Any](
-    val witness: Origin[Target]) extends Reason
+  case class Witness[Shape <: Shape.Any](
+    val witness: Origin[Shape]) extends Reason
 }

@@ -80,7 +80,7 @@ object Schema extends Domain {
 
   abstract class RichDynamic extends Dynamic
 
-  abstract class Factory {
+  trait Factory {
     def primitive[Raw: TypeTag]: RichPrimitive[Raw]
 
     def struct(name: String, featureSchemas: Map[String, Schema.Any]): RichStruct

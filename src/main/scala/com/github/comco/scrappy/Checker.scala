@@ -1,7 +1,7 @@
 package com.github.comco.scrappy
 
-abstract class Checker[+Target <: Shape.Any] {
+abstract class Checker[Shape <: Shape.Any] {
   def sourceSchema: Schema.Any
 
-  def check[Source <: Shape.Any](source: Data[Target]): Reason.Result[Source, Target]
+  def check(source: Data[Shape]): Reason.Result[Shape]
 }

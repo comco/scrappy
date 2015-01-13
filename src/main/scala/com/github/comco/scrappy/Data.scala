@@ -50,7 +50,7 @@ object Data extends Domain {
   }
 
   abstract class RichSequence[+Element <: Shape.Any]
-      extends Sequence[Element] with StateEquality[RichSequence[Element]] {
+      extends Sequence[Element] with StateEquality[RichSequence[_]] {
     def elements: Seq[Data[Element]]
 
     protected override def state = (schema, origin, elements)
@@ -61,7 +61,7 @@ object Data extends Domain {
   }
 
   abstract class RichSome[+Value <: Shape.Concrete]
-      extends RichOptional[Value] with Some[Value] with StateEquality[RichSome[Value]] {
+      extends RichOptional[Value] with Some[Value] with StateEquality[RichSome[_]] {
     def value: Data[Value]
 
     override def hasValue = true
@@ -89,7 +89,7 @@ object Data extends Domain {
 
     def tuple(
       coordinates: IndexedSeq[Data[Shape.Any]],
-      origin: Origin[Shape.Any],
+      origin: Origin.Tuple,
       schema: Schema.Tuple): RichTuple
 
     def tuple[Coordinate1 <: Shape.Any](

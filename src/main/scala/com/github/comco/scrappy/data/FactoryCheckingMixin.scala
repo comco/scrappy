@@ -1,15 +1,24 @@
 package com.github.comco.scrappy.data
 
+import scala.reflect.runtime.universe._
+
 import com.github.comco.scrappy.Data
 import com.github.comco.scrappy.Schema
 import com.github.comco.scrappy.Origin
 import com.github.comco.scrappy.Shape
 
 trait FactoryCheckingMixin extends Data.Factory {
+  abstract override def primitive[Raw: TypeTag](
+    raw: Raw,
+    origin: Origin.Primitive[Raw],
+    schema: Schema.Primitive[Raw]) = {
+    super.primitive(raw, origin, schema)
+  }
+
   abstract override def struct(
-    features: Map[String, Data.Any])(
-      origin: Origin.Struct,
-      schema: Schema.Struct) = {
+    features: Map[String, Data.Any],
+    origin: Origin.Struct,
+    schema: Schema.Struct) = {
     // all provided features should be valid.
     features.foreach {
       case (name, feature) =>
@@ -30,9 +39,9 @@ trait FactoryCheckingMixin extends Data.Factory {
   }
 
   abstract override def tuple(
-    coordinates: IndexedSeq[Data.Any])(
-      origin: Origin.Tuple,
-      schema: Schema.Tuple) = {
+    coordinates: IndexedSeq[Data.Any],
+    origin: Origin.Tuple,
+    schema: Schema.Tuple) = {
     // there should be the right number of coordinates.
     require(coordinates.length == schema.coordinateSchemas.length,
       s"The number of provided coordinates: ${coordinates.length} should match the number of coordinates of the schema: ${schema.coordinateSchemas.length}.")
@@ -48,9 +57,9 @@ trait FactoryCheckingMixin extends Data.Factory {
   }
 
   abstract override def tuple[Coordinate1 <: Shape.Any](
-    coordinate1: Data[Coordinate1])(
-      origin: Origin.Tuple1[Coordinate1],
-      schema: Schema.Tuple1[Coordinate1]) = {
+    coordinate1: Data[Coordinate1],
+    origin: Origin.Tuple1[Coordinate1],
+    schema: Schema.Tuple1[Coordinate1]) = {
     require(coordinate1.schema.satisfies(schema.coordinate1Schema),
       s"Coordinate1 data: $coordinate1 should satisfy schema: ${schema.coordinate1Schema}.")
 
@@ -59,9 +68,9 @@ trait FactoryCheckingMixin extends Data.Factory {
 
   abstract override def tuple[Coordinate1 <: Shape.Any, Coordinate2 <: Shape.Any](
     coordinate1: Data[Coordinate1],
-    coordinate2: Data[Coordinate2])(
-      origin: Origin.Tuple2[Coordinate1, Coordinate2],
-      schema: Schema.Tuple2[Coordinate1, Coordinate2]) = {
+    coordinate2: Data[Coordinate2],
+    origin: Origin.Tuple2[Coordinate1, Coordinate2],
+    schema: Schema.Tuple2[Coordinate1, Coordinate2]) = {
     require(coordinate1.schema.satisfies(schema.coordinate1Schema),
       s"Coordinate1 data: $coordinate1 should satisfy schema: ${schema.coordinate1Schema}.")
 
@@ -69,9 +78,9 @@ trait FactoryCheckingMixin extends Data.Factory {
   }
 
   abstract override def sequence[Element <: Shape.Any](
-    elements: Seq[Data[Element]])(
-      origin: Origin.Sequence[Element],
-      schema: Schema.Sequence[Element]) = {
+    elements: Seq[Data[Element]],
+    origin: Origin.Sequence[Element],
+    schema: Schema.Sequence[Element]) = {
     elements.zipWithIndex.foreach {
       case (element, index) => require(element.schema.satisfies(schema.elementSchema),
         s"Element $element at index: $index should satisfy schema: ${schema.elementSchema}.")
@@ -81,9 +90,9 @@ trait FactoryCheckingMixin extends Data.Factory {
   }
 
   abstract override def some[Value <: Shape.Concrete](
-    value: Data[Value])(
-      origin: Origin.Some[Value],
-      schema: Schema.Some[Value]) = {
+    value: Data[Value],
+    origin: Origin.Some[Value],
+    schema: Schema.Some[Value]) = {
     require(value.schema.satisfies(schema.valueSchema),
       s"Value: $value should satisfy schema: ${schema.valueSchema}.")
 
