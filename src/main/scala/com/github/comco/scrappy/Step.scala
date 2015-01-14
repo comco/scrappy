@@ -43,16 +43,16 @@ case class Coordinate11Step[Coordinate1 <: Shape.Any](
 }
 
 case class Coordinate21Step[Coordinate1 <: Shape.Any](
-  val sourceSchema: Schema.Tuple2[Coordinate1, Nothing])
-    extends Step[Shape.Tuple2[Coordinate1, Nothing], Coordinate1] {
+  val sourceSchema: Schema.Tuple2[Coordinate1, Shape.Any])
+    extends Step[Shape.Tuple2[Coordinate1, Shape.Any], Coordinate1] {
   override def targetSchema = sourceSchema.coordinate1Schema
 
   override def picker = Coordinate21Picker(sourceSchema)
 }
 
 case class Coordinate22Step[Coordinate2 <: Shape.Any](
-  val sourceSchema: Schema.Tuple2[Nothing, Coordinate2])
-    extends Step[Shape.Tuple2[Nothing, Coordinate2], Coordinate2] {
+  val sourceSchema: Schema.Tuple2[Shape.Any, Coordinate2])
+    extends Step[Shape.Tuple2[Shape.Any, Coordinate2], Coordinate2] {
   override def targetSchema = sourceSchema.coordinate2Schema
 
   override def picker = Coordinate22Picker(sourceSchema)

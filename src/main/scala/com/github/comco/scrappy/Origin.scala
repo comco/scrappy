@@ -2,6 +2,8 @@ package com.github.comco.scrappy
 
 sealed abstract class Origin[+Shape <: Shape.Any] {
   def computed: Origin.Computed
+  
+  def append[NewShape <: Shape.Any](step: Step[Shape, NewShape]): Origin[NewShape] = ???
 }
 
 object Origin extends Domain {
