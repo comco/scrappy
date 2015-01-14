@@ -17,6 +17,6 @@ case class StructPicker[-Source <: Shape.Any](
 
     val targetOrigin = source.origin.computed
 
-    dataFactory.struct(targetFeatures, targetOrigin, targetSchema)
+    dataFactory.struct(targetSchema, targetOrigin, targetFeatures)
   }
 }

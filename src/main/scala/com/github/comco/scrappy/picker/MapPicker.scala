@@ -12,6 +12,6 @@ case class MapPicker[-Source <: Shape.Any, +Target <: Shape.Any](
   override def doPick(source: Data.Sequence[Source]): Data.Sequence[Target] = {
     val targetElements = source.elements.map(f.pick(_))
     val targetOrigin = source.origin.computed
-    Data.Sequence(targetElements, targetOrigin, targetSchema)
+    Data.Sequence(targetSchema, targetOrigin, targetElements) 
   }
 }

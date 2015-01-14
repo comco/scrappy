@@ -3,7 +3,7 @@ package com.github.comco.scrappy.data.basic
 import com.github.comco.scrappy._
 
 case class BasicStructData(
-  val features: Map[String, Data[Shape.Any]],
+  val schema: Schema.Struct,
   val origin: Origin[Shape.Struct],
-  val schema: Schema.Struct)
+  val features: Map[String, Data[Shape.Any]])
     extends Data.RichStruct

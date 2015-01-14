@@ -83,102 +83,176 @@ object Data extends Domain {
 
   abstract class Factory {
     def primitive[Raw: TypeTag](
-      raw: Raw,
-      origin: Origin[Shape.Primitive[Raw]],
-      schema: Schema.Primitive[Raw]): RichPrimitive[Raw]
+      schema: Schema.Primitive[Raw],
+      origin: Origin.Primitive[Raw],
+      raw: Raw): RichPrimitive[Raw]
 
     def struct(
-      features: Map[String, Data[Shape.Any]],
-      origin: Origin[Shape.Struct],
-      schema: Schema.Struct): RichStruct
+      schema: Schema.Struct,
+      origin: Origin.Struct,
+      features: Map[String, Data[Shape.Any]]): RichStruct
 
     def tuple(
-      coordinates: IndexedSeq[Data[Shape.Any]],
+      schema: Schema.Tuple,
       origin: Origin.Tuple,
-      schema: Schema.Tuple): RichTuple
+      coordinates: IndexedSeq[Data[Shape.Any]]): RichTuple
 
     def tuple[Coordinate1 <: Shape.Any](
-      coordinate1: Data[Coordinate1],
-      origin: Origin[Shape.Tuple1[Coordinate1]],
-      schema: Schema.Tuple1[Coordinate1]): RichTuple1[Coordinate1]
+      schema: Schema.Tuple1[Coordinate1],
+      origin: Origin.Tuple1[Coordinate1],
+      coordinate1: Data[Coordinate1]): RichTuple1[Coordinate1]
 
     def tuple[Coordinate1 <: Shape.Any, Coordinate2 <: Shape.Any](
+      schema: Schema.Tuple2[Coordinate1, Coordinate2],
+      origin: Origin.Tuple2[Coordinate1, Coordinate2],
       coordinate1: Data[Coordinate1],
-      coordinate2: Data[Coordinate2],
-      origin: Origin[Shape.Tuple2[Coordinate1, Coordinate2]],
-      schema: Schema.Tuple2[Coordinate1, Coordinate2]): RichTuple2[Coordinate1, Coordinate2]
+      coordinate2: Data[Coordinate2]): RichTuple2[Coordinate1, Coordinate2]
 
     def sequence[Element <: Shape.Any](
-      elements: Seq[Data[Element]],
-      origin: Origin[Shape.Sequence[Element]],
-      schema: Schema.Sequence[Element]): RichSequence[Element]
+      schema: Schema.Sequence[Element],
+      origin: Origin.Sequence[Element],
+      elements: Seq[Data[Element]]): RichSequence[Element]
 
     def some[Value <: Shape.Concrete](
-      value: Data[Value],
+      schema: Schema.Optional[Value],
       origin: Origin.Optional[Value],
-      schema: Schema.Optional[Value]): RichSome[Value]
+      value: Data[Value]): RichSome[Value]
 
     def none(origin: Origin.None): RichNone
   }
 
   object Primitive {
     def apply[Raw: TypeTag](
-      raw: Raw,
+      schema: Schema.Primitive[Raw],
       origin: Origin.Primitive[Raw],
-      schema: Schema.Primitive[Raw])(
+      raw: Raw)(
         implicit factory: Factory) =
-      factory.primitive(raw, origin, schema)
+      factory.primitive(schema, origin, raw)
+
+    def apply[Raw: TypeTag](
+      origin: Origin.Primitive[Raw],
+      raw: Raw)(
+        implicit factory: Factory): RichPrimitive[Raw] =
+      apply(Schema.Primitive[Raw], origin, raw)
+
+    def apply[Raw: TypeTag](raw: Raw)(implicit factory: Factory): RichPrimitive[Raw] =
+      apply(Origin.Bare, raw)
   }
 
   object Struct {
     def apply(
-      features: Map[String, Data.Any],
+      schema: Schema.Struct,
       origin: Origin.Struct,
-      schema: Schema.Struct)(
-        implicit factory: Factory) =
-      factory.struct(features, origin, schema)
+      features: Map[String, Data.Any])(
+        implicit factory: Factory): RichStruct =
+      factory.struct(schema, origin, features)
+
+    def apply(
+      schema: Schema.Struct,
+      features: Map[String, Data.Any])(
+        implicit factory: Factory): RichStruct =
+      apply(schema, Origin.Bare, features)
   }
 
   object Tuple {
     def apply(
-      coordinates: IndexedSeq[Data.Any],
+      schema: Schema.Tuple,
       origin: Origin.Tuple,
-      schema: Schema.Tuple)(
-        implicit factory: Factory) =
-      factory.tuple(coordinates, origin, schema)
+      coordinates: IndexedSeq[Data.Any])(
+        implicit factory: Factory): RichTuple =
+      factory.tuple(schema, origin, coordinates)
+
+    def apply(
+      origin: Origin.Tuple,
+      coordinates: IndexedSeq[Data.Any])(
+        implicit factory: Factory): RichTuple =
+      apply(Schema.Tuple(coordinates.map(_.schema)), origin, coordinates)
+
+    def apply(coordinates: IndexedSeq[Data.Any])(
+      implicit factory: Factory): RichTuple =
+      apply(Origin.Bare, coordinates)
 
     def apply[Coordinate1 <: Shape.Any](
-      coordinate1: Data[Coordinate1],
+      schema: Schema.Tuple1[Coordinate1],
       origin: Origin.Tuple1[Coordinate1],
-      schema: Schema.Tuple1[Coordinate1])(
-        implicit factory: Factory) =
-      factory.tuple(coordinate1, origin, schema)
+      coordinate1: Data[Coordinate1])(
+        implicit factory: Factory): RichTuple1[Coordinate1] =
+      factory.tuple(schema, origin, coordinate1)
+
+    def apply[Coordinate1 <: Shape.Any](
+      origin: Origin.Tuple1[Coordinate1],
+      coordinate1: Data[Coordinate1])(
+        implicit factory: Factory): RichTuple1[Coordinate1] =
+      apply(Schema.Tuple(coordinate1.schema), origin, coordinate1)
+
+    def apply[Coordinate1 <: Shape.Any](coordinate1: Data[Coordinate1])(
+      implicit factory: Factory): RichTuple1[Coordinate1] =
+      apply(Origin.Bare, coordinate1)
+
+    def apply[Coordinate1 <: Shape.Any, Coordinate2 <: Shape.Any](
+      schema: Schema.Tuple2[Coordinate1, Coordinate2],
+      origin: Origin.Tuple2[Coordinate1, Coordinate2],
+      coordinate1: Data[Coordinate1],
+      coordinate2: Data[Coordinate2])(
+        implicit factory: Factory): RichTuple2[Coordinate1, Coordinate2] =
+      factory.tuple(schema, origin, coordinate1, coordinate2)
+
+    def apply[Coordinate1 <: Shape.Any, Coordinate2 <: Shape.Any](
+      origin: Origin.Tuple2[Coordinate1, Coordinate2],
+      coordinate1: Data[Coordinate1],
+      coordinate2: Data[Coordinate2])(
+        implicit factory: Factory): RichTuple2[Coordinate1, Coordinate2] =
+      apply(Schema.Tuple(coordinate1.schema, coordinate2.schema), origin, coordinate1, coordinate2)
 
     def apply[Coordinate1 <: Shape.Any, Coordinate2 <: Shape.Any](
       coordinate1: Data[Coordinate1],
-      coordinate2: Data[Coordinate2],
-      origin: Origin.Tuple2[Coordinate1, Coordinate2],
-      schema: Schema.Tuple2[Coordinate1, Coordinate2])(
-        implicit factory: Factory) =
-      factory.tuple(coordinate1, coordinate2, origin, schema)
+      coordinate2: Data[Coordinate2])(
+        implicit factory: Factory): RichTuple2[Coordinate1, Coordinate2] =
+      apply(Origin.Bare, coordinate1, coordinate2)
   }
 
   object Sequence {
     def apply[Element <: Shape.Any](
-      elements: Seq[Data[Element]],
+      schema: Schema.Sequence[Element],
       origin: Origin.Sequence[Element],
-      schema: Schema.Sequence[Element])(
-        implicit factory: Factory) =
-      factory.sequence(elements, origin, schema)
+      elements: Seq[Data[Element]])(
+        implicit factory: Factory): RichSequence[Element] =
+      factory.sequence(schema, origin, elements)
+
+    def apply[Element <: Shape.Any](
+      origin: Origin.Sequence[Element],
+      elements: Seq[Data[Element]])(
+        implicit factory: Factory): RichSequence[Element] =
+      apply(Schema.Sequence(elements.head.schema), origin, elements)
+
+    def apply[Element <: Shape.Any](
+      elements: Seq[Data[Element]])(
+        implicit factory: Factory): RichSequence[Element] =
+      apply(Origin.Bare, elements)
+
+    def apply[Element <: Shape.Any](
+      elements: Data[Element]*)(
+        implicit factory: Factory, dummyImplicit: DummyImplicit): RichSequence[Element] =
+      apply(elements)
   }
 
   object Some {
     def apply[Value <: Shape.Concrete](
-      value: Data[Value],
+      schema: Schema.Optional[Value],
       origin: Origin.Optional[Value],
-      schema: Schema.Optional[Value])(
-        implicit factory: Factory) =
-      factory.some(value, origin, schema)
+      value: Data[Value])(
+        implicit factory: Factory): RichSome[Value] =
+      factory.some(schema, origin, value)
+
+    def apply[Value <: Shape.Concrete](
+      origin: Origin.Optional[Value],
+      value: Data[Value])(
+        implicit factory: Factory): RichSome[Value] =
+      apply(Schema.Optional(value.schema), origin, value)
+
+    def apply[Value <: Shape.Concrete](value: Data[Value])(
+      implicit factory: Factory): RichSome[Value] =
+      apply(Origin.Bare, value)
   }
 
   object None {

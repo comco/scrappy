@@ -15,6 +15,6 @@ case class TuplePicker[-Source <: Shape.Any](
     val targetCoordinates: IndexedSeq[Data.Any] = coordinatePickers.map(_.pick(source))
     val targetOrigin = source.origin.computed
 
-    Data.Tuple(targetCoordinates, targetOrigin, targetSchema)
+    Data.Tuple(targetSchema, targetOrigin, targetCoordinates)
   }
 }

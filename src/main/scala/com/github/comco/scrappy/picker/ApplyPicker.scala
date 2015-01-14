@@ -11,6 +11,6 @@ case class ApplyPicker[RawSource: TypeTag, RawTarget: TypeTag](
 
   override def doPick(source: Data.Primitive[RawSource]): Data.Primitive[RawTarget] = {
     val targetOrigin = source.origin.computed
-    Data.Primitive(f(source.raw), targetOrigin, targetSchema)
+    Data.Primitive(targetSchema, targetOrigin, f(source.raw))
   }
 }

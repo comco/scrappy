@@ -7,47 +7,47 @@ import com.github.comco.scrappy.data.FactoryCheckingMixin
 
 class BasicFactory extends Data.Factory {
   override def primitive[Raw: TypeTag](
-    raw: Raw,
+    schema: Schema.Primitive[Raw],
     origin: Origin.Primitive[Raw],
-    schema: Schema.Primitive[Raw]) =
-    BasicPrimitiveData(raw, origin, schema)
+    raw: Raw) =
+    BasicPrimitiveData(schema, origin, raw)
 
   override def struct(
-    features: Map[String, Data[Shape.Any]],
+    schema: Schema.Struct,
     origin: Origin.Struct,
-    schema: Schema.Struct) =
-    BasicStructData(features, origin, schema)
+    features: Map[String, Data[Shape.Any]]) =
+    BasicStructData(schema, origin, features)
 
   override def tuple(
-    coordinates: IndexedSeq[Data[Shape.Any]],
+    schema: Schema.Tuple,
     origin: Origin.Tuple,
-    schema: Schema.Tuple) =
-    BasicTupleNData(coordinates, origin, schema)
+    coordinates: IndexedSeq[Data[Shape.Any]]) =
+    BasicTupleNData(schema, origin, coordinates)
 
   override def tuple[Coordinate1 <: Shape.Any](
-    coordinate1: Data[Coordinate1],
+    schema: Schema.Tuple1[Coordinate1],
     origin: Origin.Tuple1[Coordinate1],
-    schema: Schema.Tuple1[Coordinate1]) =
-    BasicTuple1Data(coordinate1, origin, schema)
+    coordinate1: Data[Coordinate1]) =
+    BasicTuple1Data(schema, origin, coordinate1)
 
   override def tuple[Coordinate1 <: Shape.Any, Coordinate2 <: Shape.Any](
-    coordinate1: Data[Coordinate1],
-    coordinate2: Data[Coordinate2],
+    schema: Schema.Tuple2[Coordinate1, Coordinate2],
     origin: Origin.Tuple2[Coordinate1, Coordinate2],
-    schema: Schema.Tuple2[Coordinate1, Coordinate2]) =
-    BasicTuple2Data(coordinate1, coordinate2, origin, schema)
+    coordinate1: Data[Coordinate1],
+    coordinate2: Data[Coordinate2]) =
+    BasicTuple2Data(schema, origin, coordinate1, coordinate2)
 
   override def sequence[Element <: Shape.Any](
-    elements: Seq[Data[Element]],
+    schema: Schema.Sequence[Element],
     origin: Origin.Sequence[Element],
-    schema: Schema.Sequence[Element]) =
-    BasicSequenceData(elements, origin, schema)
+    elements: Seq[Data[Element]]) =
+    BasicSequenceData(schema, origin, elements)
 
   override def some[Value <: Shape.Concrete](
-    value: Data[Value],
+    schema: Schema.Optional[Value],
     origin: Origin.Optional[Value],
-    schema: Schema.Optional[Value]) =
-    BasicSomeData(value, origin, schema)
+    value: Data[Value]) =
+    BasicSomeData(schema, origin, value)
 
   override def none(origin: Origin.None) = BasicNoneData(origin)
 }
