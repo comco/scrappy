@@ -61,7 +61,7 @@ object Data extends Domain {
     protected override def state = (schema, origin, elements)
   }
 
-  abstract class RichOptional[+Value <: Shape.Concrete] extends Optional[Value] {
+  sealed abstract class RichOptional[+Value <: Shape.Concrete] extends Optional[Value] {
     def hasValue: Boolean
   }
 
@@ -256,7 +256,7 @@ object Data extends Domain {
   }
 
   object None {
-    def apply(origin: Origin.None)(implicit factory: Factory) = factory.none(origin)
+    def apply(origin: Origin.None = Origin.Bare)(implicit factory: Factory) = factory.none(origin)
   }
 }
 
