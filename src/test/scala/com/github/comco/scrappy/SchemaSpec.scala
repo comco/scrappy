@@ -83,4 +83,20 @@ class SchemaSpec extends FlatSpec with Matchers {
     Schema.Nil.satisfies(int) shouldEqual true
     Schema.None.satisfies(optional) shouldEqual true
   }
+  
+  it should "provide join" in {
+    Schema.join(int, int) shouldEqual int
+    Schema.join(int, string) shouldEqual Schema.Any
+    Schema.join(Schema.None, optional) shouldEqual optional
+    Schema.join(Schema.None, int) shouldEqual Schema.Any
+    Schema.join(Schema.Tuple(optional, int), Schema.Tuple(Schema.None, int)) shouldEqual Schema.Tuple(optional, int)
+  }
+  
+  it should "provide meet" in {
+    Schema.meet(int, int) shouldEqual int
+    Schema.meet(Schema.Any, Schema.Any) shouldEqual Schema.Any
+    Schema.meet(int, string) shouldEqual Schema.Nil
+    Schema.meet(optional, Schema.None) shouldEqual Schema.None
+    Schema.meet(Schema.Tuple(optional), Schema.Tuple(Schema.None)) shouldEqual Schema.Tuple(Schema.None)
+  }
 }
