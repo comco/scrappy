@@ -4,7 +4,7 @@ import com.github.comco.scrappy._
 
 case class TuplePicker[-Source <: Shape.Any](
   val coordinatePickers: IndexedSeq[Picker[Source, Shape.Any]])(
-    implicit schemaFactory: Schema.Factory, dataFactory: Data.Factory)
+    implicit dataFactory: Data.Factory)
     extends BasePicker[Source, Shape.Tuple] {
 
   override def sourceSchema = coordinatePickers.head.sourceSchema

@@ -7,13 +7,19 @@ sealed abstract class Origin[+Shape <: Shape.Any] {
 object Origin extends Domain {
   type Abstract[+Shape <: Shape.Any] = Origin[Shape]
 
-  abstract class Bare extends Dynamic
+  abstract class Bare extends Nil
 
-  abstract class Original[-Source <: Shape.Any, +Target <: Shape.Any] extends Origin[Target] {
-    def pointer: Pointer[Source, Target]
+  object Bare extends Bare {
+    override def computed = Computed(Set.empty)
   }
 
-  abstract class Computed extends Dynamic {
-    def pointers: Set[Pointer.Any]
+  abstract class Original[-Source <: Shape.Any, +Target <: Shape.Any](
+      val pointer: Pointer[Source, Target]) extends Origin[Target] {
+    override def computed = Computed(Set(pointer))
+  }
+
+  case class Computed(val pointers: Set[Pointer[Nothing, Shape.Any]])
+      extends Nil {
+    override def computed = this
   }
 }

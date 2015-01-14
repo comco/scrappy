@@ -3,9 +3,7 @@ package com.github.comco.scrappy.picker
 import com.github.comco.scrappy._
 
 case class MapPicker[-Source <: Shape.Any, +Target <: Shape.Any](
-  val f: Picker[Source, Target])(
-    implicit schemaFactory: Schema.Factory,
-    dataFactory: Data.Factory)
+  val f: Picker[Source, Target])(implicit dataFactory: Data.Factory)
     extends BasePicker[Shape.Sequence[Source], Shape.Sequence[Target]] {
   override def sourceSchema = Schema.Sequence(f.sourceSchema)
 

@@ -23,18 +23,10 @@ trait Domain {
   type Sequence[+Element <: Shape.Any] = Abstract[Shape.Sequence[Element]]
 
   type Optional[+Value <: Shape.Concrete] = Abstract[Shape.Optional[Value]]
+  
+  type None = Optional[Shape.Nil]
 
-  type Some[+Value <: Shape.Concrete] = Abstract[Shape.Some[Value]]
-
-  type None = Abstract[Shape.None]
-
-  type Dynamic = Abstract[Nothing]
-
-  type RichAny <: Any
-  implicit def toRichAny(a: Any) = a.asInstanceOf[RichAny]
-
-  type RichConcrete <: Concrete
-  implicit def toRichConcrete(a: Concrete) = a.asInstanceOf[RichConcrete]
+  type Nil = Abstract[Shape.Nil]
 
   type RichPrimitive[Raw] <: Primitive[Raw]
   implicit def toRichPrimitive[Raw](a: Primitive[Raw]) = a.asInstanceOf[RichPrimitive[Raw]]
@@ -56,13 +48,4 @@ trait Domain {
 
   type RichOptional[+Value <: Shape.Concrete] <: Optional[Value]
   implicit def toRichOptional[Value <: Shape.Concrete](a: Optional[Value]) = a.asInstanceOf[RichOptional[Value]]
-
-  type RichSome[+Value <: Shape.Concrete] <: RichOptional[Value] with Some[Value]
-  implicit def toRichSome[Value <: Shape.Concrete](a: Some[Value]) = a.asInstanceOf[RichSome[Value]]
-
-  type RichNone <: RichOptional[Nothing] with None
-  implicit def toRichNone(a: None) = a.asInstanceOf[RichNone]
-
-  type RichDynamic <: Dynamic
-  implicit def toRichDynamic(a: Dynamic) = a.asInstanceOf[RichDynamic]
 }

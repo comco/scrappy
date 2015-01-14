@@ -66,7 +66,7 @@ object Data extends Domain {
   }
 
   abstract class RichSome[+Value <: Shape.Concrete]
-      extends RichOptional[Value] with Some[Value] with StateEquality[RichSome[_]] {
+      extends RichOptional[Value] with StateEquality[RichSome[_]] {
     def value: Data[Value]
 
     override def hasValue = true
@@ -75,7 +75,7 @@ object Data extends Domain {
   }
 
   abstract class RichNone
-      extends RichOptional[Nothing] with None with StateEquality[RichNone] {
+      extends RichOptional[Nothing] with StateEquality[RichNone] {
     override def hasValue = false
 
     protected override def state = (schema, origin)
@@ -115,10 +115,10 @@ object Data extends Domain {
 
     def some[Value <: Shape.Concrete](
       value: Data[Value],
-      origin: Origin[Shape.Some[Value]],
-      schema: Schema.Some[Value]): RichSome[Value]
+      origin: Origin.Optional[Value],
+      schema: Schema.Optional[Value]): RichSome[Value]
 
-    def none(origin: Origin[Shape.None], schema: Schema.None): RichNone
+    def none(origin: Origin.None): RichNone
   }
 
   object Primitive {
@@ -175,18 +175,14 @@ object Data extends Domain {
   object Some {
     def apply[Value <: Shape.Concrete](
       value: Data[Value],
-      origin: Origin.Some[Value],
-      schema: Schema.Some[Value])(
+      origin: Origin.Optional[Value],
+      schema: Schema.Optional[Value])(
         implicit factory: Factory) =
       factory.some(value, origin, schema)
   }
 
   object None {
-    def apply(
-      origin: Origin.None,
-      schema: Schema.None)(
-        implicit factory: Factory) =
-      factory.none(origin, schema)
+    def apply(origin: Origin.None)(implicit factory: Factory) = factory.none(origin)
   }
 }
 

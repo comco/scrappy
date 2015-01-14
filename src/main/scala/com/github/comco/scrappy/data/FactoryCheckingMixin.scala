@@ -91,8 +91,8 @@ trait FactoryCheckingMixin extends Data.Factory {
 
   abstract override def some[Value <: Shape.Concrete](
     value: Data[Value],
-    origin: Origin.Some[Value],
-    schema: Schema.Some[Value]) = {
+    origin: Origin.Optional[Value],
+    schema: Schema.Optional[Value]) = {
     require(value.schema.satisfies(schema.valueSchema),
       s"Value: $value should satisfy schema: ${schema.valueSchema}.")
 

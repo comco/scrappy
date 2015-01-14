@@ -12,7 +12,7 @@ import com.github.comco.scrappy.Result
 case class QuantifierChecker[Element <: Shape.Any](
   val quantifierFactory: QuantifierFactory,
   val elementChecker: Checker[Element])(
-    implicit schemaFactory: Schema.Factory, dataFactory: Data.Factory)
+    implicit dataFactory: Data.Factory)
     extends BaseChecker[Shape.Sequence[Element]] {
   override def sourceSchema = Schema.Sequence(elementChecker.sourceSchema)
 

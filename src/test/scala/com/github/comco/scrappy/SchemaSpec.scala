@@ -5,11 +5,7 @@ import scala.reflect.runtime.universe.TypeTag
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers
 
-import com.github.comco.scrappy.schema.basic.BasicFactory
-
 class SchemaSpec extends FlatSpec with Matchers {
-  implicit def schemaFactory = BasicFactory
-
   val int = Schema.Primitive[Int]
   val string = Schema.Primitive[String]
   val boolean = Schema.Primitive[Boolean]
@@ -18,24 +14,25 @@ class SchemaSpec extends FlatSpec with Matchers {
     int.typeTag shouldEqual implicitly[TypeTag[Int]]
   }
 
-  val struct = Schema.Struct("line", "number" -> int, "content" -> string)
+  val lineStruct = Schema.Struct("line", "number" -> int, "content" -> string)
+  val pageStruct = Schema.Struct("page", "number" -> int, "lines" -> Schema.Sequence(lineStruct))
 
   "A Schema.Struct" should "be constructible from a Map" in {
-    Schema.Struct("line", Map("number" -> int, "content" -> string)) shouldEqual struct
+    Schema.Struct("line", Map("number" -> int, "content" -> string)) shouldEqual lineStruct
   }
 
   it should "provide name" in {
-    struct.name shouldEqual "line"
+    lineStruct.name shouldEqual "line"
   }
 
   it should "provide featureSchemas" in {
-    struct.featureSchemas shouldEqual Map("number" -> int, "content" -> string)
+    lineStruct.featureSchemas shouldEqual Map("number" -> int, "content" -> string)
   }
 
   it should "provide hasFeatureNamed" in {
-    struct.hasFeatureNamed("number") shouldEqual true
-    struct.hasFeatureNamed("content") shouldEqual true
-    struct.hasFeatureNamed("nonexistent") shouldEqual false
+    lineStruct.hasFeatureNamed("number") shouldEqual true
+    lineStruct.hasFeatureNamed("content") shouldEqual true
+    lineStruct.hasFeatureNamed("nonexistent") shouldEqual false
   }
 
   val tuple = Schema.Tuple(int, string, int, boolean)
@@ -69,19 +66,21 @@ class SchemaSpec extends FlatSpec with Matchers {
 
   val optional = Schema.Optional(int)
 
-  "A Schema.Optional" should "provide hasValue" in {
-    optional.hasValue shouldEqual true
-  }
-
   it should "provide valueSchema" in {
     optional.valueSchema shouldEqual int
   }
-
-  "A Schema.None" should "provide hasValue" in {
-    schemaFactory.none.hasValue shouldEqual false
+  
+  "A Schema.None" should "provide valueSchema" in {
+    Schema.None.valueSchema shouldEqual Schema.Nil
   }
-
-  it should "provide valueSchema" in {
-    schemaFactory.none.valueSchema.isInstanceOf[Schema.RichDynamic] shouldEqual true
+  
+  "A Schema" should "provide satisfy" in {
+    int.satisfies(int) shouldEqual true
+    int.satisfies(string) shouldEqual false
+    int.satisfies(tuple) shouldEqual false
+    int.satisfies(lineStruct) shouldEqual false
+    int.satisfies(Schema.Any) shouldEqual true
+    Schema.Nil.satisfies(int) shouldEqual true
+    Schema.None.satisfies(optional) shouldEqual true
   }
 }

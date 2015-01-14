@@ -5,27 +5,45 @@ import scala.reflect.runtime.universe.TypeTag
 import com.github.comco.scrappy.utils.StateEquality
 
 sealed trait Schema[+Shape <: Shape.Any] {
-  def satisfies(superSchema: Schema.Any): Boolean = {
-    // TODO
-    true
-  }
+  def satisfies(that: Schema.Any) = Schema.satisfies(this, that)
 }
 
 object Schema extends Domain {
+  def satisfies(a: Schema.Any, b: Schema.Any): Boolean = (a, b) match {
+    case (_, Any) => true
+    case (Nil, _) => true
+    case (a: RichPrimitive[_], b: RichPrimitive[_]) => a.typeTag == b.typeTag
+    case (a: RichStruct, b: RichStruct) => a == b
+    case (a: RichTuple, b: RichTuple) => (a.arity == b.arity && 
+        a.coordinateSchemas.zip(b.coordinateSchemas).forall {
+      case (ac, bc) => satisfies(ac, bc)
+    })
+    case (a: RichSequence[_], b: RichSequence[_]) => satisfies(a.elementSchema, b.elementSchema)
+    case (a: RichOptional[_], b: RichOptional[_]) => satisfies(a.valueSchema, b.valueSchema)
+    case _ => false
+  }
+  
+  def join[Shape <: Shape.Any](a: Schema[Shape], b: Schema[Shape]): Schema[Shape] = {
+    if (a.satisfies(b)) b
+    else if (b.satisfies(a)) a
+    else Schema.Any.asInstanceOf[Schema[Shape]] // TODO: is this safe?
+  }
+  
+  def meet[Shape <: Shape.Any](a: Schema[Shape], b: Schema[Shape]): Schema[Shape] = {
+    if (a.satisfies(b)) a
+    else if (b.satisfies(a)) b
+    else Schema.Nil // TODO
+  }
+  
   type Abstract[+Shape <: Shape.Any] = Schema[Shape]
 
-  type RichAny = Any
-
-  abstract class RichPrimitive[Raw] extends Primitive[Raw] with StateEquality[RichPrimitive[Raw]] {
-    def typeTag: TypeTag[Raw]
-
+  case class RichPrimitive[Raw](implicit val typeTag: TypeTag[Raw])
+      extends Primitive[Raw] with StateEquality[RichPrimitive[Raw]] {
     protected override def state = (typeTag)
   }
-
-  abstract class RichStruct extends Struct with StateEquality[RichStruct] {
-    def name: String
-
-    def featureSchemas: Map[String, Schema.Any]
+  
+  case class RichStruct(val name: String, val featureSchemas: Map[String, Schema.Any])
+      extends Struct with StateEquality[RichStruct] {
 
     def hasFeatureNamed(featureName: String): Boolean = featureSchemas.contains(featureName)
 
@@ -42,101 +60,63 @@ object Schema extends Domain {
     protected override def state = (coordinateSchemas)
   }
 
-  abstract class RichTuple1[+Coordinate1 <: Shape.Any] extends RichTuple with Tuple1[Coordinate1] {
-    def coordinate1Schema: Schema[Coordinate1]
-
+  case class RichTuple1[+Coordinate1 <: Shape.Any](val coordinate1Schema: Schema[Coordinate1])
+      extends RichTuple with Tuple1[Coordinate1] {
     override def coordinateSchemas = IndexedSeq(coordinate1Schema)
   }
 
-  abstract class RichTuple2[+Coordinate1 <: Shape.Any, +Coordinate2 <: Shape.Any] extends RichTuple with Tuple2[Coordinate1, Coordinate2] {
-    def coordinate1Schema: Schema[Coordinate1]
-
-    def coordinate2Schema: Schema[Coordinate2]
-
+  case class RichTuple2[+Coordinate1 <: Shape.Any, +Coordinate2 <: Shape.Any](
+    val coordinate1Schema: Schema[Coordinate1],
+    val coordinate2Schema: Schema[Coordinate2])
+      extends RichTuple with Tuple2[Coordinate1, Coordinate2] {
     override def coordinateSchemas = IndexedSeq(coordinate1Schema, coordinate2Schema)
   }
+  
+  case class RichTupleN(val coordinateSchemas: IndexedSeq[Schema.Any]) extends RichTuple
 
-  abstract class RichSequence[+Element <: Shape.Any] extends Sequence[Element] with StateEquality[RichSequence[_]] {
-    def elementSchema: Schema[Element]
-
+  case class RichSequence[+Element <: Shape.Any](val elementSchema: Schema[Element])
+      extends Sequence[Element] with StateEquality[RichSequence[_]] {
     protected override def state = (elementSchema)
   }
 
-  sealed abstract class RichOptional[+Value <: Shape.Concrete] extends Optional[Value] with StateEquality[RichOptional[_]] {
-    def hasValue: Boolean
-
-    def valueSchema: Schema[Value]
-
+  case class RichOptional[+Value <: Shape.Concrete](val valueSchema: Schema[Value])
+      extends Optional[Value] with StateEquality[RichOptional[_]] {
     protected override def state = (valueSchema)
   }
-
-  abstract class RichSome[+Value <: Shape.Concrete] extends RichOptional[Value] with Some[Value] {
-    override def hasValue = true
-  }
-
-  abstract class RichNone extends RichOptional[Nothing] with None {
-    override def hasValue = false
-  }
-
-  abstract class RichDynamic extends Dynamic
-
-  trait Factory {
-    def primitive[Raw: TypeTag]: RichPrimitive[Raw]
-
-    def struct(name: String, featureSchemas: Map[String, Schema.Any]): RichStruct
-
-    def tuple(coordinateSchemas: IndexedSeq[Schema.Any]): RichTuple
-
-    def tuple[Coordinate1 <: Shape.Any](coordinate1Schema: Schema[Coordinate1]): RichTuple1[Coordinate1]
-
-    def tuple[Coordinate1 <: Shape.Any, Coordinate2 <: Shape.Any](coordinate1Schema: Schema[Coordinate1], coordinate2Schema: Schema[Coordinate2]): RichTuple2[Coordinate1, Coordinate2]
-
-    def sequence[Element <: Shape.Any](elementSchema: Schema[Element]): RichSequence[Element]
-
-    def optional[Value <: Shape.Concrete](valueSchema: Schema[Value]): RichSome[Value]
-
-    def none: RichNone
-
-    def any: RichAny = Any
-
-    def struct(name: String, featureSchemas: (String, Schema.Any)*): RichStruct =
-      struct(name, featureSchemas.toMap)
-
-    def tuple(coordinateSchemas: Schema.Any*): RichTuple =
-      tuple(coordinateSchemas.toIndexedSeq)
-  }
-
+  
   object Primitive {
-    def apply[Raw: TypeTag](implicit factory: Factory) = factory.primitive
+    def apply[Raw: TypeTag] = RichPrimitive[Raw]
   }
 
   object Struct {
-    def apply(
-      name: String,
-      featureSchemas: Map[String, Schema.Any])(
-        implicit factory: Factory) = factory.struct(name, featureSchemas)
+    def apply(name: String, featureSchemas: Map[String, Schema.Any]) = RichStruct(name, featureSchemas)
 
-    def apply(name: String, featureSchemas: (String, Schema.Any)*)(
-      implicit factory: Factory) = factory.struct(name, featureSchemas: _*)
+    def apply(name: String, featureSchemas: (String, Schema.Any)*) = RichStruct(name, featureSchemas.toMap)
   }
 
   object Tuple {
-    def apply(coordinateSchemas: IndexedSeq[Schema.Any])(implicit factory: Factory) = factory.tuple(coordinateSchemas)
+    def apply(coordinateSchemas: IndexedSeq[Schema.Any]) = RichTupleN(coordinateSchemas)
 
-    def apply(coordinateSchemas: Schema.Any*)(implicit factory: Factory) = factory.tuple(coordinateSchemas: _*)
+    def apply(coordinateSchemas: Schema.Any*) = RichTupleN(coordinateSchemas.toIndexedSeq)
 
-    def apply[Coordinate1 <: Shape.Any](coordinate1Schema: Schema[Coordinate1])(implicit factory: Factory) = factory.tuple(coordinate1Schema)
+    def apply[Coordinate1 <: Shape.Any](coordinate1Schema: Schema[Coordinate1]) = RichTuple1(coordinate1Schema)
 
-    def apply[Coordinate1 <: Shape.Any, Coordinate2 <: Shape.Any](coordinate1Schema: Schema[Coordinate1], coordinate2Schema: Schema[Coordinate2])(implicit factory: Factory) = factory.tuple(coordinate1Schema, coordinate2Schema)
+    def apply[Coordinate1 <: Shape.Any, Coordinate2 <: Shape.Any](
+        coordinate1Schema: Schema[Coordinate1], 
+        coordinate2Schema: Schema[Coordinate2]) = RichTuple2(coordinate1Schema, coordinate2Schema)
   }
 
   object Sequence {
-    def apply[Element <: Shape.Any](elementSchema: Schema[Element])(implicit factory: Factory) = factory.sequence(elementSchema)
+    def apply[Element <: Shape.Any](elementSchema: Schema[Element]) = RichSequence(elementSchema)
   }
 
   object Optional {
-    def apply[Value <: Shape.Concrete](valueSchema: Schema[Value])(implicit factory: Factory) = factory.optional(valueSchema)
+    def apply[Value <: Shape.Concrete](valueSchema: Schema[Value]) = RichOptional(valueSchema)
   }
-
-  object Any extends RichAny
+  
+  val None = RichOptional(Nil)
+  
+  object Any extends Any
+  
+  object Nil extends Nil
 }

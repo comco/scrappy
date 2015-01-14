@@ -45,14 +45,11 @@ class BasicFactory extends Data.Factory {
 
   override def some[Value <: Shape.Concrete](
     value: Data[Value],
-    origin: Origin.Some[Value],
-    schema: Schema.Some[Value]) =
+    origin: Origin.Optional[Value],
+    schema: Schema.Optional[Value]) =
     BasicSomeData(value, origin, schema)
 
-  override def none(
-    origin: Origin.None,
-    schema: Schema.None) =
-    BasicNoneData(origin, schema)
+  override def none(origin: Origin.None) = BasicNoneData(origin)
 }
 
 object BasicFactory extends BasicFactory

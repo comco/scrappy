@@ -20,8 +20,6 @@ object Shape {
   sealed abstract class Sequence[+Element <: Shape.Any] extends Concrete
 
   sealed abstract class Optional[+Value <: Shape.Concrete] extends Shape
-
-  sealed abstract class Some[+Value <: Shape.Concrete] extends Optional[Value]
-
-  sealed abstract class None extends Optional[Nothing]
+  
+  type Nil = Nothing
 }
